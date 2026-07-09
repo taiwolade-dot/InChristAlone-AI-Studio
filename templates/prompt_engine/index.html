@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}AI Prompt Engine — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>AI Prompt Engine</h2>
+    <p class="prompt-engine-subtitle">
+        Select a ministry category, fill in the details, and generate a ready-to-use AI prompt.
+    </p>
+
+    <!-- Category Selector -->
+    <form method="GET" action="{{ url_for('prompt_engine.index') }}" class="category-selector">
+        <label for="category">Choose a Category</label>
+        <select name="category" id="category" onchange="this.form.submit()">
+            <option value="">-- Select --</option>
+            {% for key, cat in categories.items() %}
+                <option value="{{ key }}" {% if selected_category == key %}selected{% endif %}>
+                    {{ cat.label }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- Dynamic Field Form -->
+    {% if category_data %}
+    <form method="POST" action="{{ url_for('prompt_engine.generate') }}" class="prompt-form">
+        <input type="hidden" name="category" value="{{ selected_category }}">
+
+        {% for field in category_data.fields %}
+        <div class="form-group">
+            <label for="{{ field }}">{{ field.replace('_', ' ').title() }}</label>
+            <input type="text" id="{{ field }}" name="{{ field }}" required>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-primary">Generate Prompt</button>
+    </form>
+    {% endif %}
+
+    <!-- Generated Output -->
+    {% if generated_prompt %}
+    <div class="prompt-output">
+        <h3>Your Generated Prompt</h3>
+        <textarea id="promptOutput" readonly rows="10">{{ generated_prompt }}</textarea>
+        <button type="button" class="btn-secondary" onclick="copyPrompt()">Copy to Clipboard</button>
+    </div>
+    {% endif %}
+</section>
+
+<script>
+function copyPrompt() {
+    const textarea = document.getElementById('promptOutput');
+    textarea.select();
+    document.execCommand('copy');
+    alert('Prompt copied to clipboard!');
+}
+</script>
+{% endblock %}

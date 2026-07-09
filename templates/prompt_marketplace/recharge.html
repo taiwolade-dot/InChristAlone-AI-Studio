@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Recharge Wallet — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="auth-form" style="max-width:450px;">
+    <h2>Recharge Your Wallet</h2>
+    <p>Current Balance: <strong>{{ wallet_balance }} Units</strong></p>
+    <p style="font-size:0.9rem; color:#666;">Rate: ₦100 = 10 Units. Minimum recharge: ₦{{ min_recharge }}.</p>
+
+    <form method="POST" action="{{ url_for('prompt_marketplace.initiate_recharge') }}">
+        <div class="form-group">
+            <label for="amount_naira">Amount (₦)</label>
+            <input type="number" id="amount_naira" name="amount_naira" min="{{ min_recharge }}" step="1" required>
+        </div>
+        <button type="submit" class="btn-primary btn-full">Proceed to Payment</button>
+    </form>
+
+    <p class="auth-switch">
+        <a href="{{ url_for('prompt_marketplace.index') }}">← Back to Marketplace</a>
+    </p>
+</section>
+{% endblock %}

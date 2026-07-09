@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Prompt Marketplace — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <h2>Prompt Marketplace</h2>
+        <div style="text-align:right;">
+            <p style="margin:0;"><strong>Wallet:</strong> {{ current_user.wallet_balance }} Units</p>
+            <a href="{{ url_for('prompt_marketplace.recharge') }}" class="btn-secondary">Recharge</a>
+        </div>
+    </div>
+
+    {% if current_user.is_admin() %}
+    <p style="margin-top:1rem;">
+        <a href="{{ url_for('prompt_marketplace.add_pack') }}" class="btn-primary">+ Add Prompt Pack</a>
+    </p>
+    {% endif %}
+
+    {% if packs %}
+    <div style="margin-top:1.5rem;">
+        {% for pack in packs %}
+        <a href="{{ url_for('prompt_marketplace.pack_detail', pack_id=pack.id) }}" style="text-decoration:none; color:inherit;">
+            <div class="dashboard-card" style="margin-bottom:1rem;">
+                <h3>{{ pack.title }}</h3>
+                {% if pack.category %}<p><strong>Category:</strong> {{ pack.category }}</p>{% endif %}
+                <p>{{ pack.description }}</p>
+                <p><strong>{{ pack.price_units }} Units</strong>
+                    {% if pack.id in purchased_pack_ids %} — <span style="color:#15803d;">Owned</span>{% endif %}
+                </p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="margin-top:1.5rem;">No prompt packs available yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

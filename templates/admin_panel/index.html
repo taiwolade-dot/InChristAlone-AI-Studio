@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>Admin Panel</h2>
+
+    <div class="tab-switcher">
+        <a href="{{ url_for('admin_panel.index', tab='stats') }}"
+           class="tab-link {% if active_tab == 'stats' %}active{% endif %}">Stats</a>
+        <a href="{{ url_for('admin_panel.index', tab='users') }}"
+           class="tab-link {% if active_tab == 'users' %}active{% endif %}">Users</a>
+        <a href="{{ url_for('admin_panel.index', tab='packs') }}"
+           class="tab-link {% if active_tab == 'packs' %}active{% endif %}">Prompt Packs</a>
+    </div>
+
+    {% if active_tab == 'stats' %}
+    <div class="dashboard-grid" style="margin-top:1.5rem;">
+        <div class="dashboard-card">
+            <h3>{{ total_users }}</h3>
+            <p>Total Users</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>{{ total_packs }}</h3>
+            <p>Prompt Packs</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>{{ total_purchases }}</h3>
+            <p>Packs Unlocked</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>₦{{ total_revenue_naira }}</h3>
+            <p>Total Revenue (Recharges)</p>
+        </div>
+    </div>
+
+    {% elif active_tab == 'users' %}
+    {% for user in users %}
+    <div class="dashboard-card" style="margin-bottom:1rem;">
+        <h3>{{ user.full_name }}</h3>
+        <p>{{ user.email }}</p>
+        <p><strong>Role:</strong> {{ user.role }} | <strong>Wallet:</strong> {{ user.wallet_balance }} Units</p>
+
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:0.8rem;">
+            <form method="POST" action="{{ url_for('admin_panel.toggle_admin', user_id=user.id) }}"
+                  onsubmit="return confirm('Change {{ user.full_name }} role?');">
+                <button type="submit" class="btn-secondary">
+                    {% if user.role == 'admin' %}Demote to Member{% else %}Promote to Admin{% endif %}
+                </button>
+            </form>
+
+            <form method="POST" action="{{ url_for('admin_panel.adjust_wallet', user_id=user.id) }}" style="display:flex; gap:0.5rem;">
+                <input type="number" name="adjustment" placeholder="+/- units" style="width:100px; padding:0.5rem;">
+                <button type="submit" class="btn-secondary">Adjust Wallet</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    {% for pack in packs %}
+    <div class="dashboard-card" style="margin-bottom:1rem;">
+        <h3>{{ pack.title }} {% if not pack.is_active %}<span style="color:#b91c1c;">(Inactive)</span>{% endif %}</h3>
+        <p>{{ pack.category }} — {{ pack.price_units }} Units</p>
+
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:0.8rem;">
+            <a href="{{ url_for('admin_panel.edit_pack', pack_id=pack.id) }}" class="btn-secondary">Edit</a>
+            <form method="POST" action="{{ url_for('admin_panel.toggle_pack_active', pack_id=pack.id) }}">
+                <button type="submit" class="btn-secondary">
+                    {% if pack.is_active %}Deactivate{% else %}Activate{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,27 +1,37 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Register</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Register</h1>
+{% block title %}Register — InChristAlone AI Studio{% endblock %}
 
-<form>
+{% block content %}
+<section class="auth-form">
+    <h2>Create Your Account</h2>
 
-<input type="text" placeholder="Full Name"><br><br>
+    <form method="POST" action="{{ url_for('register') }}">
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" id="full_name" name="full_name" required>
+        </div>
 
-<input type="email" placeholder="Email"><br><br>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+        </div>
 
-<input type="password" placeholder="Password"><br><br>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
 
-<button>Create Account</button>
+        <div class="form-group">
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+        </div>
 
-</form>
+        <button type="submit" class="btn-primary btn-full">Register</button>
+    </form>
 
-<br>
-
-<a href="/login">Already have an account?</a>
-
-</body>
-</html>
+    <p class="auth-switch">
+        Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+    </p>
+</section>
+{% endblock %}

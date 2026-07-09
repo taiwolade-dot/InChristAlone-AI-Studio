@@ -1,76 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InChristAlone AI Studio</title>
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% block title %}InChristAlone AI Studio — Home{% endblock %}
 
-<nav>
-    <div class="logo">
-        InChristAlone AI Studio
-    </div>
+{% block content %}
+<section class="hero">
+    <h1>Welcome to <span>InChristAlone AI Studio</span></h1>
+    <p class="hero-subtitle">
+        Equipping pastors, churches, and Christian creators with digital and AI-powered tools
+        for ministry, research, and content creation.
+    </p>
 
-    <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Features</a></li>
-        <li><a href="#">Pricing</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Login</a></li>
-    </ul>
-</nav>
-
-<header class="hero">
-
-<h1>Build. Research. Learn. Teach. Create. Deploy.</h1>
-
-<p>
-The Ultimate Christian AI Platform for Developers,
-Researchers, Churches, Schools and Ministries.
-</p>
-
-<button>Get Started</button>
-
-</header>
-
-<section class="features">
-
-<h2>Our AI Solutions</h2>
-
-<div class="cards">
-
-<div class="card">
-<h3>AI Prompt Engine</h3>
-<p>Create powerful prompts for software, research and ministry.</p>
-</div>
-
-<div class="card">
-<h3>Website Generator</h3>
-<p>Generate complete websites with HTML, CSS, JavaScript and Flask.</p>
-</div>
-
-<div class="card">
-<h3>Research Assistant</h3>
-<p>Support for thesis, dissertations and seminary research.</p>
-</div>
-
-</div>
-
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}" class="btn-primary">Go to Dashboard</a>
+    {% else %}
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn-primary">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+        </div>
+    {% endif %}
 </section>
 
-<footer>
-
-<p>
-© 2026 InChristAlone Technologies.
-All Rights Reserved.
-</p>
-
-</footer>
-
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
-
-</body>
-</html>
+<section class="features">
+    <div class="feature-card">
+        <h3>AI Prompt Engine</h3>
+        <p>Generate sermons, Bible studies, and ministry content with guided AI prompts.</p>
+    </div>
+    <div class="feature-card">
+        <h3>Church Management</h3>
+        <p>Organize members, events, and communications from one dashboard.</p>
+    </div>
+    <div class="feature-card">
+        <h3>Research Assistant</h3>
+        <p>Support for seminary research, thesis writing, and academic study.</p>
+    </div>
+</section>
+{% endblock %}

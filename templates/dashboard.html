@@ -1,22 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Welcome to InChristAlone AI Studio</h1>
+{% block title %}Dashboard — InChristAlone AI Studio{% endblock %}
 
-<ul>
-    <li>AI Prompt Engine</li>
-    <li>Website Generator</li>
-    <li>Backend Generator</li>
-    <li>Research Hub</li>
-    <li>AI Teacher</li>
-    <li>AI Debugger</li>
-</ul>
+{% block content %}
+<section class="dashboard-welcome">
+    <h2>Welcome, {{ current_user.full_name }} 👋</h2>
+    <p>This is your InChristAlone AI Studio dashboard. Your future AI ministry tools will appear here.</p>
+</section>
 
-<a href="/">Back to Home</a>
+<section class="dashboard-grid">
+    <a href="{{ url_for('prompt_engine.index') }}" style="text-decoration:none; color:inherit;">
+        <div class="dashboard-card">
+            <h3>AI Prompt Engine</h3>
+            <p>Generate ministry-ready AI prompts by category.</p>
+        </div>
+    </a>
 
-</body>
-</html>
+    <a href="{{ url_for('website_generator.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>AI Website Generator</h3>
+        <p>Generate a deployable church or ministry website.</p>
+    </div>
+</a>
+    <a href="{{ url_for('research_assistant.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>Research Assistant</h3>
+        <p>Generate research prompts and format citations.</p>
+    </div>
+</a>
+    <a href="{{ url_for('content_generator.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>Christian Content Generator</h3>
+        <p>Create cartoons, flyers, video scripts, and music concepts.</p>
+    </div>
+</a>
+    <a href="{{ url_for('church_management.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>Church Management</h3>
+        <p>Manage church members (admin only).</p>
+    </div>
+</a><a href="{{ url_for('seminary_assistant.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>Seminary &amp; Thesis Assistant</h3>
+        <p>Track thesis chapters, papers, assignments, and refine topics.</p>
+    </div>
+</a>
+<a href="{{ url_for('prompt_marketplace.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>Prompt Marketplace</h3>
+        <p>Browse and unlock prompt packs using Units.</p>
+    </div>
+</a>
+{% if current_user.is_admin() %}
+<a href="{{ url_for('admin_panel.index') }}" style="text-decoration:none; color:inherit;">
+    <div class="dashboard-card">
+        <h3>Admin Panel</h3>
+        <p>Manage users, stats, and prompt packs.</p>
+    </div>
+</a>
+{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Church Management — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <h2>Church Members</h2>
+        <a href="{{ url_for('church_management.add_member') }}" class="btn-primary">+ Add Member</a>
+    </div>
+
+    {% if members %}
+    <div class="member-list">
+        {% for member in members %}
+        <div class="dashboard-card" style="margin-bottom:1rem;">
+            <h3>{{ member.full_name }}</h3>
+            {% if member.church_role %}<p><strong>Role:</strong> {{ member.church_role }}</p>{% endif %}
+            {% if member.phone %}<p><strong>Phone:</strong> {{ member.phone }}</p>{% endif %}
+            {% if member.email %}<p><strong>Email:</strong> {{ member.email }}</p>{% endif %}
+            {% if member.date_joined %}<p><strong>Joined:</strong> {{ member.date_joined }}</p>{% endif %}
+            {% if member.birthday %}<p><strong>Birthday:</strong> {{ member.birthday }}</p>{% endif %}
+
+            <div style="margin-top:0.8rem; display:flex; gap:0.8rem;">
+                <a href="{{ url_for('church_management.edit_member', member_id=member.id) }}" class="btn-secondary">Edit</a>
+                <form method="POST" action="{{ url_for('church_management.delete_member', member_id=member.id) }}"
+                      onsubmit="return confirm('Remove {{ member.full_name }} from the member list?');">
+                    <button type="submit" class="btn-secondary" style="border-color:#b91c1c; color:#b91c1c;">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No members added yet. Click "Add Member" to get started.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}AI Website Generator — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>AI Website Generator</h2>
+    <p class="prompt-engine-subtitle">
+        Choose a site type, fill in your details, and download a ready-to-deploy website.
+    </p>
+
+    <!-- Site Type Selector -->
+    <form method="GET" action="{{ url_for('website_generator.index') }}" class="category-selector">
+        <label for="site_type">Choose a Site Type</label>
+        <select name="site_type" id="site_type" onchange="this.form.submit()">
+            <option value="">-- Select --</option>
+            {% for key, type in site_types.items() %}
+                <option value="{{ key }}" {% if selected_type == key %}selected{% endif %}>
+                    {{ type.label }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- Details Form -->
+    {% if type_data %}
+    <form method="POST" action="{{ url_for('website_generator.generate') }}" class="prompt-form">
+        <input type="hidden" name="site_type" value="{{ selected_type }}">
+
+        <div class="form-group">
+            <label for="color_scheme">Color Scheme</label>
+            <select name="color_scheme" id="color_scheme">
+                {% for key, scheme in color_schemes.items() %}
+                    <option value="{{ key }}">{{ scheme.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {% for field in type_data.fields %}
+        <div class="form-group">
+            <label for="{{ field }}">{{ field.replace('_', ' ').title() }}</label>
+            {% if field in ['about_text', 'mission_statement'] %}
+                <textarea id="{{ field }}" name="{{ field }}" rows="4" required></textarea>
+            {% else %}
+                <input type="text" id="{{ field }}" name="{{ field }}" required>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-primary">Generate Website (Download ZIP)</button>
+    </form>
+    {% endif %}
+</section>
+{% endblock %}
