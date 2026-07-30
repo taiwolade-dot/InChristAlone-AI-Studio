@@ -117,3 +117,24 @@ def edit_pack(pack_id):
         return redirect(url_for('admin_panel.index', tab='packs'))
 
     return render_template('admin_panel/edit_pack.html', pack=pack)
+
+@admin_panel_bp.route('/grant-units-all', methods=['POST'])
+@login_required
+@admin_required
+def grant_units_all():
+    try:
+        amount = int(request.form.get('grant_amount', 0))
+    except ValueError:
+        amount = 0
+
+    if amount <= 0:
+        flash('Enter a valid positive amount to grant.', 'error')
+        return redirect(url_for('admin_panel.index', tab='users'))
+
+    users = User.query.all()
+    for user in users:
+        user.wallet_balance += amount
+    db.session.commit()
+
+    flash(f'{amount} units granted to all {len(users)} registered members.', 'success')
+    return redirect(url_for('admin_panel.index', tab='users'))

@@ -18,7 +18,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin():
-            flash('You do not have permission to access Church Management.', 'error')
+            flash('Church Management is only available to church admin/pastor accounts. Contact your studio administrator to request admin access.', 'error')
             return redirect(url_for('dashboard'))
         return f(*args, **kwargs)
     return decorated_function

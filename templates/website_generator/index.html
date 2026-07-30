@@ -24,7 +24,7 @@
 
     <!-- Details Form -->
     {% if type_data %}
-    <form method="POST" action="{{ url_for('website_generator.generate') }}" class="prompt-form">
+    <form method="POST" action="{{ url_for('website_generator.preview') }}" class="prompt-form">
         <input type="hidden" name="site_type" value="{{ selected_type }}">
 
         <div class="form-group">
@@ -47,7 +47,7 @@
         </div>
         {% endfor %}
 
-        <button type="submit" class="btn-primary">Generate Website (Download ZIP)</button>
+        <button type="submit" class="btn-primary">Generate & Preview Website</button>
     </form>
     {% endif %}
 </section>

@@ -17,6 +17,9 @@
             {{ ctype.label }}
         </a>
         {% endfor %}
+        <a href="{{ url_for('content_generator.edit_image_form') }}" class="tab-link">Edit Photo</a>
+        <a href="{{ url_for('content_generator.voice_form') }}" class="tab-link">Voice Generator</a>
+        <a href="{{ url_for('content_generator.transcribe_form') }}" class="tab-link">Audio to Text</a>
     </div>
 
     {% if type_data %}
@@ -26,7 +29,8 @@
         {% for field in type_data.fields %}
         <div class="form-group">
             <label for="{{ field }}">{{ field.replace('_', ' ').title() }}</label>
-            <input type="text" id="{{ field }}" name="{{ field }}" required>
+            <input type="text" id="{{ field }}" name="{{ field }}" required
+                placeholder="{% if field == 'mood' %}e.g. joyful, sorrowful, energetic, peaceful{% elif field == 'art_style' %}e.g. cartoon, watercolor, 3D render{% elif field == 'genre' %}e.g. gospel, afrobeat worship, acoustic{% elif field == 'tone' %}e.g. warm, urgent, celebratory{% elif field == 'audience' %}e.g. teens, young adults, families{% else %}Type your answer here{% endif %}">
         </div>
         {% endfor %}
 
@@ -39,6 +43,31 @@
     <div class="prompt-output">
         <h3>Generated Image</h3>
         <img src="{{ generated_image_url }}" alt="Generated content" style="max-width:100%; border-radius:8px;">
+        <form method="POST" action="{{ url_for('content_generator.upscale') }}" style="margin-top:0.8rem;">
+            <input type="hidden" name="image_url" value="{{ generated_image_url }}">
+            <input type="hidden" name="active_type" value="{{ active_type }}">
+            <button type="submit" class="btn-secondary">Upscale This Image (3 Units)</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if generated_video_url %}
+    <div class="prompt-output">
+        <h3>Generated Video</h3>
+        <video controls style="max-width:100%; border-radius:8px;">
+            <source src="{{ generated_video_url }}" type="video/mp4">
+            Your browser does not support video playback.
+        </video>
+    </div>
+    {% endif %}
+
+    {% if generated_audio_url %}
+    <div class="prompt-output">
+        <h3>Generated Song</h3>
+        <audio controls style="width:100%;">
+            <source src="{{ generated_audio_url }}" type="audio/mpeg">
+            Your browser does not support audio playback.
+        </audio>
     </div>
     {% endif %}
 
@@ -49,15 +78,34 @@
             {% if active_type in ['cartoon', 'flyer'] and not generated_image_url %}
                 Generated Prompt (copy into an AI image tool)
             {% elif active_type == 'video' %}
-                Generated Video Script
+                Video Script (edit before generating)
             {% elif active_type == 'music' %}
                 Generated Song Concept
             {% else %}
                 Generated Output
             {% endif %}
         </h3>
+        {% if active_type == 'video' %}
+        <form method="POST" action="{{ url_for('content_generator.generate_video_route') }}">
+            <textarea id="promptOutput" name="edited_script" rows="10">{{ generated_prompt }}</textarea>
+            <button type="submit" class="btn-primary">Generate Video from This Script (250 Units)</button>
+        </form>
+        {% elif active_type == 'music' %}
+        <form method="POST" action="{{ url_for('content_generator.generate_music_route') }}">
+            <div class="form-group">
+                <label>Style / Genre Description (at least 10 characters)</label>
+                <textarea name="style_prompt" rows="2" minlength="10" placeholder="e.g. uplifting gospel worship, acoustic guitar, warm vocals" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Lyrics (use [Verse] and [Chorus] tags)</label>
+                <textarea name="lyrics" rows="8">{{ generated_prompt }}</textarea>
+            </div>
+            <button type="submit" class="btn-primary">Generate Song (15 Units)</button>
+        </form>
+        {% else %}
         <textarea id="promptOutput" readonly rows="10">{{ generated_prompt }}</textarea>
         <button type="button" class="btn-secondary" onclick="copyText('promptOutput')">Copy to Clipboard</button>
+        {% endif %}
     </div>
     {% endif %}
 </section>

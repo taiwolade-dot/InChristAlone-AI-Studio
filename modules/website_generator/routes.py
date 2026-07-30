@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, send_file
 from flask_login import login_required
 
 from .data import SITE_TYPES, COLOR_SCHEMES
-from .generator import build_html, build_css, build_js
+from .generator import build_html, build_css, build_js, build_combined_html
 from modules.wallet_utils import spend_units
 
 website_generator_bp = Blueprint(
@@ -30,9 +30,10 @@ def index():
         type_data=type_data
     )
 
-@website_generator_bp.route('/generate', methods=['POST'])
+
+@website_generator_bp.route('/preview', methods=['POST'])
 @login_required
-def generate():
+def preview():
     result = spend_units(20)
     if result is not True:
         return result
@@ -52,8 +53,39 @@ def generate():
     html_content = build_html(site_type_key, form_data, color_scheme_key)
     css_content = build_css(color_scheme_key)
     js_content = build_js()
+    combined_html = build_combined_html(html_content, css_content, js_content)
 
-    # Build ZIP in memory
+    return render_template(
+        'website_generator/preview.html',
+        html_content=html_content,
+        css_content=css_content,
+        js_content=js_content,
+        combined_html=combined_html,
+        site_type_key=site_type_key,
+        color_scheme_key=color_scheme_key,
+        form_data=form_data
+    )
+
+
+@website_generator_bp.route('/download-zip', methods=['POST'])
+@login_required
+def download_zip():
+    site_type_key = request.form.get('site_type')
+    color_scheme_key = request.form.get('color_scheme', 'royal_blue_gold')
+    type_data = SITE_TYPES.get(site_type_key)
+
+    if not type_data:
+        return "Invalid site type selected.", 400
+
+    form_data = {
+        field: request.form.get(field, '').strip()
+        for field in type_data['fields']
+    }
+
+    html_content = build_html(site_type_key, form_data, color_scheme_key)
+    css_content = build_css(color_scheme_key)
+    js_content = build_js()
+
     memory_file = io.BytesIO()
     with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
         zf.writestr('index.html', html_content)
@@ -69,4 +101,37 @@ def generate():
         mimetype='application/zip',
         as_attachment=True,
         download_name=f'{safe_name}.zip'
+    )
+
+
+@website_generator_bp.route('/download-html', methods=['POST'])
+@login_required
+def download_html():
+    site_type_key = request.form.get('site_type')
+    color_scheme_key = request.form.get('color_scheme', 'royal_blue_gold')
+    type_data = SITE_TYPES.get(site_type_key)
+
+    if not type_data:
+        return "Invalid site type selected.", 400
+
+    form_data = {
+        field: request.form.get(field, '').strip()
+        for field in type_data['fields']
+    }
+
+    html_content = build_html(site_type_key, form_data, color_scheme_key)
+    css_content = build_css(color_scheme_key)
+    js_content = build_js()
+    combined_html = build_combined_html(html_content, css_content, js_content)
+
+    site_name = form_data.get('church_name') or form_data.get('ministry_name') or 'website'
+    safe_name = "".join(c if c.isalnum() else "_" for c in site_name).strip("_") or "website"
+
+    memory_file = io.BytesIO(combined_html.encode('utf-8'))
+
+    return send_file(
+        memory_file,
+        mimetype='text/html',
+        as_attachment=True,
+        download_name=f'{safe_name}.html'
     )

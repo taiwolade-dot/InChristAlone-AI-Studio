@@ -30,7 +30,8 @@
         {% for field in category_data.fields %}
         <div class="form-group">
             <label for="{{ field }}">{{ field.replace('_', ' ').title() }}</label>
-            <input type="text" id="{{ field }}" name="{{ field }}" required>
+            <input type="text" id="{{ field }}" name="{{ field }}" required
+                placeholder="{% if field == 'tone' %}e.g. warm, urgent, encouraging{% elif field == 'audience' %}e.g. youth, new believers, elders{% elif field == 'mood' %}e.g. joyful, reflective, hopeful{% elif field == 'duration' %}e.g. 45 minutes, 1 hour{% else %}Type your answer here{% endif %}">
         </div>
         {% endfor %}
 

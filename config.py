@@ -17,3 +17,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')
     PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
+    FAL_API_KEY = os.environ.get('FAL_API_KEY')

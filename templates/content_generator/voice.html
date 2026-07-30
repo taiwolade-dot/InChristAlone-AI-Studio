@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Voice Generator — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>Sermon Voice Generator</h2>
+    <p class="prompt-engine-subtitle">
+        Paste your sermon or message text (up to 2,000 characters) and generate spoken audio.
+    </p>
+
+    <form method="POST" action="{{ url_for('content_generator.voice_submit') }}">
+        <div class="form-group">
+            <label for="text">Text to Speak</label>
+            <textarea id="text" name="text" rows="8" maxlength="2000" required
+                placeholder="Paste your sermon text here (max 2,000 characters)"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="voice">Voice</label>
+            <select id="voice" name="voice">
+                <option value="af_heart">Female — Warm</option>
+                <option value="am_adam">Male — Deep</option>
+                <option value="am_michael">Male — Clear</option>
+                <option value="af_bella">Female — Bright</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">Generate Voice (20 Units)</button>
+    </form>
+
+    {% if generated_voice_url %}
+    <div class="prompt-output" style="margin-top:1.5rem;">
+        <h3>Generated Audio</h3>
+        <audio controls style="width:100%;">
+            <source src="{{ generated_voice_url }}" type="audio/mpeg">
+            Your browser does not support audio playback.
+        </audio>
+    </div>
+    {% endif %}
+
+    <p class="auth-switch">
+        <a href="{{ url_for('content_generator.index') }}">← Back to Content Generator</a>
+    </p>
+</section>
+{% endblock %}

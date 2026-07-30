@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Image — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>Edit Your Image</h2>
+    <p class="prompt-engine-subtitle">
+        Upload a photo and describe the change you want — background, style, or details.
+    </p>
+
+    <form method="POST" action="{{ url_for('content_generator.edit_image_submit') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="photo">Upload Photo</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+        </div>
+
+        <div class="form-group">
+            <label for="edit_prompt">Describe the Change</label>
+            <textarea id="edit_prompt" name="edit_prompt" rows="3"
+                placeholder="e.g. Change the background to a natural outdoor church setting with soft sunlight" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">Edit Image (8 Units)</button>
+    </form>
+
+    {% if edited_image_url %}
+    <div class="prompt-output" style="margin-top:1.5rem;">
+        <h3>Edited Result</h3>
+        <img src="{{ edited_image_url }}" alt="Edited image" style="max-width:100%; border-radius:8px;">
+    </div>
+    {% endif %}
+
+    <p class="auth-switch">
+        <a href="{{ url_for('content_generator.index') }}">← Back to Content Generator</a>
+    </p>
+</section>
+{% endblock %}

@@ -36,6 +36,16 @@
     </div>
 
     {% elif active_tab == 'users' %}
+    <div class="dashboard-card" style="margin-bottom:1.5rem; border-left: 4px solid #d4af37;">
+        <h3>Grant Units to All Members</h3>
+        <p style="font-size:0.9rem; color:#666;">Useful for training sessions — gives every registered user free units instantly.</p>
+        <form method="POST" action="{{ url_for('admin_panel.grant_units_all') }}"
+              onsubmit="return confirm('Grant units to ALL registered members?');"
+              style="display:flex; gap:0.8rem; margin-top:0.8rem; flex-wrap:wrap;">
+            <input type="number" name="grant_amount" placeholder="e.g. 50" min="1" style="width:120px; padding:0.5rem;" required>
+            <button type="submit" class="btn-primary">Grant to All</button>
+        </form>
+    </div>
     {% for user in users %}
     <div class="dashboard-card" style="margin-bottom:1rem;">
         <h3>{{ user.full_name }}</h3>
