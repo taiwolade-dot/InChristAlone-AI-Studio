@@ -18,6 +18,7 @@ from modules.prompt_marketplace.routes import prompt_marketplace_bp
 
 from modules.admin_panel.routes import admin_panel_bp
 from modules.help_center.routes import help_center_bp
+from modules.support.routes import support_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -32,6 +33,7 @@ app.register_blueprint(seminary_assistant_bp)
 app.register_blueprint(prompt_marketplace_bp)
 app.register_blueprint(admin_panel_bp)
 app.register_blueprint(help_center_bp)
+app.register_blueprint(support_bp)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'

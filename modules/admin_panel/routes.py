@@ -3,7 +3,7 @@ from functools import wraps
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
-from models import db, User, PromptPack, Purchase, WalletTransaction
+from models import db, User, PromptPack, Purchase, WalletTransaction, ContactMessage
 
 admin_panel_bp = Blueprint(
     'admin_panel',
@@ -37,6 +37,7 @@ def index():
 
     users = User.query.order_by(User.created_at.desc()).all()
     packs = PromptPack.query.order_by(PromptPack.created_at.desc()).all()
+    messages = ContactMessage.query.order_by(ContactMessage.created_at.desc()).all()
 
     return render_template(
         'admin_panel/index.html',
@@ -46,7 +47,8 @@ def index():
         total_purchases=total_purchases,
         total_revenue_naira=total_revenue_naira,
         users=users,
-        packs=packs
+        packs=packs,
+        messages=messages
     )
 
 
@@ -138,3 +140,21 @@ def grant_units_all():
 
     flash(f'{amount} units granted to all {len(users)} registered members.', 'success')
     return redirect(url_for('admin_panel.index', tab='users'))
+
+
+@admin_panel_bp.route('/message/<int:message_id>/reply', methods=['POST'])
+@login_required
+@admin_required
+def reply_message(message_id):
+    from datetime import datetime
+    msg = ContactMessage.query.get_or_404(message_id)
+    reply_text = request.form.get('admin_reply', '').strip()
+
+    if reply_text:
+        msg.admin_reply = reply_text
+        msg.status = 'replied'
+        msg.replied_at = datetime.utcnow()
+        db.session.commit()
+        flash('Reply sent.', 'success')
+
+    return redirect(url_for('admin_panel.index', tab='messages'))

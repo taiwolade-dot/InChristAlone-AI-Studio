@@ -13,6 +13,7 @@
            class="tab-link {% if active_tab == 'users' %}active{% endif %}">Users</a>
         <a href="{{ url_for('admin_panel.index', tab='packs') }}"
            class="tab-link {% if active_tab == 'packs' %}active{% endif %}">Prompt Packs</a>
+        <a href="{{ url_for('admin_panel.index', tab='messages') }}" class="tab-link {% if active_tab == 'messages' %}active{% endif %}">Messages</a>
     </div>
 
     {% if active_tab == 'stats' %}
@@ -68,7 +69,7 @@
     </div>
     {% endfor %}
 
-    {% else %}
+    {% elif active_tab == 'packs' %}
     {% for pack in packs %}
     <div class="dashboard-card" style="margin-bottom:1rem;">
         <h3>{{ pack.title }} {% if not pack.is_active %}<span style="color:#b91c1c;">(Inactive)</span>{% endif %}</h3>
@@ -82,6 +83,25 @@
                 </button>
             </form>
         </div>
+    </div>
+    {% endfor %}
+
+    {% elif active_tab == 'messages' %}
+    {% for msg in messages %}
+    <div class="dashboard-card" style="margin-bottom:1rem;">
+        <h3>{{ msg.subject }} <span style="font-size:0.8rem; color:#666;">({{ msg.status|title }})</span></h3>
+        <p style="font-size:0.85rem; color:#666;">From: {{ msg.user.full_name }} — {{ msg.created_at.strftime('%d %b %Y') }}</p>
+        <p>{{ msg.message }}</p>
+        {% if msg.admin_reply %}
+        <div style="margin-top:0.6rem; padding:0.5rem; background:#f5f5f7; border-left:3px solid #d4af37;">
+            <strong>Your Reply:</strong> {{ msg.admin_reply }}
+        </div>
+        {% else %}
+        <form method="POST" action="{{ url_for('admin_panel.reply_message', message_id=msg.id) }}" style="margin-top:0.6rem;">
+            <textarea name="admin_reply" rows="2" placeholder="Type your reply..." required></textarea>
+            <button type="submit" class="btn-secondary">Send Reply</button>
+        </form>
+        {% endif %}
     </div>
     {% endfor %}
     {% endif %}

@@ -113,3 +113,18 @@ class WalletTransaction(db.Model):
 
     def __repr__(self):
         return f'<WalletTransaction {self.reference}>'
+
+class ContactMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    admin_reply = db.Column(db.Text)
+    status = db.Column(db.String(20), nullable=False, default='open')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    replied_at = db.Column(db.DateTime)
+
+    user = db.relationship('User', backref='contact_messages')
+
+    def __repr__(self):
+        return f'<ContactMessage {self.subject}>'
