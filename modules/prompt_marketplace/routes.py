@@ -18,6 +18,7 @@ prompt_marketplace_bp = Blueprint(
 
 UNITS_PER_NAIRA = 0.1
 MIN_RECHARGE_NAIRA = 500
+RECHARGE_ENABLED = False  # Set to True once Paystack live account is verified
 UPLOAD_FOLDER = os.path.join('uploads', 'prompt_packs')
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -116,6 +117,9 @@ def recharge():
 @prompt_marketplace_bp.route('/recharge/initiate', methods=['POST'])
 @login_required
 def initiate_recharge():
+    if not RECHARGE_ENABLED:
+        flash("Wallet recharge is temporarily unavailable. Please contact your studio administrator for Units.", "error")
+        return redirect(url_for("prompt_marketplace.recharge"))
     try:
         amount_naira = int(request.form.get('amount_naira', 0))
     except ValueError:
