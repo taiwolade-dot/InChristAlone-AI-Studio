@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Review Quiz — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>{{ quiz.title }}</h2>
+    <p>{{ quiz.age_group }} · {{ quiz.questions|length }} questions</p>
+    <a href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}" class="btn-primary">Go Live With This Quiz</a>
+</section>
+
+{% for q in quiz.questions|sort(attribute='order_index') %}
+<div class="dashboard-card" id="q-{{ q.id }}" style="margin-bottom:1rem; text-align:left;">
+    <div class="form-group">
+        <label>Question</label>
+        <textarea rows="2" onchange="saveQuestion({{ quiz.id }}, {{ q.id }})" id="text-{{ q.id }}">{{ q.text }}</textarea>
+    </div>
+
+    {% for opt in q.options %}
+    <div class="form-group">
+        <label>Option {{ loop.index }} {% if loop.index0 == q.correct_index %}(correct){% endif %}</label>
+        <input type="text" value="{{ opt }}" class="opt-{{ q.id }}" onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
+    </div>
+    {% endfor %}
+
+    <div class="form-group">
+        <label>Correct Option (1-4)</label>
+        <input type="number" min="1" max="4" value="{{ q.correct_index + 1 }}" id="correct-{{ q.id }}"
+            onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
+    </div>
+
+    <p style="font-size:0.85rem; color:#666;">{{ q.scripture_ref }} — {{ q.difficulty }}</p>
+    <button class="btn-secondary" style="border-color:#b91c1c; color:#b91c1c;" onclick="deleteQuestion({{ quiz.id }}, {{ q.id }})">Delete Question</button>
+</div>
+{% endfor %}
+
+<script>
+function saveQuestion(quizId, questionId) {
+    const options = Array.from(document.querySelectorAll('.opt-' + questionId)).map(el => el.value);
+    const payload = {
+        text: document.getElementById('text-' + questionId).value,
+        options: options,
+        correct_index: parseInt(document.getElementById('correct-' + questionId).value, 10) - 1
+    };
+    fetch(`/bible-quiz/${quizId}/question/${questionId}/update`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    });
+}
+
+function deleteQuestion(quizId, questionId) {
+    if (!confirm('Delete this question?')) return;
+    fetch(`/bible-quiz/${quizId}/question/${questionId}/delete`, { method: 'POST' })
+        .then(() => document.getElementById('q-' + questionId).remove());
+}
+</script>
+{% endblock %}

@@ -19,6 +19,8 @@ from modules.prompt_marketplace.routes import prompt_marketplace_bp
 from modules.admin_panel.routes import admin_panel_bp
 from modules.help_center.routes import help_center_bp
 from modules.support.routes import support_bp
+from modules.bible_quiz.routes import bible_quiz_bp
+from modules.bible_quiz.session_routes import bible_quiz_session_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -34,6 +36,8 @@ app.register_blueprint(prompt_marketplace_bp)
 app.register_blueprint(admin_panel_bp)
 app.register_blueprint(help_center_bp)
 app.register_blueprint(support_bp)
+app.register_blueprint(bible_quiz_bp)
+app.register_blueprint(bible_quiz_session_bp)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -128,5 +132,5 @@ def dashboard():
 with app.app_context():
     db.create_all()
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000)

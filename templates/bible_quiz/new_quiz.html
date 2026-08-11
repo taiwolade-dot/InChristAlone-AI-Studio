@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Generate a New Quiz — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>Generate a New Bible Quiz</h2>
+    <p class="prompt-engine-subtitle">Costs 10 Units. Falls back to a built-in question bank if AI is unavailable.</p>
+
+    <form method="POST" action="{{ url_for('bible_quiz.new_quiz') }}" class="prompt-form">
+        <div class="form-group">
+            <label for="title">Quiz Title</label>
+            <input type="text" id="title" name="title" placeholder="e.g. Faith — Hebrews 11" required>
+        </div>
+
+        <div class="form-group">
+            <label for="age_group">Age Group</label>
+            <select id="age_group" name="age_group">
+                <option>Children</option>
+                <option>Teenagers</option>
+                <option>Youth</option>
+                <option selected>Adults</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="count">Number of Questions</label>
+            <input type="number" id="count" name="count" value="10" min="3" max="25">
+        </div>
+
+        <div class="form-group">
+            <label for="source_type">Source</label>
+            <select id="source_type" name="source_type" onchange="showSourceFields()">
+                <option value="topic_text">Topic + Bible Text</option>
+                <option value="pasted_text">Paste Sermon / Lesson Text</option>
+                <option value="youtube">YouTube Link</option>
+            </select>
+        </div>
+
+        <div id="fields-topic_text" class="form-group">
+            <label>Topic</label>
+            <input type="text" name="topic" placeholder="e.g. Faith">
+            <label>Bible Text / Reference</label>
+            <textarea name="bible_text" rows="4" placeholder="e.g. Hebrews 11:1-6"></textarea>
+        </div>
+
+        <div id="fields-pasted_text" class="form-group" style="display:none;">
+            <label>Paste Sermon / Lesson Text</label>
+            <textarea name="pasted_text" rows="8" placeholder="Paste the Sunday School lesson text here"></textarea>
+        </div>
+
+        <div id="fields-youtube" class="form-group" style="display:none;">
+            <label>YouTube URL</label>
+            <input type="text" name="youtube_url" placeholder="https://youtube.com/watch?v=...">
+            <small>Uses the video's transcript as the source material.</small>
+        </div>
+
+        <button type="submit" class="btn-primary">Generate Questions (10 Units)</button>
+    </form>
+</section>
+
+<script>
+function showSourceFields() {
+    const value = document.getElementById('source_type').value;
+    ['topic_text', 'pasted_text', 'youtube'].forEach(function(key) {
+        document.getElementById('fields-' + key).style.display = (key === value) ? 'block' : 'none';
+    });
+}
+</script>
+{% endblock %}

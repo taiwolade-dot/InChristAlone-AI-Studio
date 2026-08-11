@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width:600px; margin:40px auto;">
+    <div class="card" style="padding:30px; text-align:center;">
+        <h1>📖 Bible Quiz</h1>
+        <h2>Join Live Quiz</h2>
+
+        <p>Enter the PIN displayed by the quiz host.</p>
+
+        <form method="POST">
+            <div style="margin:20px 0;">
+                <input
+                    type="text"
+                    name="pin_code"
+                    placeholder="Enter Quiz PIN"
+                    maxlength="10"
+                    required
+                    style="width:100%; padding:14px; font-size:20px; text-align:center;"
+                >
+            </div>
+
+            <button
+                type="submit"
+                style="width:100%; padding:14px; font-size:18px; cursor:pointer;"
+            >
+                Join Quiz
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Bible Quiz — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <h2>Your Bible Quizzes</h2>
+        <a href="{{ url_for('bible_quiz.new_quiz') }}" class="btn-primary">+ Generate New Quiz</a>
+    </div>
+
+    {% if quizzes %}
+    <div style="margin-top:1.5rem;">
+        {% for quiz in quizzes %}
+        <div class="dashboard-card" style="margin-bottom:1rem;">
+            <h3>{{ quiz.title }}</h3>
+            <p>{{ quiz.age_group }} · {{ quiz.questions|length }} questions</p>
+            <div style="margin-top:0.8rem; display:flex; gap:0.8rem;">
+                <a href="{{ url_for('bible_quiz.edit_quiz', quiz_id=quiz.id) }}" class="btn-secondary">Edit</a>
+                <a href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}" class="btn-primary">Go Live</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="margin-top:1.5rem;">No quizzes yet. Generate your first one above.</p>
+    {% endif %}
+</section>
+{% endblock %}

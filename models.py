@@ -30,12 +30,17 @@ class User(UserMixin, db.Model):
 
 class Member(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     full_name = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(30))
     email = db.Column(db.String(120))
     address = db.Column(db.String(255))
     church_role = db.Column(db.String(80))
     date_joined = db.Column(db.Date)
+    date_of_salvation = db.Column(db.Date)
+    date_of_baptism = db.Column(db.Date)
+    marital_status = db.Column(db.String(30))
+    age_range = db.Column(db.String(20))
     birthday = db.Column(db.Date)
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -128,3 +133,105 @@ class ContactMessage(db.Model):
 
     def __repr__(self):
         return f'<ContactMessage {self.subject}>'
+
+
+import json
+import random
+import string
+
+
+def gen_pin(length=6):
+    return "".join(random.choices(string.digits, k=length))
+
+
+class BibleQuiz(db.Model):
+    __tablename__ = "quiz_quizzes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    age_group = db.Column(db.String(20), default="Adults")
+    source_type = db.Column(db.String(30))
+    source_ref = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    questions = db.relationship(
+        "QuizQuestion", backref="quiz", lazy=True, cascade="all, delete-orphan"
+    )
+    sessions = db.relationship("QuizLiveSession", backref="quiz", lazy=True)
+
+
+class QuizQuestion(db.Model):
+    __tablename__ = "quiz_questions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz_quizzes.id"), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    options_json = db.Column(db.Text, nullable=False)
+    correct_index = db.Column(db.Integer, nullable=False)
+    scripture_ref = db.Column(db.String(150))
+    explanation = db.Column(db.Text)
+    difficulty = db.Column(db.String(10), default="Medium")
+    order_index = db.Column(db.Integer, default=0)
+
+    @property
+    def options(self):
+        return json.loads(self.options_json)
+
+    @options.setter
+    def options(self, value):
+        self.options_json = json.dumps(value)
+
+
+class QuizLiveSession(db.Model):
+    __tablename__ = "quiz_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz_quizzes.id"), nullable=False)
+    mode = db.Column(db.String(1), default="A")
+    pin_code = db.Column(db.String(10), unique=True, default=gen_pin)
+    status = db.Column(db.String(20), default="waiting")
+    current_question_index = db.Column(db.Integer, default=0)
+    question_started_at = db.Column(db.DateTime)
+    seconds_per_question = db.Column(db.Integer, default=20)
+    started_at = db.Column(db.DateTime)
+    ended_at = db.Column(db.DateTime)
+
+    participants = db.relationship(
+        "QuizParticipant", backref="session", lazy=True, cascade="all, delete-orphan"
+    )
+
+    def participant_limit(self):
+        return 12 if self.mode == "A" else 500
+
+
+class QuizParticipant(db.Model):
+    __tablename__ = "quiz_participants"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("quiz_sessions.id"), nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    avatar_color = db.Column(db.String(20), default="#d4af37")
+    device_token = db.Column(db.String(64))
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    score = db.Column(db.Integer, default=0)
+
+    answers = db.relationship(
+        "QuizAnswer", backref="participant", lazy=True, cascade="all, delete-orphan"
+    )
+
+
+class QuizAnswer(db.Model):
+    __tablename__ = "quiz_answers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    participant_id = db.Column(db.Integer, db.ForeignKey("quiz_participants.id"), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey("quiz_questions.id"), nullable=False)
+    chosen_index = db.Column(db.Integer)
+    is_correct = db.Column(db.Boolean, default=False)
+    time_taken_ms = db.Column(db.Integer)
+    answered_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("participant_id", "question_id", name="uq_participant_question"),
+    )
