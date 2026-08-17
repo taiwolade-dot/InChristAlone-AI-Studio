@@ -1,362 +1,53 @@
 {% extends "base.html" %}
 
+{% block title %}Bible Quiz{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bible_quiz.css') }}">
+{% endblock %}
+
 {% block content %}
 
-            <div style="text-align: center; margin: 1rem 0;">
-                <span style="font-size: 1.1rem; font-weight: bold;">⏱️ Time Remaining: </span>
-                <span id="timer-display" style="font-size: 2rem; font-weight: bold; color: #e74c3c; background: #fdf2e9; padding: 0.3rem 0.8rem; border-radius: 8px;">--</span>
-            </div>
-            
-<div class="container" style="max-width:800px;margin:30px auto;padding:20px;">
+<div class="quiz-container">
 
-    <div style="text-align:center;">
-        <h1>📖 Bible Quiz</h1>
-        <h2>{{ participant.name }}</h2>
-        <p>PIN: <strong>{{ quiz_session.pin_code }}</strong></p>
-    </div>
+<div class="quiz-header">
+    <h1>📖 Bible Quiz Challenge</h1>
+    <p>InChristAlone AI Studio</p>
+</div>
 
-    <div id="status" style="text-align:center;padding:15px;margin:20px 0;border-radius:10px;background:#f1f5f9;">
-        Waiting for the host to start the quiz...
-    </div>
+    <h2 id="status">
+        Waiting for host...
+    </h2>
 
     <div id="quiz-area" style="display:none;">
 
-        <div style="text-align:center;">
-            <p id="question-number"></p>
-            <h2 id="question-text"></h2>
-        </div>
+        <h3 id="question-number"></h3>
+
+        <h2 id="question-text"></h2>
+
+        <div id="timer"></div>
 
         <div id="answers"></div>
 
-        <div id="result"
-             style="display:none;text-align:center;margin-top:20px;padding:15px;border-radius:10px;">
-        </div>
+        <div id="result"></div>
 
-    </div>
+        <hr>
 
-    <div style="text-align:center;margin-top:30px;">
-        <strong>Score: <span id="score">0</span></strong>
+        <h4>Your Score:
+            <span id="score">0</span>
+        </h4>
+
+        <div id="leaderboard-list"></div>
+
     </div>
 
 </div>
 
 <script>
-const sessionId = {{ quiz_session.id }};
-
-let lastQuestion = -1;
-let answered = false;
-
-async function loadState() {
-    try {
-        const response = await fetch(
-            `/api/bible-quiz/session/${sessionId}/state`
-        );
-
-        const data = await response.json();
-
-        const status = document.getElementById("status");
-        const quizArea = document.getElementById("quiz-area");
-
-        if (data.status === "waiting") {
-            status.style.display = "block";
-            status.innerHTML = "⏳ Waiting for the host to start the quiz...";
-            quizArea.style.display = "none";
-            return;
-        }
-
-        if (data.status === "paused") {
-            status.style.display = "block";
-            status.innerHTML = "⏸️ Quiz paused. Please wait...";
-            quizArea.style.display = "none";
-            return;
-        }
-
-        if (data.status === "finished") {
-            status.style.display = "block";
-            status.innerHTML = "🎉 Quiz Finished!";
-            quizArea.style.display = "none";
-            return;
-        }
-
-        if (data.status === "active") {
-            status.style.display = "none";
-            quizArea.style.display = "block";
-
-            document.getElementById("score").textContent =
-                data.participant_score ?? 0;
-
-            if (data.current_question_index !== lastQuestion) {
-                lastQuestion = data.current_question_index;
-                answered = false;
-                showQuestion(data);
-            }
-        }
-
-    } catch (error) {
-        console.error("Quiz state error:", error);
-    }
-}
-
-
-function showQuestion(data) {
-
-    const question =
-        data.question || data.current_question;
-
-    if (!question) {
-        return;
-    }
-
-    document.getElementById("question-number").textContent =
-        "Question " + ((data.current_question_index ?? 0) + 1);
-
-    document.getElementById("question-text").textContent =
-        question.text || question.question || "";
-
-    const answers = document.getElementById("answers");
-    answers.innerHTML = "";
-
-    const options =
-        question.options || question.choices || [];
-
-    options.forEach((option, index) => {
-
-        const button = document.createElement("button");
-
-        button.textContent =
-            String.fromCharCode(65 + index) + ". " + option;
-
-        button.style.display = "block";
-        button.style.width = "100%";
-        button.style.padding = "16px";
-        button.style.margin = "10px 0";
-        button.style.fontSize = "18px";
-        button.style.cursor = "pointer";
-        button.style.borderRadius = "10px";
-        button.style.border = "1px solid #ccc";
-        button.style.background = "#ffffff";
-
-        button.onclick = function () {
-            submitAnswer(index);
-        };
-
-        answers.appendChild(button);
-    });
-}
-
-
-async function submitAnswer(index) {
-
-    if (answered) {
-        return;
-    }
-
-    answered = true;
-
-    const buttons =
-        document.querySelectorAll("#answers button");
-
-    buttons.forEach(button => {
-        button.disabled = true;
-    });
-
-    try {
-
-        const response = await fetch(
-            `/bible-quiz/session/${sessionId}/answer`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    chosen_index: index,
-                    time_taken_ms: 0
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        const result =
-            document.getElementById("result");
-
-        result.style.display = "block";
-
-        if (data.is_correct) {
-            result.innerHTML = "✅ Correct!";
-        } else {
-            result.innerHTML =
-                "❌ Incorrect.";
-        }
-
-        document.getElementById("score").textContent =
-            data.score ?? document.getElementById("score").textContent;
-
-    } catch (error) {
-
-        console.error("Answer error:", error);
-
-        result.innerHTML =
-            "Unable to submit answer. Please wait.";
-
-        answered = false;
-
-        buttons.forEach(button => {
-            button.disabled = false;
-        });
-    }
-}
-
-
-loadState();
-
-setInterval(loadState, 3000);
+const sessionId={{ quiz_session.id }};
 </script>
+
+<script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
 {% endblock %}
-
-
-<div id="timer-display" class="timer-box"></div>
-<script>
-let countdownTimer = null;
-
-function handleTimerUpdate(seconds) {
-    const display = document.getElementById("timer-display");
-    if (!display) return;
-
-    clearInterval(countdownTimer);
-    let currentSeconds = seconds;
-    display.innerText = currentSeconds + "s";
-
-    countdownTimer = setInterval(() => {
-        currentSeconds--;
-        if (currentSeconds <= 0) {
-            clearInterval(countdownTimer);
-            display.innerText = "0s";
-        } else {
-            display.innerText = currentSeconds + "s";
-        }
-    }, 1000);
-}
-
-setInterval(() => {
-    fetch("/api/bible-quiz/session/11/state") // replace 11 with dynamic session ID
-        .then(response => response.json())
-        .then(data => {
-            if (data.seconds !== undefined) {
-                handleTimerUpdate(data.seconds);
-            }
-        });
-}, 1000);
-</script>
-<script>
-function getSessionId() {
-    const match = window.location.pathname.match(/session\/(\d+)/);
-    return match ? match[1] : null;
-}
-
-let countdownTimer = null;
-
-function handleTimerUpdate(seconds) {
-    const display = document.getElementById("timer-display");
-    if (!display) return;
-
-    clearInterval(countdownTimer);
-    let currentSeconds = seconds;
-    display.innerText = currentSeconds + "s";
-
-    countdownTimer = setInterval(() => {
-        currentSeconds--;
-        if (currentSeconds <= 0) {
-            clearInterval(countdownTimer);
-            display.innerText = "0s";
-        } else {
-            display.innerText = currentSeconds + "s";
-        }
-    }, 1000);
-}
-
-setInterval(() => {
-    const sessionId = getSessionId();
-    if (!sessionId) return;
-    fetch(`/api/bible-quiz/session/${sessionId}/state`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.seconds !== undefined) {
-                handleTimerUpdate(data.seconds);
-            }
-        });
-}, 1000);
-</script>
-
-<script>
-let currentQId = null;
-let secondsLeft = 0;
-let timerInterval = null;
-
-function startLocalTimer(initialSeconds) {
-    clearInterval(timerInterval);
-    secondsLeft = initialSeconds;
-    const display = document.getElementById("timer-display");
-    if (display) display.innerText = secondsLeft + 's';
-
-    timerInterval = setInterval(() => {
-        secondsLeft--;
-        if (display) {
-            display.innerText = (secondsLeft > 0 ? secondsLeft : 0) + 's';
-        }
-        if (secondsLeft <= 0) {
-            clearInterval(timerInterval);
-        }
-    }, 1000);
-}
-
-function pollSessionState() {
-    fetch('/api/bible-quiz/session/{{ quiz_session.id }}/state')
-        .then(res => res.json())
-        .then(data => {
-            if (data.question) {
-                // Render Question Text & Options if question changed
-                if (data.question.question_id !== currentQId) {
-                    currentQId = data.question.question_id;
-                    
-                    const qTextEl = document.getElementById('question-text');
-                    if (qTextEl) qTextEl.innerText = data.question.text;
-
-                    const qNumEl = document.getElementById('question-number');
-                    if (qNumEl) qNumEl.innerText = (data.current_question_index + 1) + ' / ' + data.total_questions;
-
-                    const optionsBox = document.getElementById('options-container');
-                    if (optionsBox && data.question.options) {
-                        optionsBox.innerHTML = '';
-                        data.question.options.forEach((opt, idx) => {
-                            const btn = document.createElement('button');
-                            btn.className = 'btn btn-outline-primary option-btn';
-                            btn.style.cssText = 'width: 100%; margin-bottom: 8px; text-align: left; padding: 12px;';
-                            btn.innerText = opt;
-                            optionsBox.appendChild(btn);
-                        });
-                    }
-
-                    // Reset Timer for new question
-                    startLocalTimer(data.question.seconds);
-                } else {
-                    // Sync timer if drift is greater than 3 seconds
-                    if (Math.abs(secondsLeft - data.question.seconds) > 3) {
-                        startLocalTimer(data.question.seconds);
-                    }
-                }
-            }
-
-            if (data.status === 'finished') {
-                clearInterval(timerInterval);
-                window.location.reload();
-            }
-        })
-        .catch(err => console.error('State poll error:', err));
-}
-
-setInterval(pollSessionState, 2000);
-pollSessionState();
-</script>

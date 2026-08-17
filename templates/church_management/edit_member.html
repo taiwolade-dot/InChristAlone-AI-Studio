@@ -36,6 +36,27 @@
            <input type="date" id="birthday" name="birthday" value="{{ member.birthday or '' }}">
         </div>
         <div class="form-group">
+            <label for="marital_status">Marital Status</label>
+            <select id="marital_status" name="marital_status">
+                <option value="">Select Status</option>
+                <option value="Single" {% if member.marital_status == 'Single' %}selected{% endif %}>Single</option>
+                <option value="Married" {% if member.marital_status == 'Married' %}selected{% endif %}>Married</option>
+                <option value="Divorced" {% if member.marital_status == 'Divorced' %}selected{% endif %}>Divorced</option>
+                <option value="Widowed" {% if member.marital_status == 'Widowed' %}selected{% endif %}>Widowed</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="age_range">Age Range</label>
+            <select id="age_range" name="age_range">
+                <option value="">Select Age Range</option>
+                <option value="Under 18" {% if member.age_range == 'Under 18' %}selected{% endif %}>Under 18</option>
+                <option value="18-25" {% if member.age_range == '18-25' %}selected{% endif %}>18-25</option>
+                <option value="26-35" {% if member.age_range == '26-35' %}selected{% endif %}>26-35</option>
+                <option value="36-50" {% if member.age_range == '36-50' %}selected{% endif %}>36-50</option>
+                <option value="50+" {% if member.age_range == '50+' %}selected{% endif %}>50+</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label for="notes">Notes</label>
             <textarea id="notes" name="notes" rows="3">{{ member.notes or '' }}</textarea>
         </div>

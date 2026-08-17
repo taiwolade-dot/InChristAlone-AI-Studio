@@ -110,44 +110,53 @@ def _leaderboard_payload(quiz_session):
     ]
 
 
-
 @bible_quiz_session_bp.route('/api/bible-quiz/session/<int:session_id>/state')
 def api_session_state(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
-    questions = sorted(quiz_session.quiz.questions,key=lambda q:q.order_index)
+    questions = sorted(quiz_session.quiz.questions, key=lambda q: q.order_index)
 
-    if quiz_session.status=="active" and quiz_session.current_question_index < len(questions):
-
-        if seconds_remaining(quiz_session)<=0:
-
-            quiz_session.current_question_index += 1
-
-            if quiz_session.current_question_index >= len(questions):
-                quiz_session.status="finished"
-                quiz_session.ended_at=datetime.utcnow()
-            else:
-                quiz_session.question_started_at=datetime.utcnow()
-
-            db.session.commit()
-
-            questions = sorted(quiz_session.quiz.questions,key=lambda q:q.order_index)
-
-    payload={
-        "status":quiz_session.status,
-        "current_question_index":quiz_session.current_question_index,
-        "total_questions":len(questions),
-        "leaderboard":_leaderboard_payload(quiz_session)
+    payload = {
+        'status': quiz_session.status,
+        'leaderboard': _leaderboard_payload(quiz_session),
+        'current_question_index': quiz_session.current_question_index,
+        'total_questions': len(questions),
     }
 
-    if quiz_session.current_question_index < len(questions):
-        q=questions[quiz_session.current_question_index]
-        payload["question"]={
-            "question_id":q.id,
-            "text":q.text,
-            "options":q.options,
-            "seconds":seconds_remaining(quiz_session),
-            "correct_index":q.correct_index if seconds_remaining(quiz_session)<=0 else None
-        }
+    if questions:
+        idx = quiz_session.current_question_index
+        if idx < len(questions):
+            question = questions[idx]
+            seconds_left = seconds_remaining(quiz_session)
+
+            if quiz_session.status == 'active' and quiz_session.question_started_at:
+                import datetime
+                now = datetime.datetime.utcnow()
+                elapsed = int((now - quiz_session.question_started_at).total_seconds())
+                print("DEBUG:", session_id, elapsed, quiz_session.current_question_index)
+
+                if elapsed >= quiz_session.seconds_per_question:
+                    if quiz_session.current_question_index + 1 < len(questions):
+                        quiz_session.current_question_index += 1
+                        quiz_session.question_started_at = now
+                        db.session.commit()
+
+                        idx = quiz_session.current_question_index
+                        question = questions[idx]
+                        seconds_left = seconds_remaining(quiz_session)
+                    else:
+                        quiz_session.status = 'finished'
+                        db.session.commit()
+                        payload['status'] = 'finished'
+                        seconds_left = 0
+                else:
+                    seconds_left = seconds_remaining(quiz_session)
+
+            payload['question'] = {
+                'text': question.text,
+                'options': question.options,
+                'seconds': seconds_left,
+                'question_id': question.id,
+            }
 
     return jsonify(payload)
 
@@ -165,6 +174,7 @@ def api_start_quiz(session_id):
 
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/next-question', methods=['POST'])
+@login_required
 def api_next_question(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
     questions = sorted(quiz_session.quiz.questions, key=lambda q: q.order_index)
@@ -179,74 +189,6 @@ def api_next_question(session_id):
     quiz_session.question_started_at = datetime.utcnow()
     db.session.commit()
     return jsonify({'ok': True, 'finished': False})
-
-
-
-@bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/auto-advance', methods=['POST'])
-def auto_advance(session_id):
-    quiz_session = QuizLiveSession.query.get_or_404(session_id)
-
-    # Only active sessions can advance
-    if quiz_session.status != "active":
-        return jsonify({"advanced": False, "status": quiz_session.status})
-
-    questions = sorted(
-        quiz_session.quiz.questions,
-        key=lambda q: q.order_index
-    )
-
-    # No more questions
-    if quiz_session.current_question_index >= len(questions):
-        quiz_session.status = "finished"
-        quiz_session.ended_at = datetime.utcnow()
-        db.session.commit()
-        return jsonify({"advanced": False, "finished": True})
-
-    question = questions[quiz_session.current_question_index]
-
-    total_players = QuizParticipant.query.filter_by(
-        session_id=session_id
-    ).count()
-
-    answered = QuizAnswer.query.filter_by(
-        question_id=question.id
-    ).count()
-
-    time_up = seconds_remaining(quiz_session) <= -5
-    everyone_answered = (
-        total_players > 0 and answered >= total_players
-    )
-
-    # Advance exactly when everyone has answered OR time has expired
-    if not time_up and not everyone_answered:
-        return jsonify({
-            "advanced": False,
-            "seconds": seconds_remaining(quiz_session),
-            "answered": answered,
-            "players": total_players
-        })
-
-    quiz_session.current_question_index += 1
-
-    if quiz_session.current_question_index >= len(questions):
-        quiz_session.status = "finished"
-        quiz_session.ended_at = datetime.utcnow()
-        db.session.commit()
-
-        return jsonify({
-            "advanced": True,
-            "finished": True
-        })
-
-    # Start the new question timer
-    quiz_session.question_started_at = datetime.utcnow()
-    db.session.commit()
-
-    return jsonify({
-        "advanced": True,
-        "finished": False,
-        "current_question_index": quiz_session.current_question_index
-    })
 
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/pause', methods=['POST'])
@@ -296,6 +238,6 @@ def api_submit_answer(session_id):
 
     db.session.commit()
 
-    return jsonify({'is_correct': is_correct, 'correct_index': question.correct_index, 'score': participant.score})
+    return jsonify({'is_correct': is_correct, 'correct_index': question.correct_index})
 
 

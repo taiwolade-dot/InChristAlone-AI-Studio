@@ -9,7 +9,54 @@
         <a href="{{ url_for('church_management.add_member') }}" class="btn-primary">+ Add Member</a>
     </div>
 
+    {% if today_birthdays %}
+    <div class="flash flash-success" style="margin-top:1rem;">
+        🎉 <strong>Today's Birthdays:</strong>
+        {% for b in today_birthdays %}{{ b.full_name }}{% if not loop.last %}, {% endif %}{% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="GET" action="{{ url_for('church_management.index') }}" style="margin-top:1rem;">
+        <label for="birthday_month">Filter by Birthday Month</label>
+        <select name="birthday_month" id="birthday_month" onchange="this.form.submit()">
+            <option value="">All Members</option>
+            <option value="1" {% if filter_month == '1' %}selected{% endif %}>January</option>
+            <option value="2" {% if filter_month == '2' %}selected{% endif %}>February</option>
+            <option value="3" {% if filter_month == '3' %}selected{% endif %}>March</option>
+            <option value="4" {% if filter_month == '4' %}selected{% endif %}>April</option>
+            <option value="5" {% if filter_month == '5' %}selected{% endif %}>May</option>
+            <option value="6" {% if filter_month == '6' %}selected{% endif %}>June</option>
+            <option value="7" {% if filter_month == '7' %}selected{% endif %}>July</option>
+            <option value="8" {% if filter_month == '8' %}selected{% endif %}>August</option>
+            <option value="9" {% if filter_month == '9' %}selected{% endif %}>September</option>
+            <option value="10" {% if filter_month == '10' %}selected{% endif %}>October</option>
+            <option value="11" {% if filter_month == '11' %}selected{% endif %}>November</option>
+            <option value="12" {% if filter_month == '12' %}selected{% endif %}>December</option>
+        </select>
+    </form>
+
     {% if members %}
+    {% if filter_month %}
+    <div class="print-area">
+        <button onclick="window.print()" class="btn-primary" style="margin-bottom:1rem;">Print This List</button>
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="border-bottom:2px solid #1a2a6c;">
+                    <th style="text-align:left; padding:0.6rem;">Name</th>
+                    <th style="text-align:left; padding:0.6rem;">Date of Birth</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td style="padding:0.6rem;">{{ member.full_name }}</td>
+                    <td style="padding:0.6rem;">{{ member.birthday.strftime('%B %d') if member.birthday else '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
     <div class="member-list">
         {% for member in members %}
         <div class="dashboard-card" style="margin-bottom:1rem;">
@@ -19,6 +66,8 @@
             {% if member.email %}<p><strong>Email:</strong> {{ member.email }}</p>{% endif %}
             {% if member.date_joined %}<p><strong>Joined:</strong> {{ member.date_joined }}</p>{% endif %}
             {% if member.birthday %}<p><strong>Birthday:</strong> {{ member.birthday }}</p>{% endif %}
+            {% if member.marital_status %}<p><strong>Marital Status:</strong> {{ member.marital_status }}</p>{% endif %}
+            {% if member.age_range %}<p><strong>Age Range:</strong> {{ member.age_range }}</p>{% endif %}
 
             <div style="margin-top:0.8rem; display:flex; gap:0.8rem;">
                 <a href="{{ url_for('church_management.edit_member', member_id=member.id) }}" class="btn-secondary">Edit</a>
@@ -30,6 +79,7 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
     {% else %}
     <p>No members added yet. Click "Add Member" to get started.</p>
     {% endif %}

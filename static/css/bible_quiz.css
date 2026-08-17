@@ -1,0 +1,134 @@
+body{
+    background:#f4f7fb;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.quiz-container{
+    max-width:800px;
+    margin:30px auto;
+    background:#fff;
+    border-radius:16px;
+    padding:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+#status{
+    text-align:center;
+    color:#1e3a8a;
+    margin-bottom:20px;
+}
+
+#question-number{
+    color:#666;
+    margin-bottom:10px;
+}
+
+#question-text{
+    font-size:1.5rem;
+    font-weight:bold;
+    margin-bottom:20px;
+    color:#222;
+}
+
+#timer{
+    text-align:center;
+    font-size:1.3rem;
+    font-weight:bold;
+    color:#d97706;
+    margin:15px 0;
+}
+
+#answers{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:20px;
+}
+
+.answer-btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    font-size:1rem;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.answer-btn:hover{
+    background:#1d4ed8;
+    transform:translateY(-2px);
+}
+
+.answer-btn:disabled{
+    background:#94a3b8;
+    cursor:not-allowed;
+}
+
+#result{
+    margin-top:20px;
+    text-align:center;
+    font-weight:bold;
+    font-size:1.2rem;
+}
+
+#score{
+    color:#059669;
+    font-weight:bold;
+    font-size:1.3rem;
+}
+
+#leaderboard-list{
+    margin-top:20px;
+    border-top:1px solid #ddd;
+    padding-top:15px;
+}
+
+#leaderboard-list div{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+@media(max-width:600px){
+    .quiz-container{
+        margin:10px;
+        padding:18px;
+    }
+
+    #question-text{
+        font-size:1.2rem;
+    }
+
+    .answer-btn{
+        font-size:.95rem;
+        padding:14px;
+    }
+}
+
+/* ===== Quiz Header ===== */
+
+.quiz-header{
+    text-align:center;
+    margin-bottom:25px;
+    padding-bottom:15px;
+    border-bottom:2px solid #e5e7eb;
+}
+
+.quiz-header h1{
+    margin:0;
+    color:#1e3a8a;
+    font-size:2rem;
+    font-weight:700;
+}
+
+.quiz-header p{
+    margin-top:8px;
+    color:#666;
+    font-size:1rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+}

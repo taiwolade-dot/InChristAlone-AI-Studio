@@ -39,10 +39,11 @@
     {% endif %}
 
     <!-- Real Image Result (when API is connected) -->
+<p>DEBUG IMAGE URL: {{ generated_image_url }}</p>
     {% if generated_image_url %}
     <div class="prompt-output">
         <h3>Generated Image</h3>
-        <img src="{{ generated_image_url }}" alt="Generated content" style="max-width:100%; border-radius:8px;">
+        <div style="text-align:center;"><img src="{{ generated_image_url }}" alt="Generated content" style="display:block; width:100%; max-width:1024px; height:auto; margin:0 auto; border-radius:8px; border:2px solid #ddd;"></div>
         <form method="POST" action="{{ url_for('content_generator.upscale') }}" style="margin-top:0.8rem;">
             <input type="hidden" name="image_url" value="{{ generated_image_url }}">
             <input type="hidden" name="active_type" value="{{ active_type }}">

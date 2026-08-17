@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+            
+            
+<div class="container" style="max-width:800px;margin:30px auto;padding:20px;">
+
+    <div style="text-align:center;">
+<h2>📖 Bible Quiz</h2>
+<p><strong>Session ID:</strong> {{ quiz_session.id }}</p>
+<p><strong>Session ID:</strong> {{ quiz_session.id }}</p>
+        <h2>{{ participant.name }}</h2>
+        <p>PIN: <strong>{{ quiz_session.pin_code }}</strong></p>
+    </div>
+
+    <div id="status" style="text-align:center;padding:15px;margin:20px 0;border-radius:10px;background:#f1f5f9;">
+        Waiting for the host to start the quiz...
+    </div>
+
+    <div style="font-size:24px;font-weight:bold;text-align:center;margin:15px 0;">⏱ Time Left: <span id="timer">20</span>s</div>
+
+<div id="quiz-area" style="display:none;">
+
+        <div style="text-align:center;">
+            <p id="question-number"></p>
+            <h2 id="question-text"></h2>
+        </div>
+
+        <div id="answers"></div>
+
+        <div id="result"
+             style="display:none;text-align:center;margin-top:20px;padding:15px;border-radius:10px;">
+        </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:30px;">
+        <strong>Score: <span id="score">0</span></strong>
+
+<div id="leaderboard" style="
+margin-top:20px;
+padding:15px;
+border:1px solid #ddd;
+border-radius:10px;
+background:#f8f9fa;">
+<h3 style="margin-top:0;">🏆 Live Leaderboard</h3>
+<div id="leaderboard-list">
+Loading...
+</div>
+</div>
+    </div>
+
+</div>
+
+<script>
+const sessionId = {{ quiz_session.id }};
+
+let lastQuestion = -1;
+let answered = false;
+let selectedAnswer = null;
+
+async function loadState() {
+    try {
+        const response = await fetch(
+            `/api/bible-quiz/session/${sessionId}/state`
+        );
+
+        const data = await response.json();
+
+        const status = document.getElementById("status");
+        const quizArea = document.getElementById("quiz-area");
+
+        if (data.status === "waiting") {
+            status.style.display = "block";
+            status.innerHTML = "⏳ Waiting for the host to start the quiz...";
+            quizArea.style.display = "none";
+            return;
+        }
+
+        if (data.status === "paused") {
+            status.style.display = "block";
+            status.innerHTML = "⏸️ Quiz paused. Please wait...";
+            quizArea.style.display = "none";
+            return;
+        }
+
+        if (data.status === "finished") {
+            status.style.display = "block";
+            status.innerHTML = "🎉 Quiz Finished!";
+            quizArea.style.display = "none";
+            return;
+        }
+
+        if (data.leaderboard){
+            updateLeaderboard(data.leaderboard);
+        }
+
+        if (data.status === "active") {
+            status.style.display = "none";
+            quizArea.style.display = "block";
+
+            document.getElementById("score").textContent =
+                data.participant_score ?? 0;
+
+            if (data.current_question_index !== lastQuestion) {
+                lastQuestion = data.current_question_index;
+                answered = false;
+            console.log("Calling showQuestion", data.question.text);
+                showQuestion(data);
+
+                if (data.question && data.question.seconds !== undefined) {
+                    startLocalTimer(data.question.seconds);
+                }
+            }
+
+            // Reveal answer whenever time reaches zero
+            if (data.question &&
+                data.question.seconds === 0 &&
+                data.question.correct_index !== null) {
+
+                        document.querySelectorAll("#answers button").forEach(function(btn, i) {
+
+                            btn.disabled = true;
+
+                            if (i === data.question.correct_index) {
+                                btn.style.background = "#28a745";
+                                btn.style.color = "#fff";
+                                btn.style.fontWeight = "bold";
+                            }
+
+                            if (
+                                selectedAnswer !== null &&
+                                selectedAnswer !== data.question.correct_index &&
+                                i === selectedAnswer
+                            ) {
+                                btn.style.background = "#dc3545";
+                                btn.style.color = "#fff";
+                                btn.style.fontWeight = "bold";
+                            }
+
+                        });
+
+                        const result = document.getElementById("result");
+
+                        if (result) {
+                            result.style.display = "block";
+                            result.innerHTML =
+                                "⏰ <strong>Time Up!</strong><br><br>" +
+                                "✅ Correct Answer: <strong>" +
+                                String.fromCharCode(65 + data.question.correct_index) +
+                                "</strong><br><br>" +
+                                "⏳ Waiting for next question...";
+                        }
+                    }
+                }
+            }
+        }
+
+    } catch (error) {
+        console.error("Quiz state error:", error);
+    }
+}
+
+
+            console.log("Calling showQuestion", data.question.text);
+function showQuestion(data) {
+
+    const question =
+        data.question || data.current_question;
+
+    if (!question) {
+        return;
+    }
+
+    document.getElementById("question-number").textContent =
+        "Question " + ((data.current_question_index ?? 0) + 1);
+
+    document.getElementById("question-text").textContent =
+        question.text || question.question || "";
+
+    const answers = document.getElementById("answers");
+    answers.innerHTML = "";
+
+    const options =
+        question.options || question.choices || [];
+
+    options.forEach((option, index) => {
+
+        const button = document.createElement("button");
+
+        button.textContent =
+            String.fromCharCode(65 + index) + ". " + option;
+
+        button.style.display = "block";
+        button.style.width = "100%";
+        button.style.padding = "16px";
+        button.style.margin = "10px 0";
+        button.style.fontSize = "18px";
+        button.style.cursor = "pointer";
+        button.style.borderRadius = "10px";
+        button.style.border = "1px solid #ccc";
+        button.style.background = "#ffffff";
+
+        button.onclick = function () {
+            selectedAnswer = index;
+            submitAnswer(index);
+        };
+
+        answers.appendChild(button);
+    });
+}
+
+
+async function submitAnswer(index) {
+
+    if (answered) {
+        return;
+    }
+
+    answered = true;
+
+    const buttons =
+        document.querySelectorAll("#answers button");
+
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+
+    try {
+
+        const response = await fetch(
+            `/bible-quiz/session/${sessionId}/answer`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    chosen_index: index,
+                    time_taken_ms: 0
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        const result =
+            document.getElementById("result");
+
+        result.style.display = "block";
+
+        if (data.is_correct) {
+            result.innerHTML = "✅ Correct!";
+        } else {
+            result.innerHTML =
+                "❌ Incorrect.";
+        }
+
+        document.getElementById("score").textContent =
+            data.score ?? document.getElementById("score").textContent;
+
+    } catch (error) {
+
+        console.error("Answer error:", error);
+
+        result.innerHTML =
+            "Unable to submit answer. Please wait.";
+
+        answered = false;
+
+        buttons.forEach(button => {
+            button.disabled = false;
+        });
+    }
+}
+
+
+
+
+let secondsLeft = 0;
+let timerInterval = null;
+
+
+function startLocalTimer(initialSeconds) {
+    clearInterval(timerInterval);
+
+    secondsLeft = initialSeconds;
+
+    const timer = document.getElementById("timer");
+    const result = document.getElementById("result");
+
+    if (timer) timer.textContent = secondsLeft;
+
+    timerInterval = setInterval(function () {
+
+        secondsLeft--;
+
+        if (timer) {
+            timer.textContent = Math.max(0, secondsLeft);
+        }
+
+        if (secondsLeft <= 0) {
+            clearInterval(timerInterval);
+
+            if (timer) timer.textContent = "0";
+
+            document.querySelectorAll("#answers button").forEach(function(btn){
+                btn.disabled = true;
+            });
+
+            if (result) {
+                result.style.display = "block";
+
+                let correct = document.querySelector(
+                    "#answers button[style*='rgb(40, 167, 69)'], #answers button[style*='#28a745']"
+                );
+
+                result.innerHTML =
+                    "⏰ <strong>Time Up!</strong><br><br>" +
+                    "✅ Correct answer has been highlighted in <span style='color:green;'>GREEN</span>.";
+            }
+        }
+
+    },1000);
+}
+
+
+
+
+function updateLeaderboard(players){
+
+    if(!players) return;
+
+    const board = document.getElementById("leaderboard-list");
+    if(!board) return;
+
+    let html = "";
+
+    players.forEach(function(player,index){
+
+        let medal = "";
+
+        if(index===0) medal="🥇";
+        else if(index===1) medal="🥈";
+        else if(index===2) medal="🥉";
+        else medal=(index+1)+".";
+
+        html += `
+<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee;">
+<span>${medal} ${player.name}</span>
+<strong>${player.score}</strong>
+</div>`;
+    });
+
+    board.innerHTML = html;
+}
+
+
+
+loadState();
+
+setInterval(loadState, 1000);
+</script>
+
+
+
+
+{% endblock %}

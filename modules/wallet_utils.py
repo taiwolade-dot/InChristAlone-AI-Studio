@@ -24,3 +24,11 @@ def spend_units(amount, redirect_endpoint='prompt_marketplace.recharge'):
     current_user.wallet_balance -= amount
     db.session.commit()
     return True
+
+def refund_units(amount):
+    """
+    Refunds units back to the current user's wallet, typically after
+    a paid AI generation call fails (so the user isn't charged for nothing).
+    """
+    current_user.wallet_balance += amount
+    db.session.commit()

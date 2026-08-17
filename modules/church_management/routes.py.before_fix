@@ -168,7 +168,6 @@ def edit_member(member_id):
                 flash('Invalid date format for birthday. Please use YYYY-MM-DD.', 'error')
                 return render_template('church_management/edit_member.html', member=member)
         else:
-            member.birthday = None
 
         date_of_salvation_str = request.form.get('date_of_salvation', '').strip()
         if date_of_salvation_str:
@@ -180,10 +179,23 @@ def edit_member(member_id):
             member.date_of_salvation = None
 
         date_of_baptism_str = request.form.get('date_of_baptism', '').strip()
-        if date_of_baptism_str:
+member.birthday = None
+
+date_of_salvation_str = request.form.get('date_of_salvation', '').strip()
+if date_of_salvation_str:
+    try:
+        member.date_of_salvation = datetime.strptime(
+            date_of_salvation_str,
+            '%Y-%m-%d'
+        ).date()
+    except ValueError:
+        pass
+else:
+    member.date_of_salvation = None        if date_of_baptism_str:
             try:
                 member.date_of_baptism = datetime.strptime(date_of_baptism_str, '%Y-%m-%d').date()
-            except ValueError:
+            except ValueErrotry:
+    db.session.commit()
                 pass
         else:
             member.date_of_baptism = None

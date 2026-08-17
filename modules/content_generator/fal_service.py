@@ -27,6 +27,9 @@ def generate_image(prompt_text):
     try:
         # Submit the generation request to the queue
         response = requests.post(FAL_QUEUE_URL, json=payload, headers=headers, timeout=30)
+        print("========== FAL DEBUG ==========")
+        print("Status Code:", response.status_code)
+        print("Response:", response.text)
         if response.status_code != 200:
             return None
 
@@ -49,9 +52,11 @@ def generate_image(prompt_text):
             time.sleep(1)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 if "images" in result_data and len(result_data["images"]) > 0:
                     return result_data["images"][0]["url"]
                 return None
@@ -106,9 +111,11 @@ def upscale_image(image_url, scale=2):
             time.sleep(1)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 if "image" in result_data and isinstance(result_data["image"], dict):
                     return result_data["image"].get("url")
                 return None
@@ -165,9 +172,11 @@ def edit_image(image_data_uri, prompt_text):
             time.sleep(1)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 if "images" in result_data and len(result_data["images"]) > 0:
                     return result_data["images"][0]["url"]
                 return None
@@ -213,9 +222,11 @@ def generate_video(prompt_text, duration=5):
             time.sleep(2)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 if "video" in result_data and isinstance(result_data["video"], dict):
                     return result_data["video"].get("url")
                 return None
@@ -260,10 +271,12 @@ def generate_music(style_prompt, lyrics):
             time.sleep(2)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             print("FAL MUSIC POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 print("FAL MUSIC RESULT:", result_data)
                 if "audio" in result_data and isinstance(result_data["audio"], dict):
                     return result_data["audio"].get("url")
@@ -311,9 +324,11 @@ def generate_voice(text, voice="af_heart"):
             time.sleep(1)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 if "audio" in result_data and isinstance(result_data["audio"], dict):
                     return result_data["audio"].get("url")
                 return None
@@ -356,9 +371,11 @@ def transcribe_audio(audio_data_uri):
             time.sleep(2)
             status_resp = requests.get(status_url, headers=headers, timeout=15)
             status_data = status_resp.json()
+            print("FAL POLL:", status_data)
             if status_data.get("status") == "COMPLETED":
                 result_resp = requests.get(response_url, headers=headers, timeout=15)
                 result_data = result_resp.json()
+                print("FAL RESULT:", result_data)
                 if "text" in result_data:
                     return result_data.get("text")
                 return None

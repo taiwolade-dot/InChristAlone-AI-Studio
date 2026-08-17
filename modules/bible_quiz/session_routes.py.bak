@@ -110,47 +110,73 @@ def _leaderboard_payload(quiz_session):
     ]
 
 
-
+@bible_quiz_session_bp.route('/api/bible-quiz/session/<int:session_id>/state')
 @bible_quiz_session_bp.route('/api/bible-quiz/session/<int:session_id>/state')
 def api_session_state(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
-    questions = sorted(quiz_session.quiz.questions,key=lambda q:q.order_index)
+    questions = sorted(quiz_session.quiz.questions, key=lambda q: q.order_index)
 
-    if quiz_session.status=="active" and quiz_session.current_question_index < len(questions):
-
-        if seconds_remaining(quiz_session)<=0:
-
-            quiz_session.current_question_index += 1
-
-            if quiz_session.current_question_index >= len(questions):
-                quiz_session.status="finished"
-                quiz_session.ended_at=datetime.utcnow()
-            else:
-                quiz_session.question_started_at=datetime.utcnow()
-
-            db.session.commit()
-
-            questions = sorted(quiz_session.quiz.questions,key=lambda q:q.order_index)
-
-    payload={
-        "status":quiz_session.status,
-        "current_question_index":quiz_session.current_question_index,
-        "total_questions":len(questions),
-        "leaderboard":_leaderboard_payload(quiz_session)
+    payload = {
+        'status': quiz_session.status,
+        'leaderboard': _leaderboard_payload(quiz_session),
+        'current_question_index': quiz_session.current_question_index,
+        'total_questions': len(questions),
     }
 
-    if quiz_session.current_question_index < len(questions):
-        q=questions[quiz_session.current_question_index]
-        payload["question"]={
-            "question_id":q.id,
-            "text":q.text,
-            "options":q.options,
-            "seconds":seconds_remaining(quiz_session),
-            "correct_index":q.correct_index if seconds_remaining(quiz_session)<=0 else None
-        }
+    if questions:
+        idx = quiz_session.current_question_index
+
+        if idx < len(questions):
+            question = questions[idx]
+
+            remaining = seconds_remaining(quiz_session)
+
+            payload['question'] = {
+                'text': question.text,
+                'options': question.options,
+                'seconds': remaining,
+                'question_id': question.id,
+                'correct_index': question.correct_index if remaining == 0 else None,
+            }
+
+    participant_id = flask_session.get('participant_id')
+    if participant_id:
+        participant = QuizParticipant.query.get(participant_id)
+        if participant:
+            payload['participant_score'] = participant.score
+
+    payload['current_participant_id'] = flask_session.get('participant_id')
+
+    payload['leaderboard'] = sorted(
+        [
+            {
+                'id': p.id,
+                'name': p.name,
+                'score': p.score
+            }
+            for p in quiz_session.participants
+        ],
+        key=lambda x: x['score'],
+        reverse=True
+    )[:10]
+
+    
+    answers = QuizAnswer.query.join(
+        QuizQuestion,
+        QuizAnswer.question_id == QuizQuestion.id
+    ).filter(
+        QuizQuestion.id == question.id
+    ).all() if questions and idx < len(questions) else []
+
+    payload['analytics'] = {
+        'players_joined': len(quiz_session.participants),
+        'answered': len(answers),
+        'waiting': max(0, len(quiz_session.participants) - len(answers)),
+        'correct': sum(1 for a in answers if a.is_correct),
+        'wrong': sum(1 for a in answers if not a.is_correct)
+    }
 
     return jsonify(payload)
-
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/start-quiz', methods=['POST'])
 @login_required
@@ -212,7 +238,7 @@ def auto_advance(session_id):
         question_id=question.id
     ).count()
 
-    time_up = seconds_remaining(quiz_session) <= -5
+    time_up = seconds_remaining(quiz_session) <= 0
     everyone_answered = (
         total_players > 0 and answered >= total_players
     )

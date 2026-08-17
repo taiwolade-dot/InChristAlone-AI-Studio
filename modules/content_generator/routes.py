@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
-from modules.wallet_utils import spend_units
+from modules.wallet_utils import spend_units, refund_units
 from .data import CONTENT_TYPES
 from .fal_service import generate_image, upscale_image, edit_image, generate_video, generate_music, generate_voice, transcribe_audio
 
@@ -13,6 +13,7 @@ content_generator_bp = Blueprint(
 
 
 def generate_image_from_prompt(prompt_text):
+    print(">>> generate_image_from_prompt CALLED")
     """
     Calls fal.ai (Flux Schnell) to generate a real image from the prompt text.
     Returns an image URL on success, or None on failure - the template
@@ -61,6 +62,10 @@ def generate():
 
         if content_type in ('cartoon', 'flyer'):
             generated_image_url = generate_image_from_prompt(generated_prompt)
+            print("IMAGE URL =", repr(generated_image_url))
+            if not generated_image_url:
+                refund_units(unit_cost)
+                flash(f'Image generation failed. Your {unit_cost} Units have been refunded.', 'error')
 
     return render_template(
         'content_generator/index.html',
@@ -75,7 +80,7 @@ def generate():
 @content_generator_bp.route('/upscale', methods=['POST'])
 @login_required
 def upscale():
-    from modules.wallet_utils import spend_units
+    from modules.wallet_utils import spend_units, refund_units
 
     result = spend_units(3)
     if result is not True:
@@ -87,6 +92,9 @@ def upscale():
     upscaled_url = None
     if image_url:
         upscaled_url = upscale_image(image_url)
+        if not upscaled_url:
+            refund_units(3)
+            flash('Upscaling failed. Your 3 Units have been refunded.', 'error')
 
     type_data = CONTENT_TYPES.get(active_type)
 
@@ -108,7 +116,7 @@ def edit_image_form():
 @content_generator_bp.route('/edit-image/submit', methods=['POST'])
 @login_required
 def edit_image_submit():
-    from modules.wallet_utils import spend_units
+    from modules.wallet_utils import spend_units, refund_units
     import base64
 
     result = spend_units(8)

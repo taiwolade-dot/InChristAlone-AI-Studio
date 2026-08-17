@@ -18,3 +18,5 @@ class Config:
     PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')
     PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
     FAL_API_KEY = os.environ.get('FAL_API_KEY')
+    ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+    ANTHROPIC_MODEL = 'claude-sonnet-4-6'
