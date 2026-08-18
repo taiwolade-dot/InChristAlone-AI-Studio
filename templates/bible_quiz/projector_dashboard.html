@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Bible Quiz Projector</title>
+
+<style>
+body {
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial, sans-serif;
+    text-align:center;
+}
+
+.container {
+    padding:40px;
+}
+
+h1 {
+    font-size:50px;
+}
+
+.question {
+    font-size:40px;
+    margin:30px;
+}
+
+.options {
+    font-size:32px;
+    text-align:left;
+    max-width:800px;
+    margin:auto;
+}
+
+.option {
+    padding:15px;
+    margin:10px;
+    background:#222;
+    border-radius:10px;
+}
+
+.timer {
+    font-size:80px;
+    color:#ffd700;
+}
+
+.progress {
+    font-size:30px;
+}
+
+.leaderboard {
+    position:absolute;
+    right:30px;
+    top:30px;
+    background:#222;
+    padding:20px;
+    border-radius:15px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📖 BIBLE QUIZ CHALLENGE</h1>
+
+<div class="progress" id="progress"></div>
+
+<div class="question" id="question">
+Waiting...
+</div>
+
+
+<div class="options" id="options"></div>
+
+
+<div class="timer" id="timer">
+20
+</div>
+
+
+<div class="leaderboard">
+
+<h2>🏆 Top 5</h2>
+
+<div id="leaders"></div>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+const sessionId = {{ quiz_session.id }};
+
+
+function updateProjector(){
+
+fetch(`/api/bible-quiz/session/${sessionId}/state`)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+
+if(data.status==="finished"){
+
+document.body.innerHTML=
+`
+<h1 style="font-size:80px;margin-top:200px">
+🎉 QUIZ COMPLETE 🎉
+</h1>
+`;
+
+return;
+
+}
+
+
+document.getElementById("progress").innerHTML =
+`Question ${data.current_question_index + 1} of ${data.total_questions}`;
+
+
+if(data.question){
+
+document.getElementById("question").innerHTML =
+data.question.text;
+
+
+let html="";
+
+data.question.options.forEach((o,i)=>{
+
+html += `
+<div class="option">
+${String.fromCharCode(65+i)}. ${o}
+</div>
+`;
+
+});
+
+
+document.getElementById("options").innerHTML=html;
+
+
+document.getElementById("timer").innerHTML =
+data.question.seconds;
+
+
+}
+
+
+
+let leaders="";
+
+data.leaderboard.slice(0,5).forEach((p,i)=>{
+
+leaders += `
+<p>
+${i+1}. ${p.name} - ${p.score}
+</p>
+`;
+
+});
+
+
+document.getElementById("leaders").innerHTML=leaders;
+
+
+
+});
+
+
+}
+
+
+setInterval(updateProjector,1000);
+
+updateProjector();
+
+
+</script>
+
+
+</body>
+</html>

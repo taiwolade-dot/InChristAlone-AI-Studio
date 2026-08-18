@@ -132,3 +132,82 @@ body{
     letter-spacing:1px;
     text-transform:uppercase;
 }
+
+/* ===== Answer Button Effects ===== */
+
+.answer-btn{
+    transition:all .25s ease;
+    box-shadow:0 2px 8px rgba(0,0,0,.10);
+}
+
+.answer-btn:hover:not(:disabled){
+    transform:translateY(-3px);
+    box-shadow:0 8px 18px rgba(37,99,235,.25);
+}
+
+.answer-btn:active:not(:disabled){
+    transform:scale(.98);
+}
+
+.answer-btn.correct{
+    background:#16a34a !important;
+    color:#fff;
+}
+
+.answer-btn.wrong{
+    background:#dc2626 !important;
+    color:#fff;
+}
+
+.answer-btn:disabled{
+    opacity:.85;
+}
+
+/* ===== Progress Bar ===== */
+
+#progress-bar{
+    width:100%;
+    height:12px;
+    background:#e5e7eb;
+    border-radius:999px;
+    overflow:hidden;
+    margin:15px 0 25px;
+}
+
+#progress-fill{
+    width:0%;
+    height:100%;
+    background:linear-gradient(90deg,#2563eb,#16a34a);
+    transition:width .5s ease;
+}
+
+/* ===== Host Dashboard ===== */
+
+.host-stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:#ffffff;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    box-shadow:0 6px 16px rgba(0,0,0,.08);
+    border-top:5px solid #2563eb;
+}
+
+.stat-card h4{
+    margin:0 0 10px;
+    font-size:.95rem;
+    color:#666;
+}
+
+.stat-card span{
+    display:block;
+    font-size:1.7rem;
+    font-weight:700;
+    color:#1e3a8a;
+}

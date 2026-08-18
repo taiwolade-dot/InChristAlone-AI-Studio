@@ -1,3 +1,17 @@
+
+function animateScore(target){
+    let current = parseInt(scoreEl.textContent || "0");
+
+    const timer = setInterval(() => {
+        if(current >= target){
+            clearInterval(timer);
+            return;
+        }
+        current++;
+        scoreEl.textContent = current;
+    }, 40);
+}
+
 const statusEl = document.getElementById("status");
 const quizArea = document.getElementById("quiz-area");
 const questionNumberEl = document.getElementById("question-number");
@@ -5,6 +19,7 @@ const questionTextEl = document.getElementById("question-text");
 const timerEl = document.getElementById("timer");
 const answersEl = document.getElementById("answers");
 const resultEl = document.getElementById("result");
+const progressFill = document.getElementById("progress-fill");
 const scoreEl = document.getElementById("score");
 const leaderboardEl = document.getElementById("leaderboard-list");
 
@@ -32,7 +47,9 @@ async function loadState() {
 
             data.question.options.forEach((option, index) => {
                 const btn = document.createElement("button");
-                btn.textContent = option;
+                const labels = ["A","B","C","D"];
+
+                btn.innerHTML = `<strong>${labels[index]}.</strong> ${option}`;
                 btn.className = "answer-btn";
                 btn.disabled = false;
 
@@ -53,15 +70,15 @@ async function loadState() {
                     const result = await res.json();
 
                     if(result.is_correct){
-                        btn.style.background = "#16a34a";
+                        btn.classList.add("correct");
                         resultEl.textContent = "✅ Correct!";
                     }else{
-                        btn.style.background = "#dc2626";
+                        btn.classList.add("wrong");
                         resultEl.textContent = "❌ Wrong!";
                     }
 
                     if(result.score !== undefined){
-                        scoreEl.textContent = result.score;
+                        animateScore(result.score);
                     }
                 };
                 answersEl.appendChild(btn);
@@ -78,7 +95,7 @@ async function loadState() {
         data.leaderboard.forEach((player, i) => {
             const row = document.createElement("div");
             row.textContent =
-                `${i + 1}. ${player.name} (${player.score})`;
+                `${i===0?"🥇":i===1?"🥈":i===2?"🥉":"🏅"} ${player.name} — ${player.score} pts`;
             leaderboardEl.appendChild(row);
         });
 

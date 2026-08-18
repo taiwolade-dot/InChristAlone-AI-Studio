@@ -38,7 +38,29 @@ function copyJoinLink() {
 
     <h1>Bible Quiz Host Panel</h1>
 
-    <div class="prompt-output">
+    <div class="host-stats">
+    <div class="stat-card">
+        <h4>📍 Status</h4>
+        <span id="status">{{ quiz_session.status }}</span>
+    </div>
+
+    <div class="stat-card">
+        <h4>👥 Players</h4>
+        <span id="player-count">0</span>
+    </div>
+
+    <div class="stat-card">
+        <h4>❓ Question</h4>
+        <span id="question-progress">0 / {{ quiz_session.quiz.questions|length }}</span>
+    </div>
+
+    <div class="stat-card">
+        <h4>⏱ Timer</h4>
+        <span id="timer-display">{{ quiz_session.seconds_per_question }}s</span>
+    </div>
+</div>
+
+<div class="prompt-output">
         <h2>{{ quiz_session.quiz.title }}</h2>
 
         <p>
@@ -71,6 +93,13 @@ function copyJoinLink() {
             Start Quiz
         </button>
 
+        <a href="{{ url_for('bible_quiz_session.projector_dashboard', session_id=quiz_session.id) }}"
+           target="_blank"
+           class="btn-secondary"
+           style="text-decoration:none; display:inline-block;">
+            📺 Open Projector
+        </a>
+
         <button id="nextBtn" class="btn-secondary" onclick="nextQuestion()">
             Next Question
         </button>
@@ -81,7 +110,7 @@ function copyJoinLink() {
     </div>
 
     <div class="prompt-output">
-        <h3>Leaderboard</h3>
+</button>        <h3>Leaderboard</h3>
         <div id="leaderboard">
             Waiting for participants...
         </div>
@@ -141,6 +170,17 @@ async function loadState() {
     const data = await response.json();
 
     document.getElementById('status').textContent = data.status;
+
+document.getElementById('player-count').textContent =
+    data.leaderboard.length;
+
+document.getElementById('question-progress').textContent =
+    `${data.current_question_index + 1} / ${data.total_questions}`;
+
+if(data.question){
+    document.getElementById('timer-display').textContent =
+        data.question.seconds + "s";
+}
 
     const leaderboard = document.getElementById('leaderboard');
 
