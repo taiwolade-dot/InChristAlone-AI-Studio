@@ -43,6 +43,18 @@ async function loadState() {
             timerEl.textContent =
                 `⏱ ${data.question.seconds} seconds`;
 
+            if(data.question.seconds === 0 && data.question.correct_index !== null){
+                document.querySelectorAll(".answer-btn").forEach((btn,index)=>{
+                    btn.disabled = true;
+
+                    if(index === data.question.correct_index){
+                        btn.classList.add("correct");
+                    }
+                });
+
+                resultEl.textContent = "⏰ Time Up!";
+            }
+
             answersEl.innerHTML = "";
 
             data.question.options.forEach((option, index) => {
@@ -84,18 +96,45 @@ async function loadState() {
                 answersEl.appendChild(btn);
             });
 
+            if(data.question.seconds === 0 && data.question.correct_index !== null){
+                document.querySelectorAll(".answer-btn").forEach((btn,index)=>{
+                    btn.disabled = true;
+
+                    if(index === data.question.correct_index){
+                        btn.classList.add("correct");
+                    }
+                });
+
+                resultEl.textContent = "⏰ Time Up!";
+            }
+
         } else {
             quizArea.style.display = "none";
         }
 
-        scoreEl.textContent = 0;
+        const me = data.leaderboard.find(
+            player => player.id == participantId
+        );
+
+        if(me){
+            animateScore(me.score);
+        }
 
         leaderboardEl.innerHTML = "";
 
         data.leaderboard.forEach((player, i) => {
             const row = document.createElement("div");
+            const badge =
+                i===0 ? "🥇" :
+                i===1 ? "🥈" :
+                i===2 ? "🥉" : "🏅";
+
+            const me =
+                player.id == participantId ? " ⭐ YOU" : "";
+
             row.textContent =
-                `${i===0?"🥇":i===1?"🥈":i===2?"🥉":"🏅"} ${player.name} — ${player.score} pts`;
+                `${badge} #${i+1} ${player.name}${me} — ${player.score} pts`;
+
             leaderboardEl.appendChild(row);
         });
 

@@ -197,6 +197,29 @@ if(data.question){
     `).join('');
 }
 
+async function loadPlayers(){
+
+    const response = await fetch(
+        `/api/bible-quiz/session/${sessionId}/players`
+    );
+
+    const data = await response.json();
+
+    document.getElementById("player-count").textContent =
+        data.count;
+
+    document.getElementById("players").innerHTML =
+        data.players.map(player =>
+        `<div>
+        🟢 ${player.name}
+        </div>`
+        ).join("");
+}
+
+
+loadPlayers();
+setInterval(loadPlayers,3000);
+
 loadState();
 setInterval(loadState, 3000);
 

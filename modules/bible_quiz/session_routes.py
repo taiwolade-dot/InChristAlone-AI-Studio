@@ -337,3 +337,24 @@ def api_submit_answer(session_id):
     return jsonify({'is_correct': is_correct, 'correct_index': question.correct_index, 'score': participant.score})
 
 
+
+
+@bible_quiz_session_bp.route('/api/bible-quiz/session/<int:session_id>/players')
+def api_players(session_id):
+
+    quiz_session = QuizLiveSession.query.get_or_404(session_id)
+
+    players = [
+        {
+            "id": p.id,
+            "name": p.name,
+            "score": p.score,
+            "avatar_color": p.avatar_color
+        }
+        for p in quiz_session.participants
+    ]
+
+    return jsonify({
+        "count": len(players),
+        "players": players
+    })
