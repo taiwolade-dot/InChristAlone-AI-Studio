@@ -56,6 +56,21 @@ h1 {
     padding:20px;
     border-radius:15px;
 }
+
+.qr-box {
+    position:absolute;
+    left:30px;
+    top:30px;
+    background:#222;
+    padding:20px;
+    border-radius:15px;
+}
+
+.qr-box img {
+    background:white;
+    padding:10px;
+}
+
 </style>
 
 </head>
@@ -65,6 +80,17 @@ h1 {
 <div class="container">
 
 <h1>📖 BIBLE QUIZ CHALLENGE</h1>
+<div class="qr-box">
+    <h2>📱 Scan to Join</h2>
+
+    <img src="data:image/png;base64,{{ qr_code }}"
+         width="180"
+         alt="Join QR Code">
+
+    <h3>PIN: {{ quiz_session.pin_code }}</h3>
+</div>
+
+
 
 <div class="progress" id="progress"></div>
 

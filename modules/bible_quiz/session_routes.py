@@ -1,4 +1,7 @@
 import secrets
+import qrcode
+import io
+import base64
 from datetime import datetime, timedelta
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session as flask_session
@@ -6,6 +9,28 @@ from flask_login import login_required, current_user
 
 from models import db, BibleQuiz, QuizLiveSession, QuizParticipant, QuizQuestion, QuizAnswer
 from modules.bible_quiz.timer import seconds_remaining
+
+
+def generate_qr_code(data):
+    qr = qrcode.QRCode(
+        version=1,
+        box_size=8,
+        border=2
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    img = qr.make_image()
+
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+
+    encoded = base64.b64encode(
+        buffer.getvalue()
+    ).decode("utf-8")
+
+    return encoded
+
 
 bible_quiz_session_bp = Blueprint(
     'bible_quiz_session',
@@ -44,7 +69,20 @@ def host_panel(session_id):
 @bible_quiz_session_bp.route('/bible-quiz/dashboard/<int:session_id>')
 def projector_dashboard(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
-    return render_template('bible_quiz/projector_dashboard.html', quiz_session=quiz_session)
+
+    join_url = request.host_url.rstrip('/') + url_for(
+        'bible_quiz_session.join',
+        pin_code=quiz_session.pin_code
+    )
+
+    qr_code = generate_qr_code(join_url)
+
+    return render_template(
+        'bible_quiz/projector_dashboard.html',
+        quiz_session=quiz_session,
+        qr_code=qr_code,
+        join_url=join_url
+    )
 
 
 @bible_quiz_session_bp.route('/bible-quiz/join/<pin_code>', methods=['GET', 'POST'])
