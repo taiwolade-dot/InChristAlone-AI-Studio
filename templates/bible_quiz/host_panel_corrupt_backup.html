@@ -1,0 +1,483 @@
+{% extends "base.html" %}
+
+{% block title %}Bible Quiz Host Panel{% endblock %}
+
+{% block content %}
+<div class="dashboard-card" style="margin-bottom:1.5rem; text-align:center;">
+    <h3>📢 Invite Participants to Join</h3>
+    <p style="margin-bottom:0.5rem;">Share this link with players on your local Wi-Fi network:</p>
+    
+    <div style="display:flex; gap:0.5rem; justify-content:center; align-items:center; margin-bottom:1rem; flex-wrap:wrap;">
+        <input type="text" id="joinUrlInput" 
+               value="{{ url_for('bible_quiz_session.join', pin_code=quiz_session.pin_code, _external=True) }}" 
+               readonly 
+               style="padding:0.5rem; width:100%; max-width:350px; text-align:center; font-weight:bold; border:1px solid #ccc; border-radius:4px;">
+        <button type="button" onclick="copyJoinLink()" class="btn-secondary">📋 Copy Link</button>
+    </div>
+
+    <a href="{{ url_for('bible_quiz_session.join', pin_code=quiz_session.pin_code) }}" 
+       target="_blank" 
+       class="btn-primary" style="display:inline-block; text-decoration:none;">
+       🚀 Open Join Page in New Tab
+    </a>
+</div>
+
+<script>
+function copyJoinLink() {
+    const copyText = document.getElementById('joinUrlInput');
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value).then(() => {
+        alert('Join link copied to clipboard!');
+    }).catch(err => {
+        alert('Failed to copy. URL: ' + copyText.value);
+    });
+}
+</script>
+<div class="container">
+
+    <h1>Bible Quiz Host Panel</h1>
+
+    <div class="host-stats">
+    <div class="stat-card">
+        <h4>📍 Status</h4>
+        <span id="status">{{ quiz_session.status }}</span>
+    </div>
+
+    <div class="stat-card">
+        <h4>👥 Players</h4>
+        <span id="player-count">0</span>
+    </div>
+
+    <div class="stat-card">
+        <h4>❓ Question</h4>
+        <span id="question-progress">0 / {{ quiz_session.quiz.questions|length }}</span>
+    </div>
+
+    <div class="stat-card">
+        <h4>⏱ Timer</h4>
+        <span id="timer-display">{{ quiz_session.seconds_per_question }}s</span>
+    </div>
+</div>
+
+<div class="prompt-output">
+        <h2>{{ quiz_session.quiz.title }}</h2>
+
+        <p>
+            <strong>PIN:</strong>
+            <span style="font-size:1.5rem; font-weight:bold;">
+                {{ quiz_session.pin_code }}
+            </span>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span id="status">{{ quiz_session.status }}</span>
+        </p>
+
+        <p>
+            <strong>Questions:</strong>
+            {{ quiz_session.quiz.questions|length }}
+        </p>
+
+        <p>
+            <strong>Time per Question:</strong>
+            {{ quiz_session.seconds_per_question }} seconds
+        </p>
+    </div>
+
+    <div class="prompt-output">
+        <h3>Live Quiz Controls</h3>
+
+        <button id="startBtn" class="btn-primary" onclick="startQuiz()">
+            Start Quiz
+        </button>
+
+        <a href="{{ url_for('bible_quiz_session.projector_dashboard', session_id=quiz_session.id) }}"
+           target="_blank"
+           class="btn-secondary"
+           style="text-decoration:none; display:inline-block;">
+            📺 Open Projector
+        </a>
+
+        <button id="nextBtn" class="btn-secondary" onclick="nextQuestion()">
+            Next Question
+        </button>
+
+        <button id="pauseBtn" class="btn-secondary" onclick="pauseQuiz()">
+            Pause Quiz
+        </button>
+    </div>
+
+    <div class="prompt-output">
+</button>        <h3>Leaderboard</h3>
+        <div id="leaderboard">
+            Waiting for participants...
+        </div>
+    </div>
+
+</div>
+
+<script>
+const sessionId = {{ quiz_session.id }};
+
+async function startQuiz() {
+    const response = await fetch(
+        `/bible-quiz/session/${sessionId}/start-quiz`,
+        { method: 'POST' }
+    );
+
+    console.log("Start Quiz status:", response.status);
+    const data = await response.json();
+    console.log("Start Quiz response:", data);
+
+    if (data.ok) {
+        loadState();
+loadPlayers();
+    }
+}
+
+async function nextQuestion() {
+    const response = await fetch(
+        `/bible-quiz/session/${sessionId}/next-question`,
+        { method: 'POST' }
+    );
+
+    const data = await response.json();
+
+    if (data.ok) {
+        loadState();
+    }
+}
+
+async function pauseQuiz() {
+    const response = await fetch(
+        `/bible-quiz/session/${sessionId}/pause`,
+        { method: 'POST' }
+    );
+
+    const data = await response.json();
+
+    if (data.ok) {
+        loadState();
+    }
+}
+
+
+async function loadPlayers(){
+    try{
+        const response = await fetch(`/api/bible-quiz/session/${sessionId}/players`);
+        const data = await response.json();
+        document.getElementById('player-count').textContent = data.count;
+    }catch(e){
+        console.log("Player loading error:", e);
+    }
+}
+
+async function loadState() {
+    const response = await fetch(
+        `/api/bible-quiz/session/${sessionId}/state`
+    );
+
+    const data = await response.json();
+
+    document.getElementById('status').textContent = data.status;
+
+document.getElementById('player-count').textContent =
+    data.leaderboard.length;
+
+document.getElementById('question-progress').textContent =
+    `${data.current_question_index + 1} / ${data.total_questions}`;
+
+if(data.question){
+    document.getElementById('timer-display').textContent =
+        data.question.seconds + "s";
+}
+
+    const leaderboard = document.getElementById('leaderboard');
+
+    if (!data.leaderboard || data.leaderboard.length === 0) {
+        leaderboard.textContent = 'Waiting for participants...';
+        return;
+    }
+
+    leaderboard.innerHTML = data.leaderboard.map((player, index) => `
+        <div style="padding:0.5rem;">
+            <strong>${index + 1}. ${player.name}</strong>
+            — ${player.score} points
+        </div>
+    `).join('');
+}
+
+async function loadPlayers(){
+
+    const response = await fetch(
+        `/api/bible-quiz/session/${sessionId}/players`
+    );
+
+    const data = await response.json();
+
+    document.getElementById("player-count").textContent =
+        data.count;
+
+    document.getElementById("players").innerHTML =
+        data.players.map(player =>
+        `<div>
+        🟢 ${player.name}
+        </div>`
+        ).join("");
+}
+
+
+loadPlayers();
+setInterval(loadPlayers,3000);
+
+loadState();
+setInterval(loadState, 3000);
+setInterval(loadPlayers, 3000);
+
+
+async function autoAdvance(){
+
+    try{
+
+        await fetch(
+            `/bible-quiz/session/${sessionId}/auto-advance`,
+            {method:"POST"}
+        );
+
+    }catch(e){
+        console.log(e);
+    }
+
+}
+
+// setInterval(autoAdvance,1000);
+
+</script>
+
+{% endblock %}
+
+<script>
+let timerInterval = null;
+
+function updateDisplayTimer(seconds) {
+    const timerElem = document.getElementById('timer-display');
+    
+    let currentSeconds = seconds;
+    timerElem.innerText = currentSeconds + 's';
+    
+    clearInterval(timerInterval);
+    if (currentSeconds > 0) {
+        timerInterval = setInterval(() => {
+            currentSeconds--;
+            if (currentSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerElem.innerText = 'Time Up!';
+            } else {
+                timerElem.innerText = currentSeconds + 's';
+            }
+        }, 1000);
+    }
+}
+</script>
+
+<script>
+let lastQuestionId = null;
+let countdownTimer = null;
+
+function handleTimerUpdate(seconds, questionId) {
+    const display = document.getElementById('timer-display') || document.querySelector('.timer-box');
+
+    if (questionId !== lastQuestionId) {
+        lastQuestionId = questionId;
+        clearInterval(countdownTimer);
+        let currentSeconds = seconds;
+        
+        display.innerText = currentSeconds + 's';
+        
+        countdownTimer = setInterval(() => {
+            currentSeconds--;
+            if (currentSeconds <= 0) {
+                clearInterval(countdownTimer);
+                display.innerText = '0s';
+            } else {
+                display.innerText = currentSeconds + 's';
+            }
+        }, 1000);
+    }
+}
+</script>
+
+
+<div id="timer-display" class="timer-box">20s</div>
+
+<script>
+let currentQId = null;
+let timerInterval = null;
+let timerHandled = false;
+
+function startLocalTimer(initialSeconds) {
+    clearInterval(timerInterval);
+
+    let secondsLeft = Number(initialSeconds) || 20;
+    timerHandled = false;
+
+    const display = document.getElementById("timer-display");
+
+    if (display) {
+        display.innerText = secondsLeft + "s";
+    }
+
+    timerInterval = setInterval(() => {
+        secondsLeft--;
+
+        if (display) {
+            display.innerText =
+                secondsLeft > 0 ? secondsLeft + "s" : "⏰ Time Up!";
+        }
+
+        if (secondsLeft <= 0) {
+            clearInterval(timerInterval);
+
+            if (timerHandled) return;
+            timerHandled = true;
+
+            // Disable answer buttons
+            document.querySelectorAll(".option-btn").forEach(btn => {
+                btn.disabled = true;
+            });
+
+            if (display) {
+                display.innerText = "⏰ Time Up!";
+            }
+
+            // Move to next question after 1 second
+            setTimeout(function () {
+                fetch("/bible-quiz/session/" + sessionId + "/next-question", {
+                    method: "POST"
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log("AUTO NEXT:", data);
+
+                    if (data.ok) {
+                        currentQId = null;
+                        pollSessionState();
+                    }
+                })
+                .catch(function(error) {
+                    console.error("AUTO NEXT ERROR:", error);
+                });
+            }, 1000);
+        }
+    }, 1000);
+}
+
+function pollSessionState() {
+    fetch('/api/bible-quiz/session/{{ quiz_session.id }}/state')
+        .then(res => res.json())
+        .then(data => {
+
+            if (!data.question) return;
+
+            if (data.question.question_id !== currentQId) {
+
+                currentQId = data.question.question_id;
+
+                const qTextEl =
+                    document.getElementById('question-text');
+
+                if (qTextEl) {
+                    qTextEl.innerText = data.question.text;
+                }
+
+                const qNumEl =
+                    document.getElementById('question-number');
+
+                if (qNumEl) {
+                    qNumEl.innerText =
+                        (data.current_question_index + 1) +
+                        ' / ' +
+                        data.total_questions;
+                }
+
+                const optionsBox =
+                    document.getElementById('options-container');
+
+                if (optionsBox && data.question.options) {
+
+                    optionsBox.innerHTML = '';
+
+                    data.question.options.forEach((opt, idx) => {
+
+                        const btn =
+                            document.createElement('button');
+
+                        btn.className =
+                            'btn btn-outline-primary option-btn';
+
+                        btn.style.cssText =
+                            'width:100%;margin-bottom:8px;' +
+                            'text-align:left;padding:12px;';
+
+                        btn.innerText = opt;
+
+                        optionsBox.appendChild(btn);
+                    });
+                }
+
+                startLocalTimer(data.question.seconds || 20);
+            }
+
+            // Server timer has expired: automatically advance
+            if (
+                data.status === "active" &&
+                data.question &&
+                Number(data.question.seconds) <= 0 &&
+                !timerHandled
+            ) {
+                timerHandled = true;
+
+                console.log("⏰ SERVER TIMER EXPIRED");
+
+                document.querySelectorAll(".option-btn").forEach(btn => {
+                    btn.disabled = true;
+                });
+
+                const display = document.getElementById("timer-display");
+                if (display) {
+                    display.innerText = "⏰ Time Up!";
+                }
+
+                setTimeout(() => {
+                    fetch("/bible-quiz/session/" + sessionId + "/next-question", {
+                        method: "POST"
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        console.log("AUTO NEXT RESULT:", result);
+
+                        if (result.ok) {
+                            currentQId = null;
+                            timerHandled = false;
+                            pollSessionState();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("AUTO NEXT ERROR:", err);
+                        timerHandled = false;
+                    });
+                }, 1000);
+            }
+        })
+        .catch(err => {
+            console.error("Quiz state error:", err);
+        });
+}
+
+pollSessionState();
+setInterval(pollSessionState, 1000);
+</script>

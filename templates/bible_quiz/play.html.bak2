@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Bible Quiz{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bible_quiz.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="quiz-container">
+
+<div class="quiz-header">
+    <h1>📖 Bible Quiz Challenge</h1>
+    <p>InChristAlone AI Studio</p>
+</div>
+
+    <h2 id="status">
+        Waiting for host...
+    </h2>
+
+    <div id="quiz-area" style="display:none;">
+
+        <h3 id="question-number"></h3>
+<div id="progress-bar">
+    <div id="progress-fill"></div>
+</div>
+
+        <h2 id="question-text"></h2>
+
+        <div id="timer"></div>
+
+        <div id="answers"></div>
+
+        <div id="result"></div>
+
+        <hr>
+
+        <h4>Your Score:
+            <span id="score">0</span>
+        </h4>
+
+        <div id="leaderboard-list"></div>
+
+    </div>
+
+</div>
+
+<script>
+const sessionId={{ quiz_session.id }};
+</script>
+
+<script src="{{ url_for('static', filename='js/player.js') }}"></script>
+
+{% endblock %}

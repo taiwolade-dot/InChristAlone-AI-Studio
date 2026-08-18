@@ -135,31 +135,11 @@ fetch(`/api/bible-quiz/session/${sessionId}/state`)
 
 if(data.status==="finished"){
 
-let finalBoard = "";
-
-data.leaderboard.slice(0,3).forEach((p,i)=>{
-    const medal =
-        i===0 ? "🥇" :
-        i===1 ? "🥈" :
-        "🥉";
-
-    finalBoard += `
-        <h2>${medal} #${i+1} ${p.name} — ${p.score} pts</h2>
-    `;
-});
-
-document.body.innerHTML =
+document.body.innerHTML=
 `
-<div style="text-align:center;margin-top:120px;">
-<h1 style="font-size:80px;">
+<h1 style="font-size:80px;margin-top:200px">
 🎉 QUIZ COMPLETE 🎉
 </h1>
-
-<h2>🏆 Final Winners</h2>
-
-${finalBoard}
-
-</div>
 `;
 
 return;
@@ -205,14 +185,9 @@ let leaders="";
 
 data.leaderboard.slice(0,5).forEach((p,i)=>{
 
-const medal =
-    i===0 ? "🥇" :
-    i===1 ? "🥈" :
-    i===2 ? "🥉" : "🏅";
-
 leaders += `
 <p>
-${medal} #${i+1} ${p.name} — ${p.score} pts
+${i+1}. ${p.name} - ${p.score}
 </p>
 `;
 
