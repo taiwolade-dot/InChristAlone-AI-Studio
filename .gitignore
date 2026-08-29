@@ -7,3 +7,23 @@
 static/generated/
 __pycache__/
 *.pyc
+
+# Databases
+*.db
+instance/
+
+# Uploads
+uploads/
+static/uploads/
+
+# Backup source files
+*_before_*
+*_backup*
+*_stage*
+*.v2bak
+*.bak2
+*.zip
+
+# Generated AI files
+static/generated/
+
