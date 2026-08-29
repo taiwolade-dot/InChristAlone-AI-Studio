@@ -4,6 +4,7 @@ from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDoc
 from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
+from modules.ai_service import ask_ai
 
 
 ai_assistant_bp = Blueprint(
@@ -461,7 +462,17 @@ def chat():
 
         else:
             title = "🤖 AI Assistant"
-            response = "I will help you with your request."
+
+            response = ask_ai(
+                f"""
+You are InChristAlone AI Assistant, a Christian ministry AI assistant.
+
+Answer the user's question clearly and helpfully.
+
+User question:
+                {question}
+                """
+            )
 
 
         answer = f"""
