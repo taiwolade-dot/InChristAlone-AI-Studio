@@ -16,9 +16,16 @@ prompt_marketplace_bp = Blueprint(
     template_folder='../../templates/prompt_marketplace'
 )
 
-UNITS_PER_NAIRA = 0.1
-MIN_RECHARGE_NAIRA = 500
-RECHARGE_ENABLED = False  # Set to True once Paystack live account is verified
+RECHARGE_PACKAGES = {
+    1000: 250,
+    2500: 700,
+    5000: 1500,
+    10000: 3200,
+    20000: 7000
+}
+
+MIN_RECHARGE_NAIRA = 1000
+RECHARGE_ENABLED = True  # Set to True once Paystack live account is verified
 UPLOAD_FOLDER = os.path.join('uploads', 'prompt_packs')
 ALLOWED_EXTENSIONS = {'pdf'}
 
@@ -130,7 +137,11 @@ def initiate_recharge():
         return redirect(url_for('prompt_marketplace.recharge'))
 
     reference = f"ICA-{uuid.uuid4().hex[:12]}"
-    units_to_add = int(amount_naira * UNITS_PER_NAIRA)
+    units_to_add = RECHARGE_PACKAGES.get(amount_naira)
+
+    if not units_to_add:
+        flash('Please select a valid recharge package.', 'error')
+        return redirect(url_for('prompt_marketplace.recharge'))
 
     wallet_txn = WalletTransaction(
         user_id=current_user.id,

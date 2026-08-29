@@ -18,6 +18,14 @@
             <div style="margin-top:0.8rem; display:flex; gap:0.8rem;">
                 <a href="{{ url_for('bible_quiz.edit_quiz', quiz_id=quiz.id) }}" class="btn-secondary">Edit</a>
                 <a href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}" class="btn-primary">Go Live</a>
+
+                <form method="POST"
+                      action="{{ url_for('bible_quiz.delete_quiz', quiz_id=quiz.id) }}"
+                      onsubmit="return confirm('Delete this quiz permanently?');">
+                    <button type="submit" class="btn-secondary">
+                        Delete
+                    </button>
+                </form>
             </div>
         </div>
         {% endfor %}

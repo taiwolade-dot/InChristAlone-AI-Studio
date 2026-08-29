@@ -24,7 +24,38 @@ def generate_questions(source_material, age_group="Youth", count=10):
             import google.generativeai as genai
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-1.5-flash")
-            prompt = f"Generate {count} multiple choice Bible quiz questions for {age_group} from this text: {source_material}. Return ONLY JSON list with keys: text, options (list of 4 strings), correct_index (0-3), scripture_ref, explanation, difficulty."
+            prompt = f"""
+You are an expert Christian Bible teacher and quiz creator.
+
+Generate {count} high-quality multiple choice Bible quiz questions for {age_group}.
+
+Source Material:
+{source_material}
+
+Requirements:
+- Questions must be biblically accurate.
+- Provide 4 answer options for each question.
+- Only one option must be correct.
+- Include Bible reference.
+- Include a short explanation for the answer.
+- Match the difficulty level appropriately.
+- Avoid ambiguous questions.
+- Encourage Bible knowledge and spiritual learning.
+
+Return ONLY valid JSON.
+
+Format:
+[
+ {{
+  "text": "Question",
+  "options": ["A", "B", "C", "D"],
+  "correct_index": 0,
+  "scripture_ref": "Book Chapter:Verse",
+  "explanation": "Explanation",
+  "difficulty": "Easy"
+ }}
+]
+"""
             resp = model.generate_content(prompt)
             text = resp.text.strip()
             if "```json" in text:

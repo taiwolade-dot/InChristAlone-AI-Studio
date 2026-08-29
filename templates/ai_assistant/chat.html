@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+InChristAlone AI Assistant
+{% endblock %}
+
+{% block content %}
+
+<h1>🤖 InChristAlone AI Assistant</h1>
+
+<div class="dashboard-card">
+
+<form method="POST">
+
+<textarea
+name="question"
+rows="6"
+style="width:100%;"
+placeholder="Ask me anything about your ministry, church, Bible Quiz, Calendar, Wallet or AI Studio..."></textarea>
+
+<br><br>
+
+<button class="btn-primary">
+🚀 Ask AI
+</button>
+
+</form>
+
+</div>
+
+{% if answer %}
+
+<div class="dashboard-card">
+
+<h2>Response</h2>
+
+<pre style="white-space:pre-wrap;">{{ answer }}</pre>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

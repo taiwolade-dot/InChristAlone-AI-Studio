@@ -102,4 +102,70 @@ TUTORIALS = {
         ],
         "tip": "Use Grant Units to All Members before a training session so participants can test features without needing to recharge."
     },
+    "bible_quiz": {
+        "title": "AI Bible Quiz Generator",
+        "icon": "9",
+        "summary": "Create engaging Bible quizzes with AI, manage participants, and run live church quiz sessions.",
+        "steps": [
+            "Go to Bible Quiz from your dashboard.",
+            "Create a new quiz and enter the title, age group, and Bible topic.",
+            "Generate questions using AI or add your own questions manually.",
+            "Start a live quiz session and share the PIN or QR code with participants.",
+            "Use the Host Panel to control questions and monitor the leaderboard."
+        ],
+        "tip": "Bible Quiz is designed for youth programmes, Sunday School, Bible studies, and church competitions."
+    },
+
+    "projector_mode": {
+        "title": "Bible Quiz Projector Mode",
+        "icon": "10",
+        "summary": "Display live Bible quiz questions, countdown timer, answers, and leaderboard on a projector screen.",
+        "steps": [
+            "Start a Bible Quiz live session.",
+            "Open Projector Mode from the Host Panel.",
+            "Connect your laptop or device to a projector or large display.",
+            "Participants answer using their mobile devices.",
+            "The projector automatically displays questions, timer, and winners."
+        ],
+        "tip": "Use landscape mode for the best experience during church programmes."
+    },
+
+    "help_center": {
+        "title": "Help Center & Tutorials",
+        "icon": "11",
+        "summary": "Access guides and tutorials to understand every feature of InChristAlone AI Studio.",
+        "steps": [
+            "Open Help Center from your dashboard.",
+            "Select any module to view instructions.",
+            "Follow the step-by-step guide for each feature.",
+            "Contact Support if you need additional assistance."
+        ],
+        "tip": "Tutorials will continue expanding as new AI features are added."
+    },
+
+    "support_system": {
+        "title": "Support Centre",
+        "icon": "12",
+        "summary": "Submit complaints, ask questions, and receive responses from the support team.",
+        "steps": [
+            "Open the Support section.",
+            "Submit your message with a clear subject and description.",
+            "Your request will be reviewed by the support team.",
+            "You will receive an email notification when your issue is answered."
+        ],
+        "tip": "Use the correct subject category to help the support team respond faster."
+    },
+
+    "account_security": {
+        "title": "Account & Security",
+        "icon": "13",
+        "summary": "Manage your account information and protect your InChristAlone AI Studio access.",
+        "steps": [
+            "Use your registered email and password to log in.",
+            "Keep your password private.",
+            "Contact support if you experience account problems.",
+            "Administrators should only grant permissions to trusted users."
+        ],
+        "tip": "Super Admin controls platform-wide permissions and administrative access."
+    },
 }

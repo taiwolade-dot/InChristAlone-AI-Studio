@@ -1,75 +1,192 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard — InChristAlone AI Studio{% endblock %}
+{% block title %}
+Dashboard — InChristAlone AI Studio
+{% endblock %}
+
 
 {% block content %}
-<section class="dashboard-welcome">
-    <h2>Welcome, {{ current_user.full_name }} 👋</h2>
-    <p>This is your InChristAlone AI Studio dashboard. Your future AI ministry tools will appear here.</p>
+
+
+<section class="dashboard-hero">
+
+    <div>
+        <h1>
+            Welcome, {{ current_user.full_name }} 👋
+        </h1>
+
+        <p class="role-badge">
+            Role: {{ current_user.role|replace('_', ' ')|title }}
+        </p>
+
+        <p>
+            Welcome to <strong>InChristAlone AI Studio</strong>.
+            Build websites, create content, conduct research,
+            and develop AI-powered ministry solutions through
+            intelligent prompt engineering.
+        </p>
+
+    </div>
+
 </section>
+
+
+
+<section class="stats-grid">
+
+    <div class="stat-card">
+        <h3>🤖</h3>
+        <p>AI Tools</p>
+        <strong>10+</strong>
+    </div>
+
+
+    <div class="stat-card">
+        <h3>🚀</h3>
+        <p>Creative Possibilities</p>
+        <strong>Unlimited</strong>
+    </div>
+
+
+    <div class="stat-card">
+        <h3>⛪</h3>
+        <p>Ministry Focus</p>
+        <strong>AI + Faith</strong>
+    </div>
+
+</section>
+
+
+
+
+<h2 class="section-title">
+    AI Studio Tools
+</h2>
+
+
 
 <section class="dashboard-grid">
-    <a href="{{ url_for('prompt_engine.index') }}" style="text-decoration:none; color:inherit;">
-        <div class="dashboard-card">
-            <h3>AI Prompt Engine</h3>
-            <p>Generate ministry-ready AI prompts by category.</p>
-        </div>
-    </a>
 
-    <a href="{{ url_for('website_generator.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>AI Website Generator</h3>
-        <p>Generate a deployable church or ministry website.</p>
-    </div>
+
+<a href="{{ url_for('prompt_engine.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>✨ AI Prompt Engine</h3>
+<p>
+Generate ministry-ready AI prompts by category.
+</p>
+</div>
 </a>
-    <a href="{{ url_for('research_assistant.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Research Assistant</h3>
-        <p>Generate research prompts and format citations.</p>
-    </div>
+
+
+
+<a href="{{ url_for('website_generator.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🌐 AI Website Generator</h3>
+<p>
+Create deployable websites for churches and ministries.
+</p>
+</div>
 </a>
-    <a href="{{ url_for('content_generator.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Christian Content Generator</h3>
-        <p>Create cartoons, flyers, video scripts, and music concepts.</p>
-    </div>
+
+
+
+<a href="{{ url_for('content_generator.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🎨 Christian Content Generator</h3>
+<p>
+Create graphics, scripts, videos, music concepts and more.
+</p>
+</div>
 </a>
-    <a href="{{ url_for('church_management.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Church Management</h3>
-        <p>Manage church members (admin only).</p>
-    </div>
-</a><a href="{{ url_for('seminary_assistant.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Seminary &amp; Thesis Assistant</h3>
-        <p>Track thesis chapters, papers, assignments, and refine topics.</p>
-    </div>
+
+
+
+<a href="{{ url_for('research_assistant.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>📚 Research Assistant</h3>
+<p>
+Support academic research, citations and writing.
+</p>
+</div>
 </a>
-<a href="{{ url_for('prompt_marketplace.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Prompt Marketplace</h3>
-        <p>Browse and unlock prompt packs using Units.</p>
-    </div>
+
+
+
+<a href="{{ url_for('seminary_assistant.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🎓 Seminary Assistant</h3>
+<p>
+Manage theological research, thesis and assignments.
+</p>
+</div>
 </a>
-{% if current_user.is_admin() %}
-<a href="{{ url_for('admin_panel.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Admin Panel</h3>
-        <p>Manage users, stats, and prompt packs.</p>
-    </div>
+
+
+
+{% if current_user.has_role('super_admin', 'admin') %}
+<a href="{{ url_for('church_management.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>⛪ Church Management</h3>
+<p>
+Manage church members and ministry records.
+</p>
+</div>
 </a>
 {% endif %}
-<a href="{{ url_for('bible_quiz.dashboard') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Bible Quiz</h3>
-        <p>Generate and host live AI-powered Bible quizzes.</p>
-    </div>
+
+
+
+{% if current_user.has_role('super_admin', 'admin', 'quiz_moderator', 'teacher', 'youth_leader') %}
+<a href="{{ url_for('bible_quiz.dashboard') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>📖 Bible Quiz</h3>
+<p>
+Create and host interactive Bible quiz sessions.
+</p>
+</div>
 </a>
-<a href="{{ url_for('help_center.index') }}" style="text-decoration:none; color:inherit;">
-    <div class="dashboard-card">
-        <h3>Help &amp; Tutorials</h3>
-        <p>Step-by-step guidance for every tool.</p>
-    </div>
+{% endif %}
+
+
+
+<a href="{{ url_for('prompt_marketplace.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🛒 Prompt Marketplace</h3>
+<p>
+Discover premium AI prompt resources.
+</p>
+</div>
 </a>
+
+
+
+{% if current_user.is_admin() %}
+
+<a href="{{ url_for('admin_panel.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>⚙️ Admin Panel</h3>
+<p>
+Manage users, statistics and prompt packs.
+</p>
+</div>
+</a>
+
+{% endif %}
+
+
+
+<a href="{{ url_for('help_center.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>💡 Help Center</h3>
+<p>
+Learn how to use every AI Studio feature.
+</p>
+</div>
+</a>
+
+
 </section>
+
+
+
 {% endblock %}

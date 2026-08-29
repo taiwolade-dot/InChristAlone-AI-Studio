@@ -1,23 +1,72 @@
 {% extends "base.html" %}
 
-{% block title %}Recharge Wallet — InChristAlone AI Studio{% endblock %}
+{% block title %}
+Recharge Wallet — InChristAlone AI Studio
+{% endblock %}
 
 {% block content %}
-<section class="auth-form" style="max-width:450px;">
-    <h2>Recharge Your Wallet</h2>
-    <p>Current Balance: <strong>{{ wallet_balance }} Units</strong></p>
-    <p style="font-size:0.9rem; color:#666;">Rate: ₦100 = 10 Units. Minimum recharge: ₦{{ min_recharge }}.</p>
+
+<section class="auth-form" style="max-width:500px;">
+
+    <h2>💎 Recharge AI Units</h2>
+
+    <p>
+        Current Balance:
+        <strong>{{ wallet_balance }} Units</strong>
+    </p>
+
+    <p style="font-size:0.9rem;color:#666;">
+        Select an AI Unit package to continue with Paystack.
+    </p>
 
     <form method="POST" action="{{ url_for('prompt_marketplace.initiate_recharge') }}">
+
         <div class="form-group">
-            <label for="amount_naira">Amount (₦)</label>
-            <input type="number" id="amount_naira" name="amount_naira" min="{{ min_recharge }}" step="1" required>
+
+            <label>Select Package</label>
+
+            <select name="amount_naira" class="form-control" required>
+
+                <option value="">-- Choose Package --</option>
+
+                <option value="1000">
+                    ₦1,000 → 250 AI Units
+                </option>
+
+                <option value="2500">
+                    ₦2,500 → 700 AI Units
+                </option>
+
+                <option value="5000">
+                    ₦5,000 → 1,500 AI Units
+                </option>
+
+                <option value="10000">
+                    ₦10,000 → 3,200 AI Units
+                </option>
+
+                <option value="20000">
+                    ₦20,000 → 7,000 AI Units
+                </option>
+
+            </select>
+
         </div>
-        <button type="submit" class="btn-primary btn-full">Proceed to Payment</button>
+
+
+        <button type="submit" class="btn-primary btn-full">
+            Proceed to Paystack Payment
+        </button>
+
     </form>
 
+
     <p class="auth-switch">
-        <a href="{{ url_for('prompt_marketplace.index') }}">← Back to Marketplace</a>
+        <a href="{{ url_for('prompt_marketplace.index') }}">
+            ← Back to Marketplace
+        </a>
     </p>
+
 </section>
+
 {% endblock %}

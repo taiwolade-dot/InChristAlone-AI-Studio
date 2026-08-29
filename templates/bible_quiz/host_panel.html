@@ -107,6 +107,12 @@ function copyJoinLink() {
         <button id="pauseBtn" class="btn-secondary" onclick="pauseQuiz()">
             Pause Quiz
         </button>
+
+        <a href="{{ url_for('bible_quiz.quiz_report', session_id=quiz_session.id) }}"
+           class="btn-secondary"
+           style="text-decoration:none; display:inline-block;">
+            📊 View Quiz Report
+        </a>
     </div>
 
     <div class="prompt-output">

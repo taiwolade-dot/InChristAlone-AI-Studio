@@ -8,7 +8,9 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 
 from models import db, BibleQuiz, QuizLiveSession, QuizParticipant, QuizQuestion, QuizAnswer
+from modules.activity_log.service import log_activity
 from modules.bible_quiz.timer import seconds_remaining
+from modules.permissions import roles_required
 
 
 def generate_qr_code(data):
@@ -41,6 +43,13 @@ bible_quiz_session_bp = Blueprint(
 
 @bible_quiz_session_bp.route('/bible-quiz/<int:quiz_id>/start', methods=['GET', 'POST'])
 @login_required
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def start_session(quiz_id):
     quiz = BibleQuiz.query.filter_by(id=quiz_id, owner_id=current_user.id).first_or_404()
 
@@ -61,12 +70,26 @@ def start_session(quiz_id):
 
 @bible_quiz_session_bp.route('/bible-quiz/host/<int:session_id>')
 @login_required
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def host_panel(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
     return render_template('bible_quiz/host_panel.html', quiz_session=quiz_session)
 
 
 @bible_quiz_session_bp.route('/bible-quiz/dashboard/<int:session_id>')
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def projector_dashboard(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
 
@@ -192,6 +215,13 @@ def api_session_state(session_id):
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/start-quiz', methods=['POST'])
 @login_required
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def api_start_quiz(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
     quiz_session.status = 'active'
@@ -199,10 +229,25 @@ def api_start_quiz(session_id):
     quiz_session.started_at = datetime.utcnow()
     quiz_session.question_started_at = datetime.utcnow()
     db.session.commit()
+
+    log_activity(
+        current_user,
+        "Started Quiz Session",
+        "Bible Quiz",
+        f"Started: {quiz_session.quiz.title}"
+    )
+
     return jsonify({'ok': True})
 
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/next-question', methods=['POST'])
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def api_next_question(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
     questions = sorted(quiz_session.quiz.questions, key=lambda q: q.order_index)
@@ -216,11 +261,26 @@ def api_next_question(session_id):
 
     quiz_session.question_started_at = datetime.utcnow()
     db.session.commit()
+
+    log_activity(
+        current_user,
+        "Moved To Next Question",
+        "Bible Quiz",
+        f"Quiz: {quiz_session.quiz.title}, Question: {quiz_session.current_question_index + 1}"
+    )
+
     return jsonify({'ok': True, 'finished': False})
 
 
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/auto-advance', methods=['POST'])
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def auto_advance(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
 
@@ -289,6 +349,13 @@ def auto_advance(session_id):
 
 @bible_quiz_session_bp.route('/bible-quiz/session/<int:session_id>/pause', methods=['POST'])
 @login_required
+@roles_required(
+    "super_admin",
+    "admin",
+    "quiz_moderator",
+    "teacher",
+    "youth_leader"
+)
 def api_pause(session_id):
     quiz_session = QuizLiveSession.query.get_or_404(session_id)
     quiz_session.status = 'paused'

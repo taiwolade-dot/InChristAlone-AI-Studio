@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Calendar Assistant
+{% endblock %}
+
+{% block content %}
+
+<h1>🤖 AI Calendar Assistant</h1>
+
+<div class="dashboard-card">
+
+<form method="POST">
+
+<label>
+Ask about programmes:
+</label>
+
+<textarea name="question"
+rows="5"
+style="width:100%;"
+placeholder="Example: Show all Youth programmes in Association for 2026">
+</textarea>
+
+<br><br>
+
+<button class="btn-primary">
+🤖 Search Calendar
+</button>
+
+</form>
+
+</div>
+
+
+{% if events %}
+
+<div class="dashboard-card">
+
+<h2>📅 Results</h2>
+
+{% for event in events %}
+
+<p>
+<strong>{{ event.title }}</strong><br>
+
+Organization:
+{{ event.organization_name }}<br>
+
+Level:
+{{ event.level }}<br>
+
+Ministry:
+{{ event.ministry }}<br>
+
+Date:
+{{ event.start_datetime }}<br>
+
+Venue:
+{{ event.venue }}
+
+</p>
+
+<hr>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -71,6 +71,23 @@ h1 {
     padding:10px;
 }
 
+.host-btn {
+    position:absolute;
+    right:30px;
+    bottom:30px;
+    background:#333;
+    color:white;
+    padding:12px 18px;
+    border-radius:8px;
+    text-decoration:none;
+    font-size:18px;
+    opacity:0.7;
+}
+
+.host-btn:hover {
+    opacity:1;
+}
+
 </style>
 
 </head>
@@ -78,6 +95,12 @@ h1 {
 <body>
 
 <div class="container">
+
+
+<a href="{{ url_for('bible_quiz_session.host_panel', session_id=quiz_session.id) }}"
+   class="host-btn">
+   🎛 Host Panel
+</a>
 
 <h1>📖 BIBLE QUIZ CHALLENGE</h1>
 <div class="qr-box">
@@ -88,6 +111,10 @@ h1 {
          alt="Join QR Code">
 
     <h3>PIN: {{ quiz_session.pin_code }}</h3>
+
+<p style="font-size:14px; word-break:break-all;">
+    {{ join_url }}
+</p>
 </div>
 
 

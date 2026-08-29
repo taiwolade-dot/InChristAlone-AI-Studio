@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+Settings — InChristAlone AI Studio
+{% endblock %}
+
+{% block content %}
+
+<section class="account-card">
+
+    <h2>⚙️ Account Settings</h2>
+
+    <div class="profile-info">
+
+        <p>
+            <strong>Name:</strong>
+            {{ current_user.full_name }}
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+            {{ current_user.email }}
+        </p>
+
+        <p>
+            <strong>Account Type:</strong>
+            {{ current_user.role|title }}
+        </p>
+
+    </div>
+
+    <hr>
+
+    <h3>🔐 Security</h3>
+
+    <p>
+        Password management and security options will be available here.
+    </p>
+
+    <h3>🔔 Notifications</h3>
+
+    <p>
+        AI Studio updates, ministry tools announcements, and account alerts.
+    </p>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}
+Bible Quiz Report
+{% endblock %}
+
+{% block content %}
+
+<h1>📖 Bible Quiz Report</h1>
+
+<div class="dashboard-card">
+
+<h2>{{ session.quiz.title }}</h2>
+
+<p>
+<strong>Status:</strong> {{ session.status }}
+</p>
+
+<p>
+<strong>Started:</strong> {{ session.started_at }}
+</p>
+
+<p>
+<strong>Ended:</strong> {{ session.ended_at }}
+</p>
+
+</div>
+
+
+<div class="stats-grid">
+
+<div class="stat-card">
+<h3>👥</h3>
+<p>Participants</p>
+<strong>{{ total_participants }}</strong>
+</div>
+
+
+<div class="stat-card">
+<h3>❓</h3>
+<p>Questions</p>
+<strong>{{ total_questions }}</strong>
+</div>
+
+
+<div class="stat-card">
+<h3>✅</h3>
+<p>Answers</p>
+<strong>{{ total_answers }}</strong>
+</div>
+
+
+<div class="stat-card">
+<h3>📈</h3>
+<p>Accuracy</p>
+<strong>{{ accuracy }}%</strong>
+</div>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h2>🏆 Final Leaderboard</h2>
+
+{% for player in participants %}
+
+<p style="font-size:1.2rem;">
+
+{% if loop.index == 1 %}
+🥇
+{% elif loop.index == 2 %}
+🥈
+{% elif loop.index == 3 %}
+🥉
+{% else %}
+{{ loop.index }}.
+{% endif %}
+
+<strong>{{ player.name }}</strong>
+
+-
+{{ player.score }} points
+
+</p>
+
+{% else %}
+
+<p>No participants found.</p>
+
+{% endfor %}
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h2>📊 Quiz Performance</h2>
+
+<p>
+Correct Answers:
+<strong>{{ correct_answers }}</strong>
+</p>
+
+<p>
+Wrong/Unanswered:
+<strong>{{ total_answers - correct_answers }}</strong>
+</p>
+
+</div>
+
+
+{% endblock %}

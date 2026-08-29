@@ -21,8 +21,20 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def has_role(self, *roles):
+        return self.role in roles
+
+    def is_super_admin(self):
+        return self.role == 'super_admin'
+
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role in [
+            'super_admin',
+            'admin',
+            'support_admin',
+            'content_admin',
+            'finance_admin'
+        ]
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -158,7 +170,12 @@ class BibleQuiz(db.Model):
     questions = db.relationship(
         "QuizQuestion", backref="quiz", lazy=True, cascade="all, delete-orphan"
     )
-    sessions = db.relationship("QuizLiveSession", backref="quiz", lazy=True)
+    sessions = db.relationship(
+        "QuizLiveSession",
+        backref="quiz",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
 
 class QuizQuestion(db.Model):
@@ -235,3 +252,159 @@ class QuizAnswer(db.Model):
     __table_args__ = (
         db.UniqueConstraint("participant_id", "question_id", name="uq_participant_question"),
     )
+
+
+class ChurchEvent(db.Model):
+    __tablename__ = "church_events"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(200), nullable=False)
+
+    category = db.Column(
+        db.String(50),
+        default="Church"
+    )
+
+    level = db.Column(
+        db.String(30),
+        default="Local Church"
+    )
+
+    organization_name = db.Column(
+        db.String(150),
+        default="General"
+    )
+
+    ministry = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    description = db.Column(
+        db.Text
+    )
+
+    venue = db.Column(
+        db.String(200)
+    )
+
+    organizer = db.Column(
+        db.String(150)
+    )
+
+    start_datetime = db.Column(
+        db.DateTime,
+        nullable=False
+    )
+
+    end_datetime = db.Column(
+        db.DateTime
+    )
+
+    event_color = db.Column(
+        db.String(20),
+        default="#1a73e8"
+    )
+
+    is_public = db.Column(
+        db.Boolean,
+        default=True
+    )
+
+    created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+
+class AITransaction(db.Model):
+    __tablename__ = "ai_transactions"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    reference = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False
+    )
+
+    amount_naira = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    units = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="pending"
+    )
+
+    transaction_type = db.Column(
+        db.String(50),
+        default="recharge"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<AITransaction {self.reference}>"
+
+
+class ActivityLog(db.Model):
+    __tablename__ = "activity_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=True
+    )
+
+    action = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    module = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    details = db.Column(
+        db.Text
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    user = db.relationship(
+        "User",
+        backref="activity_logs"
+    )
+
+    def __repr__(self):
+        return f"<ActivityLog {self.action}>"

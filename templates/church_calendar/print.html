@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+Church Calendar Report
+
+
+<button type="button" onclick="printReport()" class="btn-primary">
+🖨 Print Calendar Report
+</button>
+
+<script>
+function printReport(){
+    window.print();
+}
+</script>
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<h1 style="text-align:center;">
+📅 Church Calendar Report
+</h1>
+
+<p style="text-align:center;">
+Generated Report
+</p>
+
+<hr>
+
+{% for event in events %}
+
+<div style="margin-bottom:20px;">
+
+<h2>
+{{ loop.index }}. {{ event.title }}
+</h2>
+
+<p>
+<strong>Organization:</strong>
+{{ event.organization_name }}
+</p>
+
+<p>
+<strong>Level:</strong>
+{{ event.level }}
+</p>
+
+<p>
+<strong>Ministry:</strong>
+{{ event.ministry }}
+</p>
+
+<p>
+<strong>Date:</strong>
+{{ event.start_datetime }}
+</p>
+
+<p>
+<strong>Venue:</strong>
+{{ event.venue }}
+</p>
+
+<p>
+{{ event.description }}
+</p>
+
+<hr>
+
+</div>
+
+{% else %}
+
+<p>No programmes found.</p>
+
+{% endfor %}
+
+
+<button onclick="window.print()" class="btn-primary">
+🖨 Print
+</button>
+
+
+{% endblock %}

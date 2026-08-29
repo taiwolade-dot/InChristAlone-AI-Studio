@@ -3,59 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>{% block title %}InChristAlone AI Studio{% endblock %}</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#1a2a6c">
+
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+
     {% block head %}{% endblock %}
 </head>
+
 <body>
-    <header class="navbar">
-        <div class="navbar-brand">
-            <a href="{{ url_for('index') }}">InChristAlone <span>AI Studio</span></a>
+
+{% if current_user.is_authenticated %}
+
+<div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <a href="{{ url_for('dashboard') }}">
+                InChristAlone
+                <span>AI Studio</span>
+            </a>
         </div>
-        <nav class="navbar-links">
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('support.contact') }}">Contact</a>
-                <a href="{{ url_for('logout') }}">Logout</a>
-            {% else %}
-                <a href="{{ url_for('support.about') }}">About</a>
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}" class="btn-nav">Register</a>
-            {% endif %}
+
+
+        <nav class="sidebar-menu">
+
+            <a href="{{ url_for('dashboard') }}">
+                🏠 Dashboard
+            </a>
+
+            <a href="{{ url_for('prompt_engine.index') }}">
+                ✨ Prompt Engine
+            </a>
+
+            <a href="{{ url_for('website_generator.index') }}">
+                🌐 Website Generator
+            </a>
+
+            <a href="{{ url_for('content_generator.index') }}">
+                🎨 Content Generator
+            </a>
+
+            <a href="{{ url_for('research_assistant.index') }}">
+                📚 Research Assistant
+            </a>
+
+            <a href="{{ url_for('seminary_assistant.index') }}">
+                🎓 Seminary Assistant
+            </a>
+
+            <a href="{{ url_for('church_management.index') }}">
+                ⛪ Church Management
+            </a>
+
+            <a href="{{ url_for('bible_quiz.dashboard') }}">
+                📖 Bible Quiz
+            </a>
+
+            <a href="{{ url_for('support.contact') }}">
+                💬 Support
+            </a>
+
         </nav>
-    </header>
 
-    <main class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-container">
-                    {% for category, message in messages %}
-                        <div class="flash flash-{{ category }}">{{ message }}</div>
-                    {% endfor %}
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}">
+                🚪 Logout
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Area -->
+
+    <section class="main-area">
+
+        <header class="topbar">
+
+            <div>
+                <h3>
+                    InChristAlone AI Studio
+                </h3>
+            </div>
+
+
+            <div class="user-area">
+
+                <div class="user-profile">
+
+                    <button class="user-button">
+                        👤 {{ current_user.username if current_user.username else "User" }} ▾
+                    </button>
+
+                    <div class="user-dropdown">
+
+                        <a href="{{ url_for('profile') }}">
+                            👤 Profile
+                        </a>
+
+                        <a href="{{ url_for('settings') }}">
+                            ⚙️ Settings
+                        </a>
+
+                        <a href="{{ url_for('subscription') }}">
+                            ⭐ Subscription
+                        </a>
+
+                        <a href="{{ url_for('logout') }}">
+                            🚪 Logout
+                        </a>
+
+                    </div>
+
                 </div>
-            {% endif %}
-        {% endwith %}
 
-        {% block content %}{% endblock %}
-    </main>
+            </div>
 
-    <footer class="footer">
-        <p>&copy; 2026 InChristAlone Digital &amp; AI Solutions. All rights reserved.</p>
-        <p style="margin-top:0.5rem;">
-            <a href="{{ url_for('support.about') }}" style="color:#f4e5b2;">About Us</a> |
-            <a href="{{ url_for('support.contact') if current_user.is_authenticated else url_for('login') }}" style="color:#f4e5b2;">Contact Us</a>
+        </header>
+
+
+        <main class="container">
+
+
+{% else %}
+
+<header class="navbar">
+
+<div class="navbar-brand">
+
+<a href="{{ url_for('index') }}">
+InChristAlone <span>AI Studio</span>
+</a>
+
+</div>
+
+
+<nav class="navbar-links">
+
+<a href="{{ url_for('support.about') }}">
+About
+</a>
+
+<a href="{{ url_for('login') }}">
+Login
+</a>
+
+<a href="{{ url_for('register') }}" class="btn-nav">
+Register
+</a>
+
+</nav>
+
+</header>
+
+
+<main class="container">
+
+{% endif %}
+
+
+<!-- Flash Messages -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+{% if messages %}
+
+<div class="flash-container">
+
+{% for category, message in messages %}
+
+<div class="flash flash-{{ category }}">
+{{ message }}
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+{% endwith %}
+
+
+
+{% block content %}
+
+{% endblock %}
+
+
+
+{% if current_user.is_authenticated %}
+
+</main>
+
+</section>
+
+</div>
+
+
+{% else %}
+
+</main>
+
+{% endif %}
+
+
+
+<footer class="professional-footer">
+
+    <div class="footer-brand">
+
+        <h3>
+            InChristAlone AI Studio
+        </h3>
+
+        <p>
+            Build Websites, Apps & AI Solutions
+            Through Intelligent Prompt Engineering.
         </p>
-    </footer>
 
-    <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
+    </div>
+
+
+    <div class="footer-links">
+
+        <a href="{{ url_for('support.about') }}">
+            About
+        </a>
+
+        <a href="{{ url_for('support.contact') }}">
+            Support
+        </a>
+
+        <a href="{{ url_for('help_center.index') }}">
+            Help Center
+        </a>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 InChristAlone Digital & AI Solutions.
+            All rights reserved.
+        </p>
+
+    </div>
+
+
+</footer>
+
+
+
+<script>
+
+if ('serviceWorker' in navigator) {
+
+window.addEventListener('load', () => {
+
+navigator.serviceWorker.register(
+"{{ url_for('static', filename='sw.js') }}"
+);
+
+});
+
+}
+
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const button = document.querySelector(".user-button");
+    const profile = document.querySelector(".user-profile");
+
+    if (button && profile) {
+        button.addEventListener("click", function(e) {
+            e.stopPropagation();
+            profile.classList.toggle("active");
+        });
+
+        document.addEventListener("click", function() {
+            profile.classList.remove("active");
         });
     }
-    </script>
+});
+</script>
+
 </body>
 </html>

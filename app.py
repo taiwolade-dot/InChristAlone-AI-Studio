@@ -1,4 +1,5 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from extensions import mail
+from flask import Flask, render_template, redirect, url_for, flash, request, send_from_directory
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from config import Config
@@ -11,6 +12,7 @@ from modules.research_assistant.routes import research_assistant_bp
 from modules.content_generator.routes import content_generator_bp
 
 from modules.church_management.routes import church_management_bp
+from modules.church_calendar.routes import church_calendar_bp
 
 from modules.seminary_assistant.routes import seminary_assistant_bp
 
@@ -21,9 +23,13 @@ from modules.help_center.routes import help_center_bp
 from modules.support.routes import support_bp
 from modules.bible_quiz.routes import bible_quiz_bp
 from modules.bible_quiz.session_routes import bible_quiz_session_bp
+from modules.ai_assistant.routes import ai_assistant_bp
 
 app = Flask(__name__)
+
 app.config.from_object(Config)
+
+mail.init_app(app)
 
 db.init_app(app)
 app.register_blueprint(prompt_engine_bp)
@@ -31,6 +37,7 @@ app.register_blueprint(website_generator_bp)
 app.register_blueprint(research_assistant_bp)
 app.register_blueprint(content_generator_bp)
 app.register_blueprint(church_management_bp)
+app.register_blueprint(church_calendar_bp)
 app.register_blueprint(seminary_assistant_bp)
 app.register_blueprint(prompt_marketplace_bp)
 app.register_blueprint(admin_panel_bp)
@@ -38,6 +45,7 @@ app.register_blueprint(help_center_bp)
 app.register_blueprint(support_bp)
 app.register_blueprint(bible_quiz_bp)
 app.register_blueprint(bible_quiz_session_bp)
+app.register_blueprint(ai_assistant_bp)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -131,6 +139,72 @@ def dashboard():
 
 with app.app_context():
     db.create_all()
+
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
+
+@app.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
+
+
+@app.route('/subscription')
+@login_required
+def subscription():
+    return render_template('subscription.html')
+
+
+@app.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        current_user.full_name = request.form.get('full_name', current_user.full_name)
+        current_user.email = request.form.get('email', current_user.email).lower()
+
+        db.session.commit()
+
+        flash('Profile updated successfully.', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('edit_profile.html')
+
+
+
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not current_user.check_password(old_password):
+            flash('Current password is incorrect.', 'error')
+            return redirect(url_for('change_password'))
+
+        if new_password != confirm_password:
+            flash('New passwords do not match.', 'error')
+            return redirect(url_for('change_password'))
+
+        current_user.set_password(new_password)
+        db.session.commit()
+
+        flash('Password changed successfully.', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('change_password.html')
+
+
+
+
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory("uploads", filename)
+
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=False, host="0.0.0.0", port=5000)

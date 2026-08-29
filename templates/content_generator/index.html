@@ -23,17 +23,107 @@
     </div>
 
     {% if type_data %}
-    <form method="POST" action="{{ url_for('content_generator.generate') }}" class="prompt-form">
+    <form method="POST"
+      enctype="multipart/form-data"
+      action="{{ url_for('content_generator.generate') }}"
+      class="prompt-form">
         <input type="hidden" name="content_type" value="{{ active_type }}">
 
         {% for field in type_data.fields %}
         <div class="form-group">
             <label for="{{ field }}">{{ field.replace('_', ' ').title() }}</label>
+            {% if field == 'mood' %}
+            <select id="{{ field }}" name="{{ field }}" required>
+                <option value="">Select Mood</option>
+                <option>Joyful Celebration</option>
+                <option>Prayerful</option>
+                <option>Inspirational</option>
+                <option>Peaceful</option>
+                <option>Powerful Revival</option>
+                <option>Elegant</option>
+            </select>
+
+            {% elif field == 'design_style' %}
+            <select id="{{ field }}" name="{{ field }}" required>
+                <option value="">Select Design Style</option>
+                <option>Modern Church Design</option>
+                <option>Professional Corporate Style</option>
+                <option>Luxury Gold Theme</option>
+                <option>Minimalist</option>
+                <option>3D Modern Design</option>
+                <option>Traditional Christian Design</option>
+            </select>
+
+            {% elif field == 'color_preference' %}
+            <select id="{{ field }}" name="{{ field }}" required>
+                <option value="">Select Colour Preference</option>
+                <option>Royal Blue and Gold</option>
+                <option>Green and White</option>
+                <option>Purple and Gold</option>
+                <option>Red and Black</option>
+                <option>White and Gold</option>
+                <option>Bright African Colours</option>
+            </select>
+
+            {% elif field == 'background_theme' %}
+            <select id="{{ field }}" name="{{ field }}" required>
+                <option value="">Select Background Theme</option>
+                <option>Church Auditorium</option>
+                <option>Open Heaven and Light Rays</option>
+                <option>Abstract Worship Background</option>
+                <option>Nature and Sunrise</option>
+                <option>Elegant Fabric Texture</option>
+                <option>Holy Spirit Fire Theme</option>
+            </select>
+
+            {% else %}
             <input type="text" id="{{ field }}" name="{{ field }}" required
-                placeholder="{% if field == 'mood' %}e.g. joyful, sorrowful, energetic, peaceful{% elif field == 'art_style' %}e.g. cartoon, watercolor, 3D render{% elif field == 'genre' %}e.g. gospel, afrobeat worship, acoustic{% elif field == 'tone' %}e.g. warm, urgent, celebratory{% elif field == 'audience' %}e.g. teens, young adults, families{% else %}Type your answer here{% endif %}">
+                placeholder="Type your answer here">
+            {% endif %}
         </div>
         {% endfor %}
 
+
+          {% if active_type == 'flyer' %}
+
+          <hr>
+
+          <h3>Speaker Information</h3>
+
+          {% for i in range(1,6) %}
+
+          <div class="form-group">
+              <label>Speaker {{ i }} Name</label>
+              <input type="text"
+                     name="speaker{{ i }}_name"
+                     placeholder="Enter speaker name">
+          </div>
+
+          <div class="form-group">
+              <label>Speaker {{ i }} Title</label>
+              <input type="text"
+                     name="speaker{{ i }}_title"
+                     placeholder="Pastor, Guest Minister, Speaker">
+          </div>
+
+          <div class="form-group">
+              <label>Speaker {{ i }} Photo</label>
+              <input type="file"
+                     name="speaker{{ i }}_photo"
+                     accept="image/*">
+          </div>
+
+          {% endfor %}
+
+          <h3>Church Logo</h3>
+
+          <div class="form-group">
+              <input type="file"
+                     name="church_logo"
+                     accept="image/*">
+          </div>
+
+          {% endif %}
         <button type="submit" class="btn-primary">Generate</button>
     </form>
     {% endif %}
@@ -49,6 +139,15 @@
             <input type="hidden" name="active_type" value="{{ active_type }}">
             <button type="submit" class="btn-secondary">Upscale This Image (3 Units)</button>
         </form>
+
+        {% if active_type == 'flyer' %}
+        <form method="GET" action="{{ url_for('content_generator.flyer_composer_page') }}" style="margin-top:0.8rem;">
+            <input type="hidden" name="flyer_url" value="{{ generated_image_url }}">
+            <button type="submit" class="btn-primary">
+                🎨 Edit This Flyer
+            </button>
+        </form>
+        {% endif %}
     </div>
     {% endif %}
 

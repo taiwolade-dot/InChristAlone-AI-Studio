@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}
+Church Calendar & Events
+{% endblock %}
+
+{% block content %}
+
+<h1>📅 Church Calendar & Events</h1>
+
+<div class="dashboard-card">
+
+<a href="{{ url_for('church_calendar.new_event') }}"
+   class="btn-primary"
+   style="text-decoration:none;">
+   ➕ Add New Event
+</a>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h2>🔎 Search Programmes</h2>
+
+<form method="GET">
+
+<label>Keyword</label>
+<input type="text"
+       name="keyword"
+       placeholder="Search programme, organization..."
+       value="{{ request.args.get('keyword','') }}">
+
+<br><br>
+
+<label>Year</label>
+<input type="number"
+       name="year"
+       placeholder="2026"
+       value="{{ request.args.get('year','') }}">
+
+<br><br>
+
+<label>Period</label>
+<select name="period">
+
+<option value="">All</option>
+<option value="q1">Quarter 1 (Jan-Mar)</option>
+<option value="q2">Quarter 2 (Apr-Jun)</option>
+<option value="q3">Quarter 3 (Jul-Sep)</option>
+<option value="q4">Quarter 4 (Oct-Dec)</option>
+<option value="h1">Half Year 1</option>
+<option value="h2">Half Year 2</option>
+
+</select>
+
+<br><br>
+
+<label>Organization Level</label>
+<select name="level">
+
+<option value="">All</option>
+<option>Convention</option>
+<option>Conference</option>
+<option>Association</option>
+<option>Local Church</option>
+
+</select>
+
+<br><br>
+
+<label>Ministry</label>
+<select name="ministry">
+
+<option value="">All</option>
+<option>General</option>
+<option>MMU</option>
+<option>WMU</option>
+<option>Youth</option>
+<option>Choir</option>
+<option>Sunday School</option>
+
+</select>
+
+<br><br>
+
+<button class="btn-primary" type="submit">
+🔍 Search
+</button>
+
+<a href="{{ url_for('church_calendar.print_calendar', **request.args) }}"
+   target="_blank"
+   class="btn-secondary"
+   style="text-decoration:none;">
+🖨 Print Calendar
+</a>
+
+<a href="{{ url_for('church_calendar.calendar_pdf') }}"
+   class="btn-secondary"
+   style="text-decoration:none;">
+📄 Download PDF
+</a>
+
+</form>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h2>Upcoming Events</h2>
+
+{% for event in events %}
+
+<div style="margin-bottom:20px;">
+
+<h3>
+📌 {{ event.title }}
+</h3>
+
+<p>
+<strong>Category:</strong>
+{{ event.category }}
+</p>
+
+<p>
+<strong>Level:</strong>
+{{ event.level }}
+</p>
+
+<p>
+<strong>Organization:</strong>
+{{ event.organization_name }}
+</p>
+
+<p>
+<strong>Ministry:</strong>
+{{ event.ministry }}
+</p>
+
+<p>
+<strong>Date:</strong>
+{{ event.start_datetime }}
+</p>
+
+<p>
+<strong>Venue:</strong>
+{{ event.venue }}
+</p>
+
+<p>
+{{ event.description }}
+</p>
+
+<hr>
+
+</div>
+
+{% else %}
+
+<p>No events created yet.</p>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

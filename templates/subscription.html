@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+Subscription — InChristAlone AI Studio
+{% endblock %}
+
+{% block content %}
+
+<section class="account-card">
+
+    <h2>⭐ Subscription & AI Units</h2>
+
+    <div class="profile-info">
+
+        <p>
+            <strong>Current Plan:</strong>
+            {{ current_user.role|title }}
+        </p>
+
+        <p>
+            <strong>Available AI Units:</strong>
+            {{ current_user.wallet_balance }}
+        </p>
+
+        <p>
+            <strong>Account Created:</strong>
+            {{ current_user.created_at.strftime('%B %d, %Y') }}
+        </p>
+
+    </div>
+
+    <hr>
+
+    <h3>🚀 Upgrade Your Experience</h3>
+
+    <p>
+        Get more AI Units to generate prompts, websites, research materials,
+        Christian content, and ministry solutions.
+    </p>
+
+    <div class="dashboard-card">
+        <h3>💎 AI Units Recharge</h3>
+        <p>
+            Flexible packages for pastors, churches, students, and Christian creators.
+        </p>
+
+        <a href="{{ url_for('prompt_marketplace.recharge') }}" class="btn-primary">
+            💳 Recharge AI Units
+        </a>
+    </div>
+
+    <hr>
+
+    <h3>📌 Future Features</h3>
+
+    <ul>
+        <li>Premium AI tools access</li>
+        <li>More content generations</li>
+        <li>Priority AI processing</li>
+        <li>Church and ministry packages</li>
+    </ul>
+
+</section>
+
+{% endblock %}

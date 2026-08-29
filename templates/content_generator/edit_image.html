@@ -1,38 +1,117 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Image — InChristAlone AI Studio{% endblock %}
+{% block title %}AI Flyer Editor — InChristAlone AI Studio{% endblock %}
 
 {% block content %}
+
 <section class="prompt-engine">
-    <h2>Edit Your Image</h2>
-    <p class="prompt-engine-subtitle">
-        Upload a photo and describe the change you want — background, style, or details.
-    </p>
 
-    <form method="POST" action="{{ url_for('content_generator.edit_image_submit') }}" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="photo">Upload Photo</label>
-            <input type="file" id="photo" name="photo" accept="image/*" required>
-        </div>
+<h2>🎨 AI Flyer & Image Editor</h2>
 
-        <div class="form-group">
-            <label for="edit_prompt">Describe the Change</label>
-            <textarea id="edit_prompt" name="edit_prompt" rows="3"
-                placeholder="e.g. Change the background to a natural outdoor church setting with soft sunlight" required></textarea>
-        </div>
+<p class="prompt-engine-subtitle">
+Upload a flyer, photo, logo or ministry design and describe how you want AI to improve it.
+</p>
 
-        <button type="submit" class="btn-primary">Edit Image (8 Units)</button>
-    </form>
 
-    {% if edited_image_url %}
-    <div class="prompt-output" style="margin-top:1.5rem;">
-        <h3>Edited Result</h3>
-        <img src="{{ edited_image_url }}" alt="Edited image" style="max-width:100%; border-radius:8px;">
-    </div>
-    {% endif %}
+<form method="POST"
+action="{{ url_for('content_generator.edit_image_submit') }}"
+enctype="multipart/form-data">
 
-    <p class="auth-switch">
-        <a href="{{ url_for('content_generator.index') }}">← Back to Content Generator</a>
-    </p>
+
+<div class="form-group">
+<label>Upload Image</label>
+<input type="file"
+name="photo"
+accept="image/*"
+required>
+</div>
+
+
+<div class="form-group">
+
+<label>Design Type</label>
+
+<select name="design_type">
+
+<option>Church Flyer</option>
+<option>Event Banner</option>
+<option>Pastor Photo</option>
+<option>Church Logo</option>
+<option>Social Media Design</option>
+
+</select>
+
+</div>
+
+
+<div class="form-group">
+
+<label>Editing Instruction</label>
+
+<textarea
+id="edit_prompt" name="edit_prompt"
+rows="5"
+placeholder="Example: Make this a professional Baptist church flyer with blue and gold colours, add space for Bible verse and improve the lighting."
+required></textarea>
+
+</div>
+
+
+<div class="form-group">
+
+<p>Quick Improvements:</p>
+
+<button type="button" onclick="addPrompt('Make the design modern and professional')">
+Modern Design
+</button>
+
+<button type="button" onclick="addPrompt('Improve quality and lighting')">
+Improve Quality
+</button>
+
+<button type="button" onclick="addPrompt('Use elegant church colours and typography')">
+Church Style
+</button>
+
+</div>
+
+
+<button type="submit" class="btn-primary">
+✨ Edit Design (8 Units)
+</button>
+
+
+</form>
+
+
+{% if edited_image_url %}
+
+<div class="prompt-output">
+
+<h3>Edited Result</h3>
+
+<img src="{{ edited_image_url }}"
+style="max-width:100%;border-radius:8px;">
+
+</div>
+
+{% endif %}
+
+
 </section>
+
+
+<script>
+
+function addPrompt(text){
+
+let box=document.getElementById("edit_prompt");
+
+box.value += " " + text;
+
+}
+
+</script>
+
+
 {% endblock %}

@@ -4,6 +4,9 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 
 from models import db, User, PromptPack, Purchase, WalletTransaction, ContactMessage
+from modules.roles import ROLES
+from modules.activity_log.service import log_activity
+from modules.email_service import send_email
 
 admin_panel_bp = Blueprint(
     'admin_panel',
@@ -11,6 +14,16 @@ admin_panel_bp = Blueprint(
     url_prefix='/admin-panel',
     template_folder='../../templates/admin_panel'
 )
+
+
+def super_admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_super_admin():
+            flash('Super Admin permission required.', 'error')
+            return redirect(url_for('dashboard'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 def admin_required(f):
@@ -48,13 +61,14 @@ def index():
         total_revenue_naira=total_revenue_naira,
         users=users,
         packs=packs,
-        messages=messages
+        messages=messages,
+        ROLES=ROLES
     )
 
 
 @admin_panel_bp.route('/user/<int:user_id>/toggle-admin', methods=['POST'])
 @login_required
-@admin_required
+@super_admin_required
 def toggle_admin(user_id):
     user = User.query.get_or_404(user_id)
 
@@ -62,9 +76,58 @@ def toggle_admin(user_id):
         flash('You cannot change your own admin status.', 'error')
         return redirect(url_for('admin_panel.index', tab='users'))
 
-    user.role = 'member' if user.role == 'admin' else 'admin'
+    new_role = request.form.get('role', 'member')
+
+    allowed_roles = [
+        'member',
+        'support_admin',
+        'content_admin',
+        'finance_admin',
+        'admin'
+    ]
+
+    if new_role not in allowed_roles:
+        flash('Invalid role selected.', 'error')
+        return redirect(url_for('admin_panel.index', tab='users'))
+
+    user.role = new_role
     db.session.commit()
+
     flash(f'{user.full_name} is now {user.role}.', 'success')
+    return redirect(url_for('admin_panel.index', tab='users'))
+
+
+
+@admin_panel_bp.route('/user/<int:user_id>/change-role', methods=['POST'])
+@login_required
+@super_admin_required
+def change_role(user_id):
+    user = User.query.get_or_404(user_id)
+
+    new_role = request.form.get('role')
+
+    if new_role not in ROLES:
+        flash('Invalid role selected.', 'error')
+        return redirect(url_for('admin_panel.index', tab='users'))
+
+    if user.id == current_user.id and new_role != 'super_admin':
+        flash('You cannot remove your own Super Admin access.', 'error')
+        return redirect(url_for('admin_panel.index', tab='users'))
+
+    old_role = user.role
+
+    user.role = new_role
+    db.session.commit()
+
+    log_activity(
+        current_user,
+        "Changed User Role",
+        "Admin Panel",
+        f"{user.full_name}: {ROLES.get(old_role, old_role)} → {ROLES[new_role]}"
+    )
+
+    flash(f'{user.full_name} role changed to {ROLES[new_role]}.', 'success')
+
     return redirect(url_for('admin_panel.index', tab='users'))
 
 
@@ -79,8 +142,18 @@ def adjust_wallet(user_id):
     except ValueError:
         adjustment = 0
 
+    old_balance = user.wallet_balance
+
     user.wallet_balance = max(0, user.wallet_balance + adjustment)
     db.session.commit()
+
+    log_activity(
+        current_user,
+        "Wallet Adjustment",
+        "Admin Panel",
+        f"{user.full_name}: {old_balance} → {user.wallet_balance} Units (Change: {adjustment})"
+    )
+
     flash(f"{user.full_name}'s wallet adjusted to {user.wallet_balance} units.", 'success')
     return redirect(url_for('admin_panel.index', tab='users'))
 
@@ -154,7 +227,16 @@ def reply_message(message_id):
         msg.admin_reply = reply_text
         msg.status = 'replied'
         msg.replied_at = datetime.utcnow()
+
         db.session.commit()
-        flash('Reply sent.', 'success')
+
+        # Send email notification to user
+        send_email(
+            msg.user.email,
+            "Response from InChristAlone AI Studio Support",
+            reply_text
+        )
+
+        flash('Reply sent and email notification delivered.', 'success')
 
     return redirect(url_for('admin_panel.index', tab='messages'))

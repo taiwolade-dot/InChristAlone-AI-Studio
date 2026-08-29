@@ -15,19 +15,33 @@ CONTENT_TYPES = {
     },
     "flyer": {
         "label": "Flyer / Graphic Design",
-        "fields": ["event_title", "date_time", "location", "key_message", "color_preference"],
+        "fields": [
+            "title",
+            "bible_verse",
+            "event_date",
+            "venue",
+            "theme",
+            "design_style",
+            "color_preference",
+            "mood"
+        ],
         "template": (
-            "Design a promotional flyer.\n\n"
-            "Event Title: {event_title}.\n"
-            "Date & Time: {date_time}.\n"
-            "Location: {location}.\n"
-            "Key Message: {key_message}.\n"
-            "Color Preference: {color_preference}.\n\n"
-            "Layout: bold title at top, clear date/time/location block, "
-            "supporting scripture or tagline, clean modern church-flyer design, "
-            "royal blue and gold accents unless otherwise specified."
+            "Create a premium Christian flyer design.\n\n"
+            "Title: {title}.\n"
+            "Bible Verse: {bible_verse}.\n"
+            "Event Date: {event_date}.\n"
+            "Venue: {venue}.\n"
+            "Theme: {theme}.\n"
+            "Design Style: {design_style}.\n"
+            "Colours: {color_preference}.\n"
+            "Mood: {mood}.\n\n"
+            "Create a professional church flyer composition "
+            "with elegant Christian atmosphere, balanced layout, "
+            "high quality typography space, speaker photo areas, "
+            "and premium ministry branding."
         ),
     },
+
     "video": {
         "label": "Video Script & Shot List",
         "fields": ["video_topic", "target_length", "audience", "call_to_action"],

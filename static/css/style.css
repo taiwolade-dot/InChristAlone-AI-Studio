@@ -254,3 +254,734 @@ body {
     .navbar-links { margin-top: 0.8rem; }
     .navbar-links a { margin-left: 0; margin-right: 1rem; }
 }#leaderboard { font-size: 18px; margin-top: 20px; } #leaderboard li { margin: 5px 0; }
+
+
+/* ==========================================
+   InChristAlone AI Studio SaaS Layout
+   ========================================== */
+
+
+/* Main Application Layout */
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* Sidebar */
+
+.sidebar {
+    width: 260px;
+    background: var(--royal-blue);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    overflow-y: auto;
+}
+
+
+.sidebar-brand {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+
+.sidebar-brand a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+
+.sidebar-brand span {
+    color: var(--gold);
+}
+
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0;
+}
+
+
+.sidebar-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 0.85rem 1.5rem;
+    transition: 0.3s;
+}
+
+
+.sidebar-menu a:hover {
+    background: rgba(255,255,255,0.15);
+    color: var(--gold-light);
+}
+
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1.5rem;
+}
+
+
+.sidebar-footer a {
+    color: var(--gold-light);
+    text-decoration: none;
+}
+
+
+
+/* Main Content Area */
+
+.main-area {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+}
+
+
+
+/* Top Navigation */
+
+.topbar {
+    background: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+
+.topbar h3 {
+    color: var(--royal-blue);
+}
+
+
+.user-area {
+    color: var(--royal-blue);
+    font-weight: bold;
+}
+
+
+
+/* Dashboard Container */
+
+.main-area .container {
+    max-width: none;
+    padding: 2rem;
+}
+
+
+
+/* Responsive Mobile Layout */
+
+@media(max-width:768px){
+
+.sidebar {
+    width: 70px;
+}
+
+
+.sidebar-brand span,
+.sidebar-menu a,
+.sidebar-footer a {
+    font-size:0;
+}
+
+
+.sidebar-menu a:first-letter {
+    font-size:1.2rem;
+}
+
+
+.main-area {
+    margin-left:70px;
+    width:calc(100% - 70px);
+}
+
+
+.topbar {
+    padding:1rem;
+}
+
+
+}
+
+
+
+
+/* Sidebar visibility improvement */
+
+.sidebar {
+    z-index: 1000;
+}
+
+.sidebar-menu a {
+    white-space: nowrap;
+}
+
+
+@media(max-width:768px){
+
+    .sidebar {
+        width:220px;
+    }
+
+    .sidebar-brand span,
+    .sidebar-menu a,
+    .sidebar-footer a {
+        font-size: inherit;
+    }
+
+    .main-area {
+        margin-left:220px;
+        width:calc(100% - 220px);
+    }
+
+}
+
+
+
+/* Better mobile portrait layout */
+
+@media(max-width:600px){
+
+    .sidebar {
+        width:80px;
+    }
+
+    .sidebar-brand a {
+        font-size:0;
+    }
+
+    .sidebar-brand a::before {
+        content:"ICA";
+        font-size:1.3rem;
+        color:white;
+    }
+
+    .sidebar-menu a {
+        font-size:0;
+        text-align:center;
+        padding:1rem 0.5rem;
+    }
+
+    .sidebar-menu a::first-letter {
+        font-size:1.4rem;
+    }
+
+    .sidebar-footer a {
+        font-size:0;
+        text-align:center;
+    }
+
+    .main-area {
+        margin-left:80px;
+        width:calc(100% - 80px);
+    }
+
+}
+
+
+
+/* ==========================================
+   Professional Dashboard Design
+   ========================================== */
+
+
+.dashboard-hero {
+
+    background: linear-gradient(
+        135deg,
+        var(--royal-blue),
+        #263b91
+    );
+
+    color:white;
+    padding:2.5rem;
+    border-radius:12px;
+    margin-bottom:2rem;
+
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+
+}
+
+
+.dashboard-hero h1 {
+
+    margin-bottom:1rem;
+    font-size:2rem;
+
+}
+
+
+.dashboard-hero p {
+
+    max-width:750px;
+    font-size:1.1rem;
+    line-height:1.7;
+
+}
+
+
+
+
+.stats-grid {
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+    gap:1.5rem;
+
+    margin-bottom:2.5rem;
+
+}
+
+
+
+.stat-card {
+
+    background:white;
+
+    padding:1.5rem;
+
+    border-radius:12px;
+
+    text-align:center;
+
+    border-top:4px solid var(--gold);
+
+    box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+
+
+.stat-card h3 {
+
+    font-size:2rem;
+
+}
+
+
+
+.stat-card p {
+
+    color:var(--gray-text);
+
+    margin:0.5rem 0;
+
+}
+
+
+
+.stat-card strong {
+
+    color:var(--royal-blue);
+
+    font-size:1.3rem;
+
+}
+
+
+
+
+.section-title {
+
+    color:var(--royal-blue);
+
+    margin-bottom:1.5rem;
+
+}
+
+
+
+
+.tool-link {
+
+    text-decoration:none;
+
+    color:inherit;
+
+}
+
+
+
+.dashboard-card {
+
+    background:white;
+
+    padding:1.5rem;
+
+    border-radius:12px;
+
+    border-left:5px solid var(--gold);
+
+    box-shadow:
+    0 4px 12px rgba(0,0,0,0.08);
+
+    height:100%;
+
+    transition:0.3s;
+
+}
+
+
+
+.dashboard-card:hover {
+
+    transform:translateY(-5px);
+
+    box-shadow:
+    0 8px 20px rgba(0,0,0,0.15);
+
+}
+
+
+
+.dashboard-card h3 {
+
+    color:var(--royal-blue);
+
+    margin-bottom:0.8rem;
+
+}
+
+
+
+.dashboard-card p {
+
+    color:var(--gray-text);
+
+}
+
+
+
+@media(max-width:600px){
+
+.dashboard-hero {
+
+    padding:1.5rem;
+
+}
+
+
+.dashboard-hero h1 {
+
+    font-size:1.5rem;
+
+}
+
+
+}
+
+
+
+/* ==========================================
+   User Profile Dropdown
+   ========================================== */
+
+
+.user-profile {
+    position: relative;
+}
+
+
+.user-button {
+
+    background: transparent;
+
+    border: none;
+
+    cursor: pointer;
+
+    color: var(--royal-blue);
+
+    font-weight:bold;
+
+    font-size:0.95rem;
+
+    padding:0.5rem 0.8rem;
+
+}
+
+
+
+.user-dropdown {
+
+    display:none;
+
+    position:absolute;
+
+    right:0;
+
+    top:45px;
+
+    background:white;
+
+    min-width:180px;
+
+    border-radius:10px;
+
+    box-shadow:
+    0 8px 20px rgba(0,0,0,0.15);
+
+    overflow:hidden;
+
+    z-index:2000;
+
+}
+
+
+
+.user-dropdown a {
+
+    display:block;
+
+    padding:0.8rem 1rem;
+
+    text-decoration:none;
+
+    color:var(--royal-blue);
+
+    transition:0.3s;
+
+}
+
+
+
+.user-dropdown a:hover {
+
+    background:var(--gray-light);
+
+    color:var(--gold);
+
+}
+
+
+
+.user-profile:hover .user-dropdown {
+
+    display:block;
+
+}
+
+
+
+
+/* ==========================================
+   Professional Footer
+   ========================================== */
+
+
+.professional-footer {
+
+    background: var(--royal-blue);
+
+    color:white;
+
+    padding:2rem;
+
+    margin-top:3rem;
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:space-between;
+
+    gap:2rem;
+
+}
+
+
+
+.footer-brand h3 {
+
+    color:var(--gold);
+
+    margin-bottom:0.7rem;
+
+}
+
+
+
+.footer-brand p {
+
+    max-width:400px;
+
+    line-height:1.6;
+
+}
+
+
+
+.footer-links {
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:0.6rem;
+
+}
+
+
+
+.footer-links a {
+
+    color:white;
+
+    text-decoration:none;
+
+}
+
+
+
+.footer-links a:hover {
+
+    color:var(--gold);
+
+}
+
+
+
+.footer-bottom {
+
+    width:100%;
+
+    border-top:1px solid rgba(255,255,255,0.2);
+
+    padding-top:1rem;
+
+    margin-top:1rem;
+
+    text-align:center;
+
+}
+
+
+
+@media(max-width:600px){
+
+    .professional-footer {
+
+        flex-direction:column;
+
+        text-align:center;
+
+    }
+
+
+    .footer-links {
+
+        align-items:center;
+
+    }
+
+}
+
+
+
+
+/* ==========================================
+   Account Pages
+   ========================================== */
+
+
+.account-card {
+
+    background:white;
+
+    padding:2rem;
+
+    border-radius:12px;
+
+    max-width:800px;
+
+    margin:auto;
+
+    box-shadow:
+    0 5px 15px rgba(0,0,0,0.08);
+
+}
+
+
+.account-card h2 {
+
+    color:var(--royal-blue);
+
+    margin-bottom:1.5rem;
+
+}
+
+
+
+.profile-info p {
+
+    padding:0.8rem 0;
+
+    border-bottom:1px solid #eee;
+
+}
+
+
+
+.profile-info strong {
+
+    color:var(--royal-blue);
+
+}
+
+
+
+.settings-list p {
+
+    background:var(--gray-light);
+
+    padding:1rem;
+
+    border-radius:8px;
+
+    margin:0.8rem 0;
+
+}
+
+
+
+.plan-card {
+
+    margin-top:1.5rem;
+
+    padding:1.5rem;
+
+    border-radius:10px;
+
+    border-left:5px solid var(--gold);
+
+    background:var(--gray-light);
+
+}
+
+
+
+.plan-card h4 {
+
+    color:var(--royal-blue);
+
+    margin-bottom:0.8rem;
+
+}
+
+
+

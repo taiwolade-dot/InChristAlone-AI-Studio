@@ -19,4 +19,13 @@ class Config:
     PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
     FAL_API_KEY = os.environ.get('FAL_API_KEY')
     ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     ANTHROPIC_MODEL = 'claude-sonnet-4-6'
+
+    # Email Configuration
+    MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', 587))
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')

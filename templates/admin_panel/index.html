@@ -54,10 +54,20 @@
         <p><strong>Role:</strong> {{ user.role }} | <strong>Wallet:</strong> {{ user.wallet_balance }} Units</p>
 
         <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:0.8rem;">
-            <form method="POST" action="{{ url_for('admin_panel.toggle_admin', user_id=user.id) }}"
+            <form method="POST" action="{{ url_for('admin_panel.change_role', user_id=user.id) }}"
+                  style="display:flex; gap:0.5rem; align-items:center;"
                   onsubmit="return confirm('Change {{ user.full_name }} role?');">
+
+                <select name="role" style="padding:0.5rem;">
+                    {% for role_key, role_name in ROLES.items() %}
+                    <option value="{{ role_key }}" {% if user.role == role_key %}selected{% endif %}>
+                        {{ role_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
                 <button type="submit" class="btn-secondary">
-                    {% if user.role == 'admin' %}Demote to Member{% else %}Promote to Admin{% endif %}
+                    Update Role
                 </button>
             </form>
 

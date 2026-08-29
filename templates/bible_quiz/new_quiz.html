@@ -5,7 +5,7 @@
 {% block content %}
 <section class="prompt-engine">
     <h2>Generate a New Bible Quiz</h2>
-    <p class="prompt-engine-subtitle">Costs 10 Units. Falls back to a built-in question bank if AI is unavailable.</p>
+    <p class="prompt-engine-subtitle">Costs 100 Units. Falls back to a built-in question bank if AI is unavailable.</p>
 
     <form method="POST" action="{{ url_for('bible_quiz.new_quiz') }}" class="prompt-form">
         <div class="form-group">
@@ -42,6 +42,29 @@
             <input type="text" name="topic" placeholder="e.g. Faith">
             <label>Bible Text / Reference</label>
             <textarea name="bible_text" rows="4" placeholder="e.g. Hebrews 11:1-6"></textarea>
+
+            <label>Bible Book</label>
+            <input type="text" name="bible_book" placeholder="e.g. Romans">
+
+            <label>Chapter / Verse Range</label>
+            <input type="text" name="chapter_reference" placeholder="e.g. Romans 8:1-17">
+
+            <label>Quiz Theme</label>
+            <input type="text" name="quiz_theme" placeholder="e.g. Holy Spirit, Faith, Prayer">
+
+            <label>Difficulty Level</label>
+            <select name="difficulty">
+                <option>Easy</option>
+                <option selected>Medium</option>
+                <option>Hard</option>
+            </select>
+
+            <label>Question Style</label>
+            <select name="question_style">
+                <option>Knowledge</option>
+                <option>Application</option>
+                <option>Spiritual Reflection</option>
+            </select>
         </div>
 
         <div id="fields-pasted_text" class="form-group" style="display:none;">
@@ -55,7 +78,7 @@
             <small>Uses the video's transcript as the source material.</small>
         </div>
 
-        <button type="submit" class="btn-primary">Generate Questions (10 Units)</button>
+        <button type="submit" class="btn-primary">Generate AI Quiz (100 Units)</button>
     </form>
 </section>
 
