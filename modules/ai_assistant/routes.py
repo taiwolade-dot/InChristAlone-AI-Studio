@@ -5,6 +5,7 @@ from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
 from modules.ai_service import ask_ai
+from modules.activity_log.service import log_activity
 
 
 ai_assistant_bp = Blueprint(
@@ -484,6 +485,14 @@ Your request:
 {question}
 """
 
+
+
+          log_activity(
+              current_user,
+              "AI Assistant Query",
+              module,
+              f"Question: {question}\nResponse: {response}"
+          )
 
     return render_template(
         "ai_assistant/chat.html",
