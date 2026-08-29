@@ -3,6 +3,8 @@ from flask_login import login_required
 from modules.wallet_utils import spend_units, refund_units
 from .data import CONTENT_TYPES
 from .fal_service import generate_image, upscale_image, edit_image, generate_video, generate_music, generate_voice, transcribe_audio
+from .prompt_enhancer import enhance_prompt
+from .flyer_composer_v5 import ai_compose_flyer
 
 content_generator_bp = Blueprint(
     'content_generator',
@@ -60,12 +62,118 @@ def generate():
         }
         generated_prompt = type_data['template'].format(**values)
 
-        if content_type in ('cartoon', 'flyer'):
-            generated_image_url = generate_image_from_prompt(generated_prompt)
-            print("IMAGE URL =", repr(generated_image_url))
+        if content_type == 'cartoon':
+
+            generated_image_url = generate_image_from_prompt(
+                generated_prompt
+            )
+
+            print(
+                "IMAGE URL =",
+                repr(generated_image_url)
+            )
+
             if not generated_image_url:
                 refund_units(unit_cost)
-                flash(f'Image generation failed. Your {unit_cost} Units have been refunded.', 'error')
+
+                flash(
+                    f'Image generation failed. Your {unit_cost} Units have been refunded.',
+                    'error'
+                )
+
+        elif content_type == 'flyer':
+
+            import os
+            from werkzeug.utils import secure_filename
+
+            upload_dir = 'static/uploads/flyer_speakers'
+
+            os.makedirs(
+                upload_dir,
+                exist_ok=True
+            )
+
+            speakers = []
+
+            for i in range(1, 6):
+
+                name = request.form.get(
+                    f'speaker{i}_name',
+                    ''
+                ).strip()
+
+                title = request.form.get(
+                    f'speaker{i}_title',
+                    ''
+                ).strip()
+
+                photo = request.files.get(
+                    f'speaker{i}_photo'
+                )
+
+                photo_path = ""
+
+                if photo and photo.filename:
+
+                    filename = secure_filename(
+                        photo.filename
+                    )
+
+                    photo_path = os.path.join(
+                        upload_dir,
+                        f'speaker_{i}_{filename}'
+                    )
+
+                    photo.save(photo_path)
+
+                if name or photo_path:
+
+                    speakers.append(
+                        {
+                            "name": name,
+                            "title": title,
+                            "photo": photo_path
+                        }
+                    )
+
+            logo_path = None
+
+            logo = request.files.get(
+                "church_logo"
+            )
+
+            if logo and logo.filename:
+
+                filename = secure_filename(
+                    logo.filename
+                )
+
+                logo_path = os.path.join(
+                    upload_dir,
+                    f"logo_{filename}"
+                )
+
+                logo.save(logo_path)
+
+            flyer_result = ai_compose_flyer(
+                title=values.get("title", ""),
+                bible_verse=values.get("bible_verse", ""),
+                event_date=values.get("event_date", ""),
+                venue=values.get("venue", ""),
+                speakers=speakers,
+                logo_path=logo_path,
+                theme=values.get("theme", "default")
+            )
+
+            generated_image_url = flyer_result.get("file")
+
+            if generated_image_url and generated_image_url.startswith("static/"):
+                generated_image_url = "/" + generated_image_url
+
+            print(
+                "AI FLYER RESULT =",
+                flyer_result
+            )
 
     return render_template(
         'content_generator/index.html',
@@ -124,6 +232,25 @@ def edit_image_submit():
         return result
 
     edit_prompt = request.form.get('edit_prompt', '').strip()
+    design_type = request.form.get('design_type', 'Church Design')
+
+    edit_prompt = f'''
+You are an expert Christian graphic designer.
+
+Design Type:
+{design_type}
+
+Editing Request:
+{edit_prompt}
+
+Improve this design with:
+- professional church branding
+- clean modern typography
+- balanced composition
+- beautiful lighting
+- high quality social media presentation
+- appropriate Christian visual elements
+'''
 
     if 'photo' not in request.files or request.files['photo'].filename == '':
         flash('Please select a photo to edit.', 'error')
@@ -252,3 +379,160 @@ def transcribe_submit():
         flash('Transcription failed. Please try again.', 'error')
 
     return render_template('content_generator/transcribe.html', transcribed_text=transcribed_text)
+
+
+@content_generator_bp.route('/composer', methods=['GET', 'POST'])
+@login_required
+def flyer_composer_page():
+
+    composed_url = None
+    generated_flyer = request.args.get('flyer_url')
+
+    if request.method == 'POST':
+
+        flyer = request.files.get('flyer')
+        generated_flyer = request.form.get('generated_flyer')
+
+        photos = []
+
+        for i in range(1, 6):
+
+            photo = request.files.get(
+                f"speaker_photo_{i}"
+            )
+
+            if photo and photo.filename:
+                photos.append(photo)
+
+        print("=" * 50)
+        print("FILES RECEIVED:", len(photos))
+        print("FILENAMES:", [p.filename for p in photos])
+        print("=" * 50)
+        logo = request.files.get('logo')
+
+        person_names = request.form.get('person_names', '')
+        person_titles = request.form.get('person_titles', '')
+
+        names = [x.strip() for x in person_names.split(',')]
+        titles = [x.strip() for x in person_titles.split(',')]
+
+        photos = [
+            photo for photo in photos
+            if photo.filename
+        ][:5]
+
+
+        if photos and (flyer or generated_flyer):
+
+            import os
+            import requests
+
+            upload_dir = "uploads/composer"
+            os.makedirs(upload_dir, exist_ok=True)
+
+            if generated_flyer and not flyer:
+
+                flyer_path = os.path.join(
+                    upload_dir,
+                    "ai_generated_flyer.png"
+                )
+
+                response = requests.get(generated_flyer)
+
+                with open(flyer_path, "wb") as f:
+                    f.write(response.content)
+
+            else:
+
+                flyer_path = os.path.join(
+                    upload_dir,
+                    flyer.filename
+                )
+
+                flyer.save(flyer_path)
+
+
+            photo_paths = []
+            logo_path = None
+
+            for photo in photos:
+
+                photo_path = os.path.join(
+                    upload_dir,
+                    photo.filename
+                )
+
+                photo.save(photo_path)
+
+                photo_paths.append(photo_path)
+
+
+            if logo and logo.filename:
+                logo_path = os.path.join(
+                    upload_dir,
+                    logo.filename
+                )
+                logo.save(logo_path)
+
+            flyer_data = {
+                "event_title": request.form.get("event_title", ""),
+                "theme": request.form.get("theme", ""),
+                "topic": request.form.get("topic", ""),
+                "date_time": request.form.get("date_time", ""),
+                "location": request.form.get("location", ""),
+                "bible_verse": request.form.get("bible_verse", "")
+            }
+
+            design_settings = {
+                "title_color": request.form.get("title_color", "#ffffff"),
+                "verse_color": request.form.get("verse_color", "#ffffff"),
+                "speaker_name_color": request.form.get("speaker_name_color", "#FFD700"),
+                "speaker_layout": request.form.get("speaker_layout", "bottom"),
+                "logo_position": request.form.get("logo_position", "top_left"),
+                  "title_font_family": request.form.get("title_font_family", "sans"),
+                  "verse_font_family": request.form.get("verse_font_family", "serif"),
+                  "speaker_font_family": request.form.get("speaker_font_family", "sans"),
+                  "title_font_size": int(request.form.get("title_font_size", 70)),
+                  "verse_font_size": int(request.form.get("verse_font_size", 34)),
+                  "speaker_font_size": int(request.form.get("speaker_font_size", 28))
+            }
+
+            print(
+                "DESIGN SETTINGS =",
+                design_settings
+            )
+
+            speaker_data = []
+
+            for i, photo_path in enumerate(photo_paths, start=1):
+
+                speaker_data.append({
+                      "photo": photo_path,
+                      "name": request.form.get(
+                          f"speaker_name_{i}", ""
+                      ),
+                      "title": request.form.get(
+                          f"speaker_title_{i}", ""
+                      )
+                  })
+
+
+
+            composed_url = "/" + generate_flyer_v4(
+                  title=flyer_data["event_title"],
+                  bible_verse=flyer_data["bible_verse"],
+                  theme=flyer_data["theme"] or "default",
+                  event_date=flyer_data["date_time"],
+                  venue=flyer_data["location"],
+                  speakers=speaker_data,
+                  logo_path=logo_path,
+                    design_settings=design_settings
+              )
+
+
+    return render_template(
+        'content_generator/composer.html',
+        composed_url=composed_url,
+        generated_flyer=generated_flyer
+    )
+
