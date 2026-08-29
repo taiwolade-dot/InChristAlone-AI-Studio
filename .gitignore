@@ -1,8 +1,9 @@
-.venv/
-.env
-instance/
-database.db
+.env*
+*.backup*
+*.bak
+*.before*
+*_backup*
+*_stage*
+static/generated/
 __pycache__/
 *.pyc
-uploads/
-InChristAlone-AI-Version3-Projector-Working.zip
