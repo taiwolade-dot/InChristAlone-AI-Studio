@@ -27,3 +27,11 @@ static/uploads/
 # Generated AI files
 static/generated/
 
+
+# Development backups
+*.falbackup
+flyer_composer.py
+flyer_composer_v2.py
+flyer_composer_v3.py
+flyer_composer_v4.py
+data_after_flyer_v5.py
