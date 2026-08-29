@@ -10,7 +10,9 @@ def detect_module(question):
         "calendar",
         "conference",
         "association",
-        "convention"
+        "convention",
+        "meeting",
+        "schedule"
     ]):
         return "calendar"
 
@@ -19,7 +21,8 @@ def detect_module(question):
         "quiz",
         "bible quiz",
         "question",
-        "competition"
+        "competition",
+        "answer"
     ]):
         return "quiz"
 
@@ -28,7 +31,10 @@ def detect_module(question):
         "member",
         "membership",
         "birthday",
-        "baptism"
+        "baptism",
+        "church member",
+        "pastor",
+        "leader"
     ]):
         return "members"
 
@@ -36,18 +42,59 @@ def detect_module(question):
     if any(word in q for word in [
         "sermon",
         "preaching",
-        "devotional"
+        "message",
+        "outline",
+        "homily"
     ]):
-        return "content"
+        return "sermon"
+
+
+    if any(word in q for word in [
+        "prayer",
+        "prayers",
+        "fasting",
+        "intercession",
+        "devotion"
+    ]):
+        return "prayer"
+
+
+    if any(word in q for word in [
+        "worship",
+        "song",
+        "hymn",
+        "praise"
+    ]):
+        return "worship"
 
 
     if any(word in q for word in [
         "research",
         "thesis",
         "seminary",
-        "academic"
+        "academic",
+        "paper"
     ]):
         return "seminary"
+
+
+    if any(word in q for word in [
+        "flyer",
+        "poster",
+        "graphic",
+        "video",
+        "content"
+    ]):
+        return "content"
+
+
+    if any(word in q for word in [
+        "help",
+        "how do i",
+        "how can i",
+        "what can you do"
+    ]):
+        return "ai_help"
 
 
     return "general"
