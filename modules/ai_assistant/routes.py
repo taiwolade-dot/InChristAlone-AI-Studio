@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request
-from flask_login import login_required
-from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument
+from flask_login import login_required, current_user
+from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation
 from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
@@ -491,6 +491,17 @@ Your request:
 {question}
 """
 
+
+
+        conversation = AIConversation(
+            user_id=current_user.id,
+            question=question,
+            module=module,
+            response=response
+        )
+
+        db.session.add(conversation)
+        db.session.commit()
 
     return render_template(
         "ai_assistant/chat.html",
