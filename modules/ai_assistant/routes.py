@@ -4,6 +4,7 @@ from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDoc
 from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
+from .analytics import get_ai_statistics
 from modules.ai_service import ask_ai
 
 
@@ -544,6 +545,21 @@ def ask_ai_with_memory(question, module=None):
 
     return ask_ai(prompt)
 
+
+
+
+@ai_assistant_bp.route("/analytics")
+@login_required
+def analytics():
+
+    stats = get_ai_statistics(
+        current_user.id
+    )
+
+    return render_template(
+        "ai_assistant/analytics.html",
+        stats=stats
+    )
 
 
 

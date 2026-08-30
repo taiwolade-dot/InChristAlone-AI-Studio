@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Ministry Intelligence
+{% endblock %}
+
+
+{% block content %}
+
+<h1>🤖 AI Ministry Intelligence Dashboard</h1>
+
+
+<div class="dashboard-card">
+
+<h2>📊 AI Usage Overview</h2>
+
+<p>
+<strong>Total AI Conversations:</strong>
+{{ stats.total }}
+</p>
+
+
+<p>
+<strong>Most Used Assistant:</strong>
+{{ stats.most_used or "No data yet" }}
+</p>
+
+</div>
+
+
+
+<div class="dashboard-card">
+
+<h2>📚 Assistant Usage</h2>
+
+
+{% if stats.modules %}
+
+<ul>
+
+{% for module, count in stats.modules.items() %}
+
+<li>
+<strong>{{ module|title }}</strong> :
+{{ count }} requests
+</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>
+No AI activity recorded yet.
+</p>
+
+{% endif %}
+
+
+</div>
+
+
+<br>
+
+<a href="{{ url_for('ai_assistant.chat') }}"
+class="btn-primary">
+⬅ Back to AI Assistant
+</a>
+
+
+{% endblock %}
