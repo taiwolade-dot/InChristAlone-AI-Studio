@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Conversation History
+{% endblock %}
+
+{% block content %}
+
+<h1>📜 AI Conversation History</h1>
+
+<a href="{{ url_for('ai_assistant.chat') }}" class="btn-primary">
+⬅ Back to AI Assistant
+</a>
+
+<br><br>
+
+{% if conversations %}
+
+{% for chat in conversations %}
+
+<div class="dashboard-card">
+
+<h3>
+{{ chat.module }}
+</h3>
+
+<p>
+<strong>Date:</strong> {{ chat.created_at }}
+</p>
+
+<p>
+<strong>Question:</strong>
+</p>
+
+<pre style="white-space:pre-wrap;">{{ chat.question }}</pre>
+
+
+<p>
+<strong>Response:</strong>
+</p>
+
+<pre style="white-space:pre-wrap;">{{ chat.response }}</pre>
+
+</div>
+
+<br>
+
+{% endfor %}
+
+{% else %}
+
+<div class="dashboard-card">
+<p>No AI conversations found yet.</p>
+</div>
+
+{% endif %}
+
+{% endblock %}

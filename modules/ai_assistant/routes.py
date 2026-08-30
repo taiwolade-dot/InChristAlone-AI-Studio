@@ -416,6 +416,23 @@ def search_bible_quiz():
     return result
 
 
+@ai_assistant_bp.route("/history")
+@login_required
+def history():
+
+    conversations = AIConversation.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        AIConversation.created_at.desc()
+    ).limit(50).all()
+
+    return render_template(
+        "ai_assistant/history.html",
+        conversations=conversations
+    )
+
+
+
 @ai_assistant_bp.route("/", methods=["GET", "POST"])
 @login_required
 def chat():

@@ -28,6 +28,13 @@ placeholder="Ask me anything about your ministry, church, Bible Quiz, Calendar, 
 
 </div>
 
+<br><br>
+
+<a href="{{ url_for('ai_assistant.history') }}" class="btn-primary">
+📜 Conversation History
+</a>
+
+
 {% if answer %}
 
 <div class="dashboard-card">
