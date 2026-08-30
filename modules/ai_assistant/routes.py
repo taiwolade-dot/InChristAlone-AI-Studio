@@ -519,6 +519,22 @@ User Request:
 
 
 
+def save_ai_conversation(user_id, question, module, response):
+
+    conversation = AIConversation(
+        user_id=user_id,
+        question=question,
+        module=module or "general",
+        response=response
+    )
+
+    db.session.add(conversation)
+    db.session.commit()
+
+    return conversation
+
+
+
 def ask_ai_with_memory(question, module=None):
 
     prompt = build_personalized_prompt(
@@ -657,15 +673,12 @@ Your request:
 
 
 
-        conversation = AIConversation(
-            user_id=current_user.id,
-            question=question,
-            module=module,
-            response=response
+        save_ai_conversation(
+            current_user.id,
+            question,
+            module,
+            response
         )
-
-        db.session.add(conversation)
-        db.session.commit()
 
     return render_template(
         "ai_assistant/chat.html",
