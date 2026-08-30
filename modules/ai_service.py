@@ -22,7 +22,7 @@ Always answer clearly and practically.
 
 def ask_ai(prompt):
 
-    prompt = MINISTRY_CONTEXT + "\n\nUser Request:\n" + prompt
+    prompt = MINISTRY_CONTEXT + "User Request:" + prompt
 
     api_key = Config.GEMINI_API_KEY
 
@@ -40,6 +40,7 @@ def ask_ai(prompt):
         "Content-Type": "application/json"
     }
 
+
     data = {
         "contents": [
             {
@@ -53,26 +54,51 @@ def ask_ai(prompt):
     }
 
 
-    try:
-        response = requests.post(
-            url,
-            headers=headers,
-            json=data,
-            timeout=60
-        )
+    for attempt in range(3):
 
-        result = response.json()
+        try:
 
-        if "candidates" in result:
-            return (
-                result["candidates"][0]
-                ["content"]
-                ["parts"][0]
-                ["text"]
+            response = requests.post(
+                url,
+                headers=headers,
+                json=data,
+                timeout=60
             )
 
-        return str(result)
+
+            if response.status_code != 200:
+                continue
 
 
-    except Exception as e:
-        return f"AI Error: {str(e)}"
+            result = response.json()
+
+
+            if "candidates" in result:
+                return (
+                    result["candidates"][0]
+                    ["content"]
+                    ["parts"][0]
+                    ["text"]
+                )
+
+
+        except requests.exceptions.RequestException:
+
+            if attempt == 2:
+                return (
+                    "⚠️ The AI service is temporarily unavailable. "
+                    "Please try again shortly."
+                )
+
+
+        except Exception:
+
+            return (
+                "⚠️ An unexpected AI error occurred. "
+                "Please try again."
+            )
+
+
+    return (
+        "⚠️ The AI service could not complete the request."
+    )
