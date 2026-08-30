@@ -416,6 +416,30 @@ def search_bible_quiz():
     return result
 
 
+def get_ai_memory(user_id, limit=5):
+
+    conversations = AIConversation.query.filter_by(
+        user_id=user_id
+    ).order_by(
+        AIConversation.created_at.desc()
+    ).limit(limit).all()
+
+    if not conversations:
+        return ""
+
+    memory = "Previous conversation context:\n\n"
+
+    for chat in reversed(conversations):
+        memory += (
+            f"User: {chat.question}\n"
+            f"Assistant: {chat.response}\n\n"
+        )
+
+    return memory
+
+
+
+
 def get_ministry_profile(user_id):
 
     profile = MinistryProfile.query.filter_by(
@@ -440,19 +464,67 @@ Preferred Bible Translation: {profile.preferred_bible_translation or "KJV"}
 
 
 
-def ask_ai_with_memory(question):
+def build_personalized_prompt(question, module=None):
 
     profile = get_ministry_profile(current_user.id)
     memory = get_ai_memory(current_user.id)
 
-    prompt = f"""
+    module_context = ""
+
+    if module == "sermon":
+        module_context = """
+Prepare sermons with:
+- Biblical exposition
+- Clear sermon structure
+- Introduction, points and conclusion
+- Practical ministry application
+"""
+
+    elif module == "prayer":
+        module_context = """
+Prepare prayers with:
+- Scripture foundation
+- Pastoral tone
+- Spiritual encouragement
+- Faith declarations
+"""
+
+    elif module == "worship":
+        module_context = """
+Provide worship assistance with:
+- Biblical themes
+- Worship flow suggestions
+- Appropriate spiritual emphasis
+"""
+
+    elif module == "research":
+        module_context = """
+Provide scholarly assistance with:
+- Academic structure
+- References
+- Critical analysis
+"""
+
+    return f"""
 {profile}
 
 {memory}
 
-Current User Request:
+{module_context}
+
+User Request:
 {question}
 """
+
+
+
+
+def ask_ai_with_memory(question, module=None):
+
+    prompt = build_personalized_prompt(
+        question,
+        module
+    )
 
     return ask_ai(prompt)
 
@@ -554,23 +626,23 @@ def chat():
 
         elif module == "sermon":
             title = "🎤 Sermon Assistant"
-            response = ask_ai(question)
+            response = ask_ai_with_memory(question, module)
 
         elif module == "prayer":
             title = "🙏 Prayer Assistant"
-            response = ask_ai(question)
+            response = ask_ai_with_memory(question, module)
 
         elif module == "worship":
             title = "🎶 Worship Assistant"
-            response = ask_ai(question)
+            response = ask_ai_with_memory(question, module)
 
         elif module == "ai_help":
             title = "🤖 AI Studio Help"
-            response = ask_ai(question)
+            response = ask_ai_with_memory(question, module)
 
         else:
             title = "🤖 AI Assistant"
-            response = ask_ai_with_memory(question)
+            response = ask_ai_with_memory(question, module)
 
 
 

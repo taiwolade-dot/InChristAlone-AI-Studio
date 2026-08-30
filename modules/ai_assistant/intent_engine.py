@@ -28,13 +28,41 @@ def detect_module(question):
 
 
     if any(word in q for word in [
+        "sermon",
+        "preaching",
+        "message",
+        "outline",
+        "homily",
+        "preach",
+        "pastoral sermon",
+        "sermon outline"
+    ]):
+        return "sermon"
+
+
+    if any(word in q for word in [
+        "prayer",
+        "prayers",
+        "pastoral prayer",
+        "pastoral prayers",
+        "fasting",
+        "intercession",
+        "devotion",
+        "declaration"
+    ]):
+        return "prayer"
+
+
+    if any(word in q for word in [
         "member",
         "membership",
         "birthday",
         "baptism",
         "church member",
-        "pastor",
-        "leader"
+        "find pastor",
+        "pastor list",
+        "pastors found",
+        "leader list"
     ]):
         return "members"
 
