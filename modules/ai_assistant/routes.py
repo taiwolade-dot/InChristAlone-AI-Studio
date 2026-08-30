@@ -416,11 +416,38 @@ def search_bible_quiz():
     return result
 
 
+def get_ministry_profile(user_id):
+
+    profile = MinistryProfile.query.filter_by(
+        user_id=user_id
+    ).first()
+
+    if not profile:
+        return ""
+
+    return f"""
+Ministry Profile
+
+Church: {profile.church_name or ""}
+Denomination: {profile.denomination or ""}
+Role: {profile.ministry_role or ""}
+Location: {profile.location or ""}
+Preferred Sermon Style: {profile.preferred_sermon_style or ""}
+Preferred Bible Translation: {profile.preferred_bible_translation or "KJV"}
+
+"""
+
+
+
+
 def ask_ai_with_memory(question):
 
+    profile = get_ministry_profile(current_user.id)
     memory = get_ai_memory(current_user.id)
 
     prompt = f"""
+{profile}
+
 {memory}
 
 Current User Request:
