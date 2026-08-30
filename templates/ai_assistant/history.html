@@ -14,6 +14,16 @@ AI Conversation History
 
 <br><br>
 
+<div class="dashboard-card">
+
+<h3>
+Total Conversations: {{ conversations|length }}
+</h3>
+
+</div>
+
+<br>
+
 {% if conversations %}
 
 {% for chat in conversations %}
@@ -21,23 +31,32 @@ AI Conversation History
 <div class="dashboard-card">
 
 <h3>
-{{ chat.module }}
+{{ loop.index }}. 
+{% if chat.module == "sermon" %}
+🎤 Sermon Assistant
+{% elif chat.module == "prayer" %}
+🙏 Prayer Assistant
+{% elif chat.module == "worship" %}
+🎶 Worship Assistant
+{% elif chat.module == "calendar" %}
+📅 Church Calendar
+{% else %}
+🤖 AI Assistant
+{% endif %}
 </h3>
 
 <p>
-<strong>Date:</strong> {{ chat.created_at }}
+<strong>Date:</strong>
+{{ chat.created_at.strftime('%d %B %Y %I:%M %p') }}
 </p>
 
-<p>
-<strong>Question:</strong>
-</p>
+<hr>
+
+<h4>📝 Question</h4>
 
 <pre style="white-space:pre-wrap;">{{ chat.question }}</pre>
 
-
-<p>
-<strong>Response:</strong>
-</p>
+<h4>🤖 Response</h4>
 
 <pre style="white-space:pre-wrap;">{{ chat.response }}</pre>
 
