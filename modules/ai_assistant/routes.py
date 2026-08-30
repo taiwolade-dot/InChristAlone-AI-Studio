@@ -416,6 +416,22 @@ def search_bible_quiz():
     return result
 
 
+def ask_ai_with_memory(question):
+
+    memory = get_ai_memory(current_user.id)
+
+    prompt = f"""
+{memory}
+
+Current User Request:
+{question}
+"""
+
+    return ask_ai(prompt)
+
+
+
+
 @ai_assistant_bp.route("/history")
 @login_required
 def history():
@@ -495,7 +511,7 @@ def chat():
 
         else:
             title = "🤖 AI Assistant"
-            response = ask_ai(question)
+            response = ask_ai_with_memory(question)
 
 
 
