@@ -451,3 +451,63 @@ class AIConversation(db.Model):
 
     def __repr__(self):
         return f"<AIConversation {self.module}>"
+
+
+class MinistryProfile(db.Model):
+    __tablename__ = "ministry_profiles"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    church_name = db.Column(
+        db.String(150)
+    )
+
+    denomination = db.Column(
+        db.String(150)
+    )
+
+    ministry_role = db.Column(
+        db.String(100)
+    )
+
+    location = db.Column(
+        db.String(150)
+    )
+
+    preferred_sermon_style = db.Column(
+        db.String(100)
+    )
+
+    preferred_bible_translation = db.Column(
+        db.String(50),
+        default="KJV"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    user = db.relationship(
+        "User",
+        backref="ministry_profile"
+    )
+
+    def __repr__(self):
+        return f"<MinistryProfile {self.church_name}>"
+

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
-from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation
+from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile
 from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
@@ -445,6 +445,38 @@ def history():
     return render_template(
         "ai_assistant/history.html",
         conversations=conversations
+    )
+
+
+
+@ai_assistant_bp.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+
+    profile = MinistryProfile.query.filter_by(
+        user_id=current_user.id
+    ).first()
+
+    if request.method == "POST":
+
+        if not profile:
+            profile = MinistryProfile(
+                user_id=current_user.id
+            )
+
+        profile.church_name = request.form.get("church_name")
+        profile.denomination = request.form.get("denomination")
+        profile.ministry_role = request.form.get("ministry_role")
+        profile.location = request.form.get("location")
+        profile.preferred_sermon_style = request.form.get("preferred_sermon_style")
+        profile.preferred_bible_translation = request.form.get("preferred_bible_translation")
+
+        db.session.add(profile)
+        db.session.commit()
+
+    return render_template(
+        "ai_assistant/profile.html",
+        profile=profile
     )
 
 
