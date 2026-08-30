@@ -408,3 +408,46 @@ class ActivityLog(db.Model):
 
     def __repr__(self):
         return f"<ActivityLog {self.action}>"
+
+
+class AIConversation(db.Model):
+    __tablename__ = "ai_conversations"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=True
+    )
+
+    question = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    module = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    response = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    user = db.relationship(
+        "User",
+        backref="ai_conversations"
+    )
+
+    def __repr__(self):
+        return f"<AIConversation {self.module}>"
