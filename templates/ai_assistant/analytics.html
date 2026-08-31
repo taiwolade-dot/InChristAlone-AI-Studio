@@ -1,72 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}
-AI Ministry Intelligence
-{% endblock %}
-
+{% block title %}AI Ministry Intelligence{% endblock %}
 
 {% block content %}
 
-<h1>🤖 AI Ministry Intelligence Dashboard</h1>
+<div class="dashboard-hero">
+    <h1>🤖 AI Ministry Intelligence Dashboard</h1>
 
+<div class="mt-3">
+    <a href="/ai/reports/pdf?period=week"
+       class="btn btn-danger">
+       📄 Export PDF Report
+    </a>
+</div>
 
-<div class="dashboard-card">
+    <p>Overview of your AI Assistant usage.</p>
+</div>
 
-<h2>📊 AI Usage Overview</h2>
+<div class="dashboard-grid">
 
-<p>
-<strong>Total AI Conversations:</strong>
-{{ stats.total }}
-</p>
+    <div class="stat-card">
+        <h3>Total Conversations</h3>
+        <p>{{ stats.total }}</p>
+    </div>
 
-
-<p>
-<strong>Most Used Assistant:</strong>
-{{ stats.most_used or "No data yet" }}
-</p>
+    <div class="stat-card">
+        <h3>Most Used Assistant</h3>
+        <p>{{ stats.most_used or "No data yet" }}</p>
+    </div>
 
 </div>
 
-
-
 <div class="dashboard-card">
+    <h3>📚 Assistant Usage</h3>
 
-<h2>📚 Assistant Usage</h2>
+    {% if stats.modules %}
 
+        <ul>
+        {% for module, count in stats.modules.items() %}
+            <li><strong>{{ module|title }}</strong> — {{ count }} requests</li>
+        {% endfor %}
+        </ul>
 
-{% if stats.modules %}
+    {% else %}
 
-<ul>
+        <p>No AI activity recorded yet.</p>
 
-{% for module, count in stats.modules.items() %}
-
-<li>
-<strong>{{ module|title }}</strong> :
-{{ count }} requests
-</li>
-
-{% endfor %}
-
-</ul>
-
-{% else %}
-
-<p>
-No AI activity recorded yet.
-</p>
-
-{% endif %}
-
-
+    {% endif %}
 </div>
 
-
-<br>
-
-<a href="{{ url_for('ai_assistant.chat') }}"
-class="btn-primary">
-⬅ Back to AI Assistant
-</a>
-
+<p style="margin-top:20px;">
+    <a href="{{ url_for('ai_assistant.chat') }}" class="btn-primary">
+        ⬅ Back to AI Assistant
+    </a>
+</p>
 
 {% endblock %}
