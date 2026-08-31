@@ -1,10 +1,15 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, make_response
+from io import BytesIO
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
 from flask_login import login_required, current_user
 from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile
 from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
 from .analytics import get_ai_statistics
+from .pdf_export import create_pdf
+from .reports import generate_ai_report
 from modules.ai_service import ask_ai
 
 
@@ -548,6 +553,112 @@ def ask_ai_with_memory(question, module=None):
 
 
 
+
+
+@ai_assistant_bp.route("/reports/pdf")
+@login_required
+def reports_pdf():
+
+    report = generate_ai_report(
+        current_user.id,
+        "week"
+    )
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer
+    )
+
+    styles = getSampleStyleSheet()
+
+    elements = []
+
+    elements.append(
+        Paragraph(
+            "InChristAlone AI Ministry Report",
+            styles["Title"]
+        )
+    )
+
+    elements.append(
+        Spacer(1, 12)
+    )
+
+    elements.append(
+        Paragraph(
+            f"Period: {report['period']}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Total AI Requests: {report['total_requests']}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Paragraph(
+            f"Most Used Module: {report['top_module']}",
+            styles["Normal"]
+        )
+    )
+
+    elements.append(
+        Spacer(1, 12)
+    )
+
+    elements.append(
+        Paragraph(
+            "Module Usage:",
+            styles["Heading2"]
+        )
+    )
+
+    for module, count in report["modules"].items():
+
+        elements.append(
+            Paragraph(
+                f"{module}: {count}",
+                styles["Normal"]
+            )
+        )
+
+
+    doc.build(elements)
+
+    buffer.seek(0)
+
+    response = make_response(
+        buffer.read()
+    )
+
+    response.headers["Content-Type"] = "application/pdf"
+
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=AI_Ministry_Report.pdf"
+    )
+
+    return response
+
+
+@ai_assistant_bp.route("/reports")
+@login_required
+def reports():
+
+    report = generate_ai_report(
+        current_user.id,
+        "week"
+    )
+
+    return render_template(
+        "ai_assistant/reports.html",
+        report=report
+    )
+
+
 @ai_assistant_bp.route("/analytics")
 @login_required
 def analytics():
@@ -561,6 +672,48 @@ def analytics():
         stats=stats
     )
 
+
+
+
+@ai_assistant_bp.route("/export-report")
+@login_required
+def export_report():
+
+    import csv
+    from io import StringIO
+    from flask import Response
+
+    conversations = AIConversation.query.filter_by(
+        user_id=current_user.id
+    ).all()
+
+    output = StringIO()
+
+    writer = csv.writer(output)
+
+    writer.writerow([
+        "Date",
+        "Module",
+        "Question",
+        "Response"
+    ])
+
+    for item in conversations:
+        writer.writerow([
+            item.created_at,
+            item.module,
+            item.question,
+            item.response
+        ])
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition":
+            "attachment; filename=ai_ministry_report.csv"
+        }
+    )
 
 
 @ai_assistant_bp.route("/history")
