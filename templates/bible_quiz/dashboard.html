@@ -1,37 +1,158 @@
 {% extends "base.html" %}
 
-{% block title %}Bible Quiz — InChristAlone AI Studio{% endblock %}
+{% block title %}
+Bible Quiz Studio - InChristAlone AI
+{% endblock %}
 
 {% block content %}
+
 <section class="prompt-engine">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-        <h2>Your Bible Quizzes</h2>
-        <a href="{{ url_for('bible_quiz.new_quiz') }}" class="btn-primary">+ Generate New Quiz</a>
-    </div>
 
-    {% if quizzes %}
-    <div style="margin-top:1.5rem;">
-        {% for quiz in quizzes %}
-        <div class="dashboard-card" style="margin-bottom:1rem;">
-            <h3>{{ quiz.title }}</h3>
-            <p>{{ quiz.age_group }} · {{ quiz.questions|length }} questions</p>
-            <div style="margin-top:0.8rem; display:flex; gap:0.8rem;">
-                <a href="{{ url_for('bible_quiz.edit_quiz', quiz_id=quiz.id) }}" class="btn-secondary">Edit</a>
-                <a href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}" class="btn-primary">Go Live</a>
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
 
-                <form method="POST"
-                      action="{{ url_for('bible_quiz.delete_quiz', quiz_id=quiz.id) }}"
-                      onsubmit="return confirm('Delete this quiz permanently?');">
-                    <button type="submit" class="btn-secondary">
-                        Delete
-                    </button>
-                </form>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p style="margin-top:1.5rem;">No quizzes yet. Generate your first one above.</p>
+<div>
+<h2>📖 Bible Quiz Studio</h2>
+
+<p>
+Create, manage and host AI-powered Bible quizzes for your church, ministry or class.
+</p>
+
+{% if ministry %}
+<div class="dashboard-card" style="margin-top:1rem; margin-bottom:1rem;">
+    <h3>⛪ {{ ministry.church_name or "My Church" }}</h3>
+
+    {% if ministry.denomination %}
+    <p><strong>Denomination:</strong> {{ ministry.denomination }}</p>
     {% endif %}
+
+    {% if ministry.ministry_role %}
+    <p><strong>Role:</strong> {{ ministry.ministry_role }}</p>
+    {% endif %}
+
+    <p><strong>Total Bible Quizzes:</strong> {{ quizzes|length }}</p>
+</div>
+{% endif %}
+
+</div>
+
+<a href="{{ url_for('bible_quiz.new_quiz') }}" class="btn-primary">
+➕ Generate New Quiz
+</a>
+
+</div>
+
+
+{% if quizzes %}
+
+<div style="margin-top:2rem;">
+
+{% for quiz in quizzes %}
+
+<div class="dashboard-card" style="margin-bottom:1.5rem;">
+
+
+<h3>
+📚 {{ quiz.title }}
+
+{% if ministry %}
+<p>
+⛪ Church: {{ ministry.church_name }}
+</p>
+{% endif %}
+</h3>
+
+
+<p>
+👥 Age Group:
+{{ quiz.age_group }}
+</p>
+
+<p>
+🎯 Target Group:
+{{ quiz.target_group }}
+  </p>
+
+  <p>
+  📖 Bible Version:
+  {{ quiz.bible_version }}
+  </p>
+
+  <p>
+  ❓ Question Type:
+  {{ quiz.question_type }}
+    </p>
+
+    <p>
+    📊 Difficulty Level:
+    {{ quiz.difficulty }}
+  </p>
+
+
+<p>
+❓ Questions:
+{{ quiz.questions|length }}
+</p>
+
+
+{% if quiz.ministry_id %}
+<p>
+⛪ {{ ministry.church_name if ministry else 'Ministry Quiz' }}
+</p>
+{% endif %}
+
+
+<div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+
+<a class="btn-secondary"
+href="{{ url_for('bible_quiz.edit_quiz', quiz_id=quiz.id) }}">
+✏️ Edit
+</a>
+
+
+<a class="btn-primary"
+href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}">
+🎮 Start Live Quiz
+</a>
+
+
+<form method="POST"
+action="{{ url_for('bible_quiz.delete_quiz', quiz_id=quiz.id) }}">
+
+<button class="btn-secondary"
+onclick="return confirm('Delete quiz?')">
+🗑 Delete
+</button>
+
+</form>
+
+
+</div>
+
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+{% else %}
+
+<div class="dashboard-card">
+
+<h3>No Bible Quiz Yet</h3>
+
+<p>
+Generate your first AI Bible Quiz for your church or ministry.
+</p>
+
+</div>
+
+{% endif %}
+
+
 </section>
+
+
 {% endblock %}

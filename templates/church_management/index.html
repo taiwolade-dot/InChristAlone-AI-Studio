@@ -9,7 +9,23 @@
         <a href="{{ url_for('church_management.add_member') }}" class="btn-primary">+ Add Member</a>
     </div>
 
-    {% if today_birthdays %}
+    
+      <div class="dashboard-card" style="margin-top:1.5rem;">
+          <h3>📖 Bible Quiz Ministry</h3>
+          <p>
+              Create AI-powered Bible quizzes for:
+              <br>✓ Sunday School
+              <br>✓ Youth Fellowship
+              <br>✓ Bible Study
+              <br>✓ Church Programmes
+          </p>
+
+          <a href="{{ url_for('bible_quiz.dashboard') }}" class="btn-primary">
+              Generate Bible Quiz
+          </a>
+      </div>
+
+{% if today_birthdays %}
     <div class="flash flash-success" style="margin-top:1rem;">
         🎉 <strong>Today's Birthdays:</strong>
         {% for b in today_birthdays %}{{ b.full_name }}{% if not loop.last %}, {% endif %}{% endfor %}

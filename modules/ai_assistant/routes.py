@@ -8,8 +8,10 @@ from datetime import datetime
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
 from .analytics import get_ai_statistics
+from .dashboard import get_ai_dashboard
 from .pdf_export import create_pdf
 from .reports import generate_ai_report
+from .insights import generate_ministry_insights
 from modules.ai_service import ask_ai
 
 
@@ -644,6 +646,21 @@ def reports_pdf():
     return response
 
 
+
+@ai_assistant_bp.route("/insights")
+@login_required
+def insights():
+
+    insight = generate_ministry_insights(
+        current_user.id
+    )
+
+    return render_template(
+        "ai_assistant/insights.html",
+        insight=insight
+    )
+
+
 @ai_assistant_bp.route("/reports")
 @login_required
 def reports():
@@ -656,6 +673,21 @@ def reports():
     return render_template(
         "ai_assistant/reports.html",
         report=report
+    )
+
+
+
+@ai_assistant_bp.route("/dashboard")
+@login_required
+def dashboard():
+
+    data = get_ai_dashboard(
+        current_user.id
+    )
+
+    return render_template(
+        "ai_assistant/dashboard.html",
+        data=data
     )
 
 

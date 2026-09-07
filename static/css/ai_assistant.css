@@ -1,0 +1,132 @@
+
+/* =========================
+   InChristAlone AI Assistant
+   Intelligence Dashboard
+========================= */
+
+.dashboard-hero {
+    background: linear-gradient(135deg,#1f4e79,#2e75b6);
+    padding: 25px;
+    border-radius: 15px;
+    color: white;
+    margin-bottom: 25px;
+}
+
+.dashboard-hero h1 {
+    margin-bottom: 10px;
+}
+
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+
+.stat-card,
+.dashboard-card,
+.card {
+
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+
+.stat-card h3,
+.dashboard-card h3,
+.card h3 {
+
+    margin-top:0;
+    color:#1f4e79;
+
+}
+
+
+.stat-card p {
+
+    font-size:32px;
+    font-weight:bold;
+    margin:10px 0;
+
+}
+
+
+
+.dashboard-card ul,
+.card ul {
+
+    list-style:none;
+    padding:0;
+
+}
+
+
+.dashboard-card li,
+.card li {
+
+    padding:12px;
+    border-bottom:1px solid #eee;
+
+}
+
+
+.ai-report {
+
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+}
+
+
+.ai-report h2 {
+
+    color:#1f4e79;
+
+}
+
+
+.ai-report table {
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+.ai-report td,
+.ai-report th {
+
+    padding:12px;
+    border-bottom:1px solid #ddd;
+
+}
+
+
+
+@media(max-width:600px){
+
+.dashboard-grid {
+
+    grid-template-columns:1fr;
+
+}
+
+
+.dashboard-hero h1 {
+
+    font-size:22px;
+
+}
+
+
+}
+

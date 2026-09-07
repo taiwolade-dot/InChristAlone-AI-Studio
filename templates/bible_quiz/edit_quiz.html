@@ -5,8 +5,70 @@
 {% block content %}
 <section class="prompt-engine">
     <h2>{{ quiz.title }}</h2>
-    <p>{{ quiz.age_group }} · {{ quiz.questions|length }} questions</p>
+
+    {% if quiz.ministry %}
+    <p>⛪ Church: {{ quiz.ministry.church_name }}</p>
+    {% endif %}
+
+    <p>👥 Age Group: {{ quiz.age_group }}</p>
+
+    <p>🎯 Target Group: {{ quiz.target_group }}</p>
+
+    <p>📖 Bible Version: {{ quiz.bible_version }}</p>
+
+    <p>❓ Question Type: {{ quiz.question_type }}</p>
+
+    <p>📝 {{ quiz.questions|length }} questions</p>
     <a href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}" class="btn-primary">Go Live With This Quiz</a>
+
+    <hr>
+
+    <h3>⚙️ Edit Quiz Settings</h3>
+
+    <form method="POST" action="{{ url_for('bible_quiz.update_quiz_settings', quiz_id=quiz.id) }}">
+
+        <div class="form-group">
+            <label>🎯 Target Group</label>
+            <input type="text" name="target_group" value="{{ quiz.target_group }}">
+        </div>
+
+        <div class="form-group">
+            <label>📖 Bible Version</label>
+            <select name="bible_version">
+                <option {% if quiz.bible_version == 'KJV' %}selected{% endif %}>KJV</option>
+                <option {% if quiz.bible_version == 'NKJV' %}selected{% endif %}>NKJV</option>
+                <option {% if quiz.bible_version == 'NIV' %}selected{% endif %}>NIV</option>
+                <option {% if quiz.bible_version == 'ESV' %}selected{% endif %}>ESV</option>
+                <option {% if quiz.bible_version == 'NLT' %}selected{% endif %}>NLT</option>
+                <option {% if quiz.bible_version == 'AMP' %}selected{% endif %}>AMP</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>❓ Question Type</label>
+            <select name="question_type">
+                <option {% if quiz.question_type == 'Mixed' %}selected{% endif %}>Mixed</option>
+                <option {% if quiz.question_type == 'Multiple Choice' %}selected{% endif %}>Multiple Choice</option>
+                <option {% if quiz.question_type == 'True / False' %}selected{% endif %}>True / False</option>
+                <option {% if quiz.question_type == 'Fill in the Blank' %}selected{% endif %}>Fill in the Blank</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>📊 Difficulty Level</label>
+            <select name="difficulty">
+                <option {% if quiz.difficulty == 'Beginner' %}selected{% endif %}>Beginner</option>
+                <option {% if quiz.difficulty == 'Medium' %}selected{% endif %}>Medium</option>
+                <option {% if quiz.difficulty == 'Advanced' %}selected{% endif %}>Advanced</option>
+                <option {% if quiz.difficulty == 'Theological / Seminary' %}selected{% endif %}>Theological / Seminary</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            💾 Save Settings
+        </button>
+
+    </form>
 </section>
 
 {% for q in quiz.questions|sort(attribute='order_index') %}

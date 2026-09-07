@@ -72,7 +72,23 @@ def generate_quiz_with_fal(prompt, model="google/gemini-2.5-flash"):
 
                 try:
                     final_data = result.json()
-                    return final_data.get("output")
+                    print("FINAL DATA PARSED:")
+                    print(final_data)
+
+                    if isinstance(final_data, dict):
+                        if final_data.get("output"):
+                            return final_data["output"]
+
+                        if final_data.get("text"):
+                            return final_data["text"]
+
+                        if final_data.get("response"):
+                            return final_data["response"]
+
+                        if final_data.get("output_text"):
+                            return final_data["output_text"]
+
+                    return str(final_data)
                 except Exception:
                     return result.text
 

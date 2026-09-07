@@ -1,4 +1,7 @@
 FALLBACK_BANK = [
+# Each question includes adaptive metadata:
+# age_group, target_group, question_style, question_type
+
     {"text": "How many books are in the New Testament?", "options": ["27", "39", "66", "12"], "correct_index": 0, "scripture_ref": "General", "explanation": "27 books.", "difficulty": "Easy"},
     {"text": "Which gospel was written by a doctor?", "options": ["Matthew", "Mark", "Luke", "John"], "correct_index": 2, "scripture_ref": "Col 4:14", "explanation": "Luke.", "difficulty": "Easy"},
     {"text": "Who was swallowed by a great fish?", "options": ["Daniel", "Jonah", "Elijah", "Noah"], "correct_index": 1, "scripture_ref": "Jonah 1:17", "explanation": "Jonah.", "difficulty": "Easy"},
@@ -16,7 +19,25 @@ FALLBACK_BANK = [
     {"text": "Who received the Ten Commandments on Mount Sinai?", "options": ["Abraham", "Moses", "Elijah", "Jacob"], "correct_index": 1, "scripture_ref": "Exodus 20", "explanation": "Moses.", "difficulty": "Easy"}
 ]
 
-def generate_questions(source_material, age_group="Youth", count=10):
+
+# Default adaptive metadata for fallback questions
+for q in FALLBACK_BANK:
+    q.setdefault("age_group", "General")
+    q.setdefault("target_group", "General Church")
+    q.setdefault("question_style", "Knowledge")
+    q.setdefault("question_type", "Multiple Choice")
+
+
+def generate_questions(
+    source_material,
+    age_group="Youth",
+    count=10,
+    target_group="General Church",
+    bible_version="KJV",
+    question_type="Mixed",
+    difficulty="Medium",
+    question_style="Knowledge"
+):
     import os, json
     api_key = os.environ.get("GEMINI_API_KEY")
     if api_key:
@@ -27,7 +48,25 @@ def generate_questions(source_material, age_group="Youth", count=10):
             prompt = f"""
 You are an expert Christian Bible teacher and quiz creator.
 
-Generate {count} high-quality multiple choice Bible quiz questions for {age_group}.
+Generate {count} high-quality multiple choice Bible quiz questions.
+
+Audience Age Group:
+{age_group}
+
+Ministry Target Group:
+{target_group}
+
+Bible Version:
+{bible_version}
+
+Question Type:
+{question_type}
+
+Difficulty Level:
+{difficulty}
+
+Question Style:
+{question_style}
 
 Source Material:
 {source_material}
@@ -38,7 +77,13 @@ Requirements:
 - Only one option must be correct.
 - Include Bible reference.
 - Include a short explanation for the answer.
-- Match the difficulty level appropriately.
+  - Match the selected difficulty level appropriately.
+  - Adapt vocabulary, complexity, and depth according to the selected audience.
+  - Follow the selected question style:
+    - Knowledge: Focus on biblical facts, people, places, events, teachings, and Scripture understanding.
+    - Application: Focus on Christian living, decision-making, discipleship, character, and practical faith.
+    - Spiritual Reflection: Focus on devotion, prayer, transformation, spiritual growth, and relationship with God.
+  - Use the selected Bible version when quoting or referencing Scripture.
 - Avoid ambiguous questions.
 - Encourage Bible knowledge and spiritual learning.
 
@@ -66,7 +111,70 @@ Format:
         except Exception as e:
             print("AI Generation failed:", e)
 
+    # Adaptive fallback engine
     selected = []
-    for i in range(count):
-        selected.append(FALLBACK_BANK[i % len(FALLBACK_BANK)])
+
+    difficulty_map = {
+        "Beginner": "Easy",
+        "Medium": "Medium",
+        "Advanced": "Medium",
+        "Theological / Seminary": "Medium"
+    }
+
+    preferred_level = difficulty_map.get(
+        difficulty,
+        "Medium"
+    )
+
+    # Intelligent fallback scoring engine
+    def question_score(q):
+        score = 0
+
+        # Difficulty matching
+        if q.get("difficulty") == preferred_level:
+            score += 5
+
+        # Question style matching
+        if q.get("question_style") == question_style:
+            score += 4
+
+        # Question type matching
+        if q.get("question_type") == question_type:
+            score += 3
+
+        # Age group matching
+        if q.get("age_group") == age_group:
+            score += 3
+
+        # Target group matching
+        if q.get("target_group") == target_group:
+            score += 2
+
+        return score
+
+    ranked = sorted(
+        FALLBACK_BANK,
+        key=question_score,
+        reverse=True
+    )
+
+    for question in ranked:
+        question = question.copy()
+
+        question["age_group"] = age_group
+        question["target_group"] = target_group
+        question["question_style"] = question_style
+        question["question_type"] = question_type
+
+        selected.append(question)
+
+        if len(selected) >= count:
+            break
+
+    # Fill remaining questions if bank is smaller
+    while len(selected) < count:
+        selected.append(
+            FALLBACK_BANK[len(selected) % len(FALLBACK_BANK)]
+        )
+
     return selected, "fallback"

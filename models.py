@@ -161,8 +161,41 @@ class BibleQuiz(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    ministry_id = db.Column(
+        db.Integer,
+        db.ForeignKey('ministry_profiles.id'),
+        nullable=True
+    )
+
     title = db.Column(db.String(200), nullable=False)
     age_group = db.Column(db.String(20), default="Adults")
+
+    target_group = db.Column(
+        db.String(100),
+        default="General Church"
+    )
+
+    bible_version = db.Column(
+        db.String(20),
+        default="KJV"
+    )
+
+    question_type = db.Column(
+        db.String(50),
+        default="Mixed"
+    )
+
+    difficulty = db.Column(
+        db.String(20),
+        default="Medium"
+    )
+
+    question_style = db.Column(
+        db.String(50),
+        default="Knowledge"
+    )
+
     source_type = db.Column(db.String(30))
     source_ref = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -175,6 +208,11 @@ class BibleQuiz(db.Model):
         backref="quiz",
         lazy=True,
         cascade="all, delete-orphan"
+    )
+
+    ministry = db.relationship(
+        "MinistryProfile",
+        backref="bible_quizzes"
     )
 
 
@@ -505,7 +543,7 @@ class MinistryProfile(db.Model):
 
     user = db.relationship(
         "User",
-        backref="ministry_profile"
+        backref=db.backref("ministry_profile", uselist=False)
     )
 
     def __repr__(self):

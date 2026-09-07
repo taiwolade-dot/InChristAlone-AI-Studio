@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>🤖 AI Ministry Intelligence Dashboard</h2>
+
+<div class="card">
+<h3>Total AI Requests</h3>
+<p>{{ data.total }}</p>
+</div>
+
+<div class="card">
+<h3>Module Usage</h3>
+
+<ul>
+{% for module,count in data.usage.items() %}
+<li>
+{{ module }} : {{ count }}
+</li>
+{% endfor %}
+</ul>
+
+</div>
+
+
+<div class="card">
+<h3>Recent Conversations</h3>
+
+{% for item in data.recent %}
+
+<p>
+<strong>{{ item.module }}</strong><br>
+{{ item.question }}
+</p>
+
+<hr>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

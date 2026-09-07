@@ -7,6 +7,19 @@
     <h2>Generate a New Bible Quiz</h2>
     <p class="prompt-engine-subtitle">Costs 100 Units. Falls back to a built-in question bank if AI is unavailable.</p>
 
+{% if ministry %}
+<div class="dashboard-card" style="margin-top:1rem; margin-bottom:1.5rem;">
+    <h3>⛪ {{ ministry.church_name }}</h3>
+    {% if ministry.denomination %}
+    <p><strong>Denomination:</strong> {{ ministry.denomination }}</p>
+    {% endif %}
+    {% if ministry.ministry_role %}
+    <p><strong>Role:</strong> {{ ministry.ministry_role }}</p>
+    {% endif %}
+    <p>📖 Create Bible quizzes specially designed for your ministry.</p>
+</div>
+{% endif %}
+
     <form method="POST" action="{{ url_for('bible_quiz.new_quiz') }}" class="prompt-form">
         <div class="form-group">
             <label for="title">Quiz Title</label>
@@ -14,18 +27,39 @@
         </div>
 
         <div class="form-group">
-            <label for="age_group">Age Group</label>
-            <select id="age_group" name="age_group">
-                <option>Children</option>
+              <label for="age_group">Age Group</label>
+              <select id="age_group" name="age_group">
+                  <option>Children (6-12)</option>
+                  <option>Teenagers (13-19)</option>
+                  <option>Youth (20-35)</option>
+                  <option selected>Adults (36+)</option>
+                  <option>Pastors / Church Leaders</option>
+                  <option>Seminary Students</option>
+                  <option>Mixed Congregation</option>
+              </select>
+        </div>
+
+        <div class="form-group">
+            <label for="target_group">🎯 Ministry Target Group</label>
+            <select id="target_group" name="target_group">
+                <option selected>General Church</option>
+                <option>Sunday School</option>
+                <option>Youth Fellowship</option>
                 <option>Teenagers</option>
-                <option>Youth</option>
-                <option selected>Adults</option>
+                <option>Children Ministry</option>
+                <option>Adults Fellowship</option>
             </select>
         </div>
 
         <div class="form-group">
             <label for="count">Number of Questions</label>
-            <input type="number" id="count" name="count" value="10" min="3" max="25">
+            <select id="count" name="count">
+                <option value="5">5 Questions</option>
+                <option value="10" selected>10 Questions</option>
+                <option value="20">20 Questions</option>
+                <option value="30">30 Questions</option>
+                <option value="50">50 Questions</option>
+            </select>
         </div>
 
         <div class="form-group">
@@ -38,26 +72,45 @@
         </div>
 
         <div id="fields-topic_text" class="form-group">
-            <label>Topic</label>
-            <input type="text" name="topic" placeholder="e.g. Faith">
-            <label>Bible Text / Reference</label>
-            <textarea name="bible_text" rows="4" placeholder="e.g. Hebrews 11:1-6"></textarea>
+            <label>Bible Passage / Topic / Theme</label>
+            <textarea
+                name="bible_text"
+                rows="6"
+                placeholder="Examples:
+John 3:16-21
+Faith - Hebrews 11:1-6
+The Good Samaritan - Luke 10:25-37
+The Fruit of the Spirit - Galatians 5:22-23"></textarea>
 
-            <label>Bible Book</label>
-            <input type="text" name="bible_book" placeholder="e.g. Romans">
-
-            <label>Chapter / Verse Range</label>
-            <input type="text" name="chapter_reference" placeholder="e.g. Romans 8:1-17">
-
-            <label>Quiz Theme</label>
-            <input type="text" name="quiz_theme" placeholder="e.g. Holy Spirit, Faith, Prayer">
-
-            <label>Difficulty Level</label>
+            <label>📊 Difficulty Level</label>
             <select name="difficulty">
-                <option>Easy</option>
+                <option>Beginner</option>
                 <option selected>Medium</option>
-                <option>Hard</option>
+                <option>Advanced</option>
+                <option>Theological / Seminary</option>
             </select>
+
+
+              <label>Bible Version</label>
+              <select name="bible_version">
+                  <option selected>KJV</option>
+                  <option>NKJV</option>
+                  <option>NIV</option>
+                  <option>ESV</option>
+                  <option>NLT</option>
+                  <option>AMP</option>
+              </select>
+
+              <label>Question Type</label>
+              <select name="question_type">
+                  <option selected>Mixed</option>
+                  <option>Multiple Choice</option>
+                  <option>True / False</option>
+                  <option>Fill in the Blank</option>
+              </select>
+
+
+
 
             <label>Question Style</label>
             <select name="question_style">

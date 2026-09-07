@@ -15,10 +15,27 @@ bible_quiz_bp = Blueprint(
 @bible_quiz_bp.route('/', methods=['GET'])
 @login_required
 def dashboard():
-    quizzes = BibleQuiz.query.filter_by(owner_id=current_user.id).order_by(
-        BibleQuiz.created_at.desc()
-    ).all()
-    return render_template('bible_quiz/dashboard.html', quizzes=quizzes)
+
+    ministry = getattr(current_user, "ministry_profile", None)
+
+    if ministry:
+        quizzes = BibleQuiz.query.filter_by(
+            ministry_id=ministry.id
+        ).order_by(
+            BibleQuiz.created_at.desc()
+        ).all()
+    else:
+        quizzes = BibleQuiz.query.filter_by(
+            owner_id=current_user.id
+        ).order_by(
+            BibleQuiz.created_at.desc()
+        ).all()
+
+    return render_template(
+        'bible_quiz/dashboard.html',
+        quizzes=quizzes,
+        ministry=ministry
+    )
 
 
 @bible_quiz_bp.route('/new', methods=['GET', 'POST'])
@@ -29,38 +46,58 @@ def new_quiz():
     if request.method == 'POST':
         title = request.form['title'].strip()
         age_group = request.form['age_group']
+        target_group = request.form.get('target_group', 'General Church')
+        bible_version = request.form.get('bible_version', 'KJV')
+        question_type = request.form.get('question_type', 'Mixed')
         source_type = request.form['source_type']
         count = int(request.form.get('count', 10))
 
         try:
             if source_type == 'topic_text':
-                topic = request.form.get('topic', '')
                 text = request.form.get('bible_text', '')
-                bible_book = request.form.get('bible_book', '')
-                chapter_reference = request.form.get('chapter_reference', '')
-                quiz_theme = request.form.get('quiz_theme', '')
+
                 difficulty = request.form.get('difficulty', 'Medium')
                 question_style = request.form.get('question_style', 'Knowledge')
 
                 source_material = f"""
-Topic: {topic}
-
-Bible Book: {bible_book}
-
-Chapter / Verse Reference:
-{chapter_reference}
-
-Bible Text:
+Bible Passage / Topic / Theme:
 {text}
 
-Quiz Theme:
-{quiz_theme}
+Bible Version:
+{bible_version}
+
+Question Type:
+{question_type}
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
 
 Difficulty:
 {difficulty}
 
 Question Style:
 {question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
 """
             elif source_type == 'pasted_text':
                 source_material = request.form.get('pasted_text', '')
@@ -85,13 +122,55 @@ Question Style:
         status = "fal"
 
         fal_prompt = f"""
-Create {count} Bible quiz questions.
+Create {count} Bible quiz questions for a church ministry.
 
-Source:
+Bible Passage / Topic / Theme:
 {source_material}
 
-Age Group:
+Audience Age Group:
 {age_group}
+
+Generation Guidelines:
+- Adjust vocabulary, complexity, and depth according to the selected audience.
+- Children (6-12): Use simple biblical facts, memory-friendly questions, and clear language.
+- Teenagers (13-19): Focus on faith challenges, identity, choices, and practical Christian living.
+- Youth (20-35): Emphasize discipleship, decision-making, leadership, and life application.
+- Adults (36+): Provide deeper biblical understanding and practical spiritual growth.
+- Pastors / Church Leaders: Include theological insight, ministry leadership, and biblical interpretation.
+- Seminary Students: Include exegetical depth, theological concepts, and biblical analysis.
+- Mixed Congregation: Balance accessibility with spiritual depth.
+
+Difficulty Level:
+{difficulty}
+
+Difficulty Guidelines:
+- Beginner: Create simple questions focused on Bible facts, names, events, memory verses, and basic understanding.
+- Medium: Create questions that test comprehension, biblical principles, spiritual application, and Christian living.
+- Advanced: Create deeper questions involving context, interpretation, doctrine, connections between passages, and critical thinking.
+- Theological / Seminary: Create scholarly questions involving biblical interpretation, theology, hermeneutics, historical background, and where appropriate original language insights.
+
+
+Ministry Target Group:
+{target_group}
+
+Bible Version:
+{bible_version}
+
+Question Type:
+{question_type}
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
+
+Instruction:
+Generate questions that promote biblical knowledge, spiritual understanding,
+practical application, and Christian growth.
 
 Return ONLY JSON array:
 [
@@ -99,8 +178,8 @@ Return ONLY JSON array:
   "text": "Question",
   "options": ["A","B","C","D"],
   "correct_index": 0,
-  "scripture_ref": "Reference",
-  "explanation": "Explanation",
+  "scripture_ref": "Bible Reference",
+  "explanation": "Biblical explanation",
   "difficulty": "Medium"
  }}
 ]
@@ -116,7 +195,14 @@ Return ONLY JSON array:
 
         if not questions:
             questions, status = ai_generator.generate_questions(
-                source_material, age_group=age_group, count=count
+                source_material,
+                age_group=age_group,
+                count=count,
+                target_group=target_group,
+              bible_version=bible_version,
+              question_type=question_type,
+              difficulty=difficulty,
+              question_style=question_style,
             )
 
 
@@ -159,8 +245,18 @@ Return ONLY JSON array:
 
         quiz = BibleQuiz(
             owner_id=current_user.id,
+
+              ministry_id=(
+                  current_user.ministry_profile.id
+                  if current_user.ministry_profile
+                  else None
+              ),
             title=title,
             age_group=age_group,
+              target_group=target_group,
+              bible_version=bible_version,
+              question_type=question_type,
+              difficulty=difficulty,
             source_type=source_type,
             source_ref=source_material[:2000],
         )
@@ -203,7 +299,11 @@ Return ONLY JSON array:
 
         return redirect(url_for('bible_quiz.edit_quiz', quiz_id=quiz.id))
 
-    return render_template('bible_quiz/new_quiz.html')
+    ministry = getattr(current_user, "ministry_profile", None)
+    return render_template(
+        'bible_quiz/new_quiz.html',
+        ministry=ministry
+    )
 
 
 @bible_quiz_bp.route('/<int:quiz_id>/delete', methods=['POST'])
@@ -229,6 +329,23 @@ def edit_quiz(quiz_id):
     quiz = BibleQuiz.query.filter_by(id=quiz_id, owner_id=current_user.id).first_or_404()
     return render_template('bible_quiz/edit_quiz.html', quiz=quiz)
 
+
+
+@bible_quiz_bp.route('/<int:quiz_id>/update-settings', methods=['POST'])
+@login_required
+def update_quiz_settings(quiz_id):
+    quiz = BibleQuiz.query.filter_by(id=quiz_id, owner_id=current_user.id).first_or_404()
+
+    quiz.target_group = request.form.get('target_group', quiz.target_group)
+    quiz.bible_version = request.form.get('bible_version', quiz.bible_version)
+    quiz.question_type = request.form.get('question_type', quiz.question_type)
+    quiz.difficulty = request.form.get('difficulty', quiz.difficulty)
+    quiz.question_style = request.form.get('question_style', quiz.question_style)
+
+    db.session.commit()
+
+    flash('Quiz settings updated successfully.', 'success')
+    return redirect(url_for('bible_quiz.edit_quiz', quiz_id=quiz.id))
 
 @bible_quiz_bp.route('/<int:quiz_id>/question/<int:question_id>/update', methods=['POST'])
 @login_required
