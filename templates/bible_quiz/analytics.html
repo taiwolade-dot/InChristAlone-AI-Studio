@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>📊 Bible Quiz Intelligence Dashboard</h2>
+
+<p class="text-muted">
+AI-powered insights from generated Bible quizzes
+</p>
+
+<div class="row">
+
+<div class="col-md-3">
+<div class="card p-3">
+<h5>Total Questions</h5>
+<h2 id="totalQuestions">0</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card p-3">
+<h5>AI Generated</h5>
+<h2 id="aiGenerated">0</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card p-3">
+<h5>Fallback</h5>
+<h2 id="fallback">0</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card p-3">
+<h5>Age Groups</h5>
+<h2 id="groups">0</h2>
+</div>
+</div>
+
+</div>
+
+<hr>
+
+<div class="row">
+
+<div class="col-md-6">
+<h4>AI Generation Ratio</h4>
+<canvas id="aiChart"></canvas>
+</div>
+
+<div class="col-md-6">
+<h4>Difficulty Levels</h4>
+<canvas id="difficultyChart"></canvas>
+</div>
+
+</div>
+
+<div class="row mt-5">
+
+<div class="col-md-6">
+<h4>Question Styles</h4>
+<canvas id="styleChart"></canvas>
+</div>
+
+<div class="col-md-6">
+<h4>Age Groups</h4>
+<canvas id="ageChart"></canvas>
+</div>
+
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+fetch("/bible-quiz/analytics/data")
+.then(response => response.json())
+.then(data => {
+
+document.getElementById("totalQuestions").innerHTML = data.total_questions;
+
+document.getElementById("aiGenerated").innerHTML = data.ai_generated;
+
+document.getElementById("fallback").innerHTML = data.fallback;
+
+document.getElementById("groups").innerHTML =
+Object.keys(data.age_groups).length;
+
+
+new Chart(document.getElementById("aiChart"), {
+type:"doughnut",
+data:{
+labels:["AI Generated","Fallback"],
+datasets:[{
+data:[
+data.ai_generated,
+data.fallback
+]
+}]
+}
+});
+
+
+new Chart(document.getElementById("difficultyChart"), {
+type:"bar",
+data:{
+labels:Object.keys(data.difficulty),
+datasets:[{
+label:"Questions",
+data:Object.values(data.difficulty)
+}]
+}
+});
+
+
+new Chart(document.getElementById("styleChart"), {
+type:"bar",
+data:{
+labels:Object.keys(data.styles),
+datasets:[{
+label:"Styles",
+data:Object.values(data.styles)
+}]
+}
+});
+
+
+new Chart(document.getElementById("ageChart"), {
+type:"pie",
+data:{
+labels:Object.keys(data.age_groups),
+datasets:[{
+data:Object.values(data.age_groups)
+}]
+}
+});
+
+});
+
+</script>
+
+{% endblock %}
