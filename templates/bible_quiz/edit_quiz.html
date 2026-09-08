@@ -91,6 +91,42 @@
             onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
     </div>
 
+    <div class="form-group">
+        <label>👥 Age Group</label>
+        <input type="text"
+               id="age-group-{{ q.id }}"
+               value="{{ q.age_group }}"
+               onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
+    </div>
+
+    <div class="form-group">
+        <label>🎯 Target Group</label>
+        <input type="text"
+               id="target-group-{{ q.id }}"
+               value="{{ q.target_group }}"
+               onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
+    </div>
+
+    <div class="form-group">
+        <label>🧠 Question Style</label>
+        <input type="text"
+               id="style-{{ q.id }}"
+               value="{{ q.question_style }}"
+               onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
+    </div>
+
+    <div class="form-group">
+        <label>📚 Question Type</label>
+        <input type="text"
+               id="type-{{ q.id }}"
+               value="{{ q.question_type }}"
+               onchange="saveQuestion({{ quiz.id }}, {{ q.id }})">
+    </div>
+
+    {% if q.ai_generated %}
+    <span style="color:green;">🤖 AI Generated</span>
+    {% endif %}
+
     <p style="font-size:0.85rem; color:#666;">{{ q.scripture_ref }} — {{ q.difficulty }}</p>
     <button class="btn-secondary" style="border-color:#b91c1c; color:#b91c1c;" onclick="deleteQuestion({{ quiz.id }}, {{ q.id }})">Delete Question</button>
 </div>
@@ -102,7 +138,15 @@ function saveQuestion(quizId, questionId) {
     const payload = {
         text: document.getElementById('text-' + questionId).value,
         options: options,
-        correct_index: parseInt(document.getElementById('correct-' + questionId).value, 10) - 1
+        correct_index: parseInt(document.getElementById('correct-' + questionId).value, 10) - 1,
+
+        age_group: document.getElementById('age-group-' + questionId).value,
+
+        target_group: document.getElementById('target-group-' + questionId).value,
+
+        question_style: document.getElementById('style-' + questionId).value,
+
+        question_type: document.getElementById('type-' + questionId).value
     };
     fetch(`/bible-quiz/${quizId}/question/${questionId}/update`, {
         method: 'POST',

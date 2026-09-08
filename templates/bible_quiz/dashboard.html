@@ -115,6 +115,11 @@ href="{{ url_for('bible_quiz_session.start_session', quiz_id=quiz.id) }}">
 🎮 Start Live Quiz
 </a>
 
+<a class="btn-secondary"
+href="{{ url_for('bible_quiz.quiz_analytics', quiz_id=quiz.id) }}">
+📊 View AI Analytics
+</a>
+
 
 <form method="POST"
 action="{{ url_for('bible_quiz.delete_quiz', quiz_id=quiz.id) }}">

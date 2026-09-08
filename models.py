@@ -576,3 +576,122 @@ class MinistryProfile(db.Model):
     def __repr__(self):
         return f"<MinistryProfile {self.church_name}>"
 
+
+
+# ==========================================================
+# Bible Quiz AI Intelligence Engine (v3.3)
+# ==========================================================
+
+
+class QuizQuestionAnalytics(db.Model):
+    __tablename__ = "quiz_question_analytics"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    question_id = db.Column(
+        db.Integer,
+        db.ForeignKey("quiz_questions.id"),
+        nullable=False
+    )
+
+    times_answered = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    correct_answers = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    accuracy_rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    difficulty_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    ai_recommendation = db.Column(
+        db.Text
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    question = db.relationship(
+        "QuizQuestion",
+        backref=db.backref(
+            "analytics",
+            uselist=False
+        )
+    )
+
+
+class QuizParticipantProfile(db.Model):
+    __tablename__ = "quiz_participant_profiles"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    participant_id = db.Column(
+        db.Integer,
+        db.ForeignKey("quiz_participants.id"),
+        nullable=False
+    )
+
+    age_group = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    knowledge_level = db.Column(
+        db.String(50),
+        default="Developing"
+    )
+
+    strengths = db.Column(
+        db.Text
+    )
+
+    improvement_areas = db.Column(
+        db.Text
+    )
+
+    recommended_difficulty = db.Column(
+        db.String(50),
+        default="Medium"
+    )
+
+    ai_summary = db.Column(
+        db.Text
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    participant = db.relationship(
+        "QuizParticipant",
+        backref=db.backref(
+            "learning_profile",
+            uselist=False
+        )
+    )

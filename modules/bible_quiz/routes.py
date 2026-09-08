@@ -365,7 +365,25 @@ def update_question(quiz_id, question_id):
         question.options = data['options']
     if 'correct_index' in data:
         question.correct_index = int(data['correct_index'])
+
+    # AI Adaptive Metadata Update
+    if 'age_group' in data:
+        question.age_group = data['age_group']
+
+    if 'target_group' in data:
+        question.target_group = data['target_group']
+
+    if 'question_style' in data:
+        question.question_style = data['question_style']
+
+    if 'question_type' in data:
+        question.question_type = data['question_type']
+
+    if 'difficulty' in data:
+        question.difficulty = data['difficulty']
+
     db.session.commit()
+
     return jsonify({'ok': True})
 
 
@@ -376,6 +394,46 @@ def delete_question(quiz_id, question_id):
     db.session.delete(question)
     db.session.commit()
     return jsonify({'ok': True})
+
+
+
+
+@bible_quiz_bp.route('/analytics/<int:quiz_id>')
+@login_required
+def quiz_analytics(quiz_id):
+
+    quiz = BibleQuiz.query.get_or_404(quiz_id)
+
+    analytics = []
+
+    for question in quiz.questions:
+
+        data = getattr(
+            question,
+            "analytics",
+            None
+        )
+
+        if data:
+            analytics.append({
+                "question": question.text,
+                "times_answered": data.times_answered,
+                "correct_answers": data.correct_answers,
+                "accuracy_rate": data.accuracy_rate,
+                "difficulty_score": data.difficulty_score,
+                "recommendation": data.ai_recommendation
+            })
+
+    analytics.sort(
+        key=lambda x: x["difficulty_score"],
+        reverse=True
+    )
+
+    return render_template(
+        "bible_quiz/analytics.html",
+        quiz=quiz,
+        analytics=analytics
+    )
 
 
 @bible_quiz_bp.route('/report/<int:session_id>')

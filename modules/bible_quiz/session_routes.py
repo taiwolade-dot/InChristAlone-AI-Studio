@@ -393,6 +393,59 @@ def api_submit_answer(session_id):
     )
     db.session.add(answer)
 
+    # AI Quiz Analytics Engine
+    from models import QuizQuestionAnalytics
+
+    analytics = QuizQuestionAnalytics.query.filter_by(
+        question_id=question.id
+    ).first()
+
+    if not analytics:
+        analytics = QuizQuestionAnalytics(
+            question_id=question.id
+        )
+        db.session.add(analytics)
+
+    analytics.times_answered += 1
+
+    if is_correct:
+        analytics.correct_answers += 1
+
+    analytics.accuracy_rate = round(
+        (analytics.correct_answers / analytics.times_answered) * 100,
+        2
+    )
+
+    # Difficulty intelligence score
+    wrong_rate = (
+        (analytics.times_answered - analytics.correct_answers)
+        / analytics.times_answered
+    )
+
+    analytics.difficulty_score = round(
+        wrong_rate * 100,
+        2
+    )
+
+    if analytics.accuracy_rate < 40:
+        analytics.ai_recommendation = (
+            "Consider reviewing this topic. "
+            "Question may require simpler explanation."
+        )
+
+    elif analytics.accuracy_rate > 85:
+        analytics.ai_recommendation = (
+            "Strong mastery detected. "
+            "Consider advanced questions."
+        )
+
+    else:
+        analytics.ai_recommendation = (
+            "Balanced performance. "
+            "Continue practice and reinforcement."
+        )
+
+
     participant = QuizParticipant.query.get(participant_id)
     if is_correct:
         base_points = 100

@@ -2,146 +2,182 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="dashboard-card">
 
-<h2>📊 Bible Quiz Intelligence Dashboard</h2>
+<h2>📊 AI Quiz Analytics Dashboard</h2>
 
-<p class="text-muted">
-AI-powered insights from generated Bible quizzes
+<h3>📚 {{ quiz.title }}</h3>
+
+<p>
+AI-powered performance analysis based on participant responses.
 </p>
 
-<div class="row">
-
-<div class="col-md-3">
-<div class="card p-3">
-<h5>Total Questions</h5>
-<h2 id="totalQuestions">0</h2>
-</div>
 </div>
 
-<div class="col-md-3">
-<div class="card p-3">
-<h5>AI Generated</h5>
-<h2 id="aiGenerated">0</h2>
-</div>
+
+{% if analytics %}
+
+{% set total_attempts = analytics|sum(attribute='times_answered') %}
+{% set total_correct = analytics|sum(attribute='correct_answers') %}
+
+
+<div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+
+<div class="dashboard-card">
+<h3>👥 Attempts</h3>
+<p style="font-size:2rem;">
+{{ total_attempts }}
+</p>
 </div>
 
-<div class="col-md-3">
-<div class="card p-3">
-<h5>Fallback</h5>
-<h2 id="fallback">0</h2>
-</div>
-</div>
 
-<div class="col-md-3">
-<div class="card p-3">
-<h5>Age Groups</h5>
-<h2 id="groups">0</h2>
-</div>
+<div class="dashboard-card">
+<h3>✅ Correct Answers</h3>
+<p style="font-size:2rem;">
+{{ total_correct }}
+</p>
 </div>
 
-</div>
 
-<hr>
-
-<div class="row">
-
-<div class="col-md-6">
-<h4>AI Generation Ratio</h4>
-<canvas id="aiChart"></canvas>
-</div>
-
-<div class="col-md-6">
-<h4>Difficulty Levels</h4>
-<canvas id="difficultyChart"></canvas>
+<div class="dashboard-card">
+<h3>🧠 Questions Analysed</h3>
+<p style="font-size:2rem;">
+{{ analytics|length }}
+</p>
 </div>
 
 </div>
 
-<div class="row mt-5">
 
-<div class="col-md-6">
-<h4>Question Styles</h4>
-<canvas id="styleChart"></canvas>
-</div>
+<div class="dashboard-card">
 
-<div class="col-md-6">
-<h4>Age Groups</h4>
-<canvas id="ageChart"></canvas>
-</div>
+<h3>📈 Question Performance</h3>
+
+<canvas id="accuracyChart"></canvas>
 
 </div>
 
+
+
+{% for item in analytics %}
+
+<div class="dashboard-card"
+style="margin-top:1rem;text-align:left;">
+
+<h4>
+❓ Question {{ loop.index }}
+</h4>
+
+<p>
+<strong>{{ item.question }}</strong>
+</p>
+
+
+<p>
+👥 Attempts:
+{{ item.times_answered }}
+</p>
+
+
+<p>
+📈 Accuracy:
+{{ item.accuracy_rate }}%
+</p>
+
+
+<p>
+🎯 Difficulty Score:
+{{ item.difficulty_score }}
+</p>
+
+
+<div style="
+padding:10px;
+background:#eef6ff;
+border-radius:8px;
+">
+
+🧠 <strong>AI Insight:</strong>
+
+<br>
+
+{{ item.recommendation }}
+
 </div>
+
+
+</div>
+
+{% endfor %}
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 
-fetch("/bible-quiz/analytics/data")
-.then(response => response.json())
-.then(data => {
-
-document.getElementById("totalQuestions").innerHTML = data.total_questions;
-
-document.getElementById("aiGenerated").innerHTML = data.ai_generated;
-
-document.getElementById("fallback").innerHTML = data.fallback;
-
-document.getElementById("groups").innerHTML =
-Object.keys(data.age_groups).length;
+const labels = [
+{% for item in analytics %}
+"Q{{ loop.index }}",
+{% endfor %}
+];
 
 
-new Chart(document.getElementById("aiChart"), {
-type:"doughnut",
+const accuracy = [
+{% for item in analytics %}
+{{ item.accuracy_rate }},
+{% endfor %}
+];
+
+
+new Chart(
+document.getElementById('accuracyChart'),
+{
+type:'bar',
+
 data:{
-labels:["AI Generated","Fallback"],
-datasets:[{
-data:[
-data.ai_generated,
-data.fallback
+labels:labels,
+
+datasets:[
+{
+label:'Accuracy %',
+data:accuracy
+}
 ]
-}]
+
+},
+
+options:{
+responsive:true,
+
+scales:{
+y:{
+beginAtZero:true,
+max:100
 }
-});
-
-
-new Chart(document.getElementById("difficultyChart"), {
-type:"bar",
-data:{
-labels:Object.keys(data.difficulty),
-datasets:[{
-label:"Questions",
-data:Object.values(data.difficulty)
-}]
 }
-});
 
-
-new Chart(document.getElementById("styleChart"), {
-type:"bar",
-data:{
-labels:Object.keys(data.styles),
-datasets:[{
-label:"Styles",
-data:Object.values(data.styles)
-}]
 }
-});
 
-
-new Chart(document.getElementById("ageChart"), {
-type:"pie",
-data:{
-labels:Object.keys(data.age_groups),
-datasets:[{
-data:Object.values(data.age_groups)
-}]
 }
-});
-
-});
+);
 
 </script>
+
+
+{% else %}
+
+<div class="dashboard-card">
+
+<h3>📌 No Analytics Available</h3>
+
+<p>
+Start a live quiz session to generate adaptive AI insights.
+</p>
+
+</div>
+
+{% endif %}
+
 
 {% endblock %}
