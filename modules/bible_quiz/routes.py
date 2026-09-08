@@ -426,3 +426,92 @@ def quiz_report(session_id):
         correct_answers=correct_answers,
         accuracy=accuracy
     )
+
+
+@bible_quiz_bp.route('/analytics/data')
+@login_required
+def quiz_analytics_data():
+
+    from sqlalchemy import func
+
+    # Get quizzes owned by current user or ministry
+    ministry = getattr(
+        current_user,
+        "ministry_profile",
+        None
+    )
+
+    if ministry:
+        quiz_ids = [
+            q.id for q in BibleQuiz.query.filter_by(
+                ministry_id=ministry.id
+            ).all()
+        ]
+    else:
+        quiz_ids = [
+            q.id for q in BibleQuiz.query.filter_by(
+                owner_id=current_user.id
+            ).all()
+        ]
+
+
+    questions = QuizQuestion.query.filter(
+        QuizQuestion.quiz_id.in_(quiz_ids)
+    ).all()
+
+
+    total_questions = len(questions)
+
+    ai_generated = len([
+        q for q in questions
+        if getattr(q, "ai_generated", False)
+    ])
+
+    fallback = total_questions - ai_generated
+
+
+    difficulty = {}
+
+    for q in questions:
+        level = q.difficulty or "Unknown"
+        difficulty[level] = difficulty.get(level, 0) + 1
+
+
+    styles = {}
+
+    for q in questions:
+        style = q.question_style or "Unknown"
+        styles[style] = styles.get(style, 0) + 1
+
+
+    age_groups = {}
+
+    for q in questions:
+        age = q.age_group or "Unknown"
+        age_groups[age] = age_groups.get(age, 0) + 1
+
+
+    target_groups = {}
+
+    for q in questions:
+        target = q.target_group or "Unknown"
+        target_groups[target] = target_groups.get(target, 0) + 1
+
+
+    return jsonify({
+
+        "total_questions": total_questions,
+
+        "ai_generated": ai_generated,
+
+        "fallback": fallback,
+
+        "difficulty": difficulty,
+
+        "styles": styles,
+
+        "age_groups": age_groups,
+
+        "target_groups": target_groups
+
+    })
