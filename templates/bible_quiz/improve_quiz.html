@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard-card">
+
+<h2>🚀 Improve Quiz With AI</h2>
+
+<h3>📚 {{ quiz.title }}</h3>
+
+<p>
+AI has analyzed the quiz performance and identified learning opportunities.
+</p>
+
+
+<hr>
+
+
+<h3>⚠️ Weak Questions</h3>
+
+{% if analysis.weak_questions %}
+
+{% for item in analysis.weak_questions %}
+
+<div class="dashboard-card">
+
+<p>
+<strong>Question ID:</strong>
+{{ item.question_id }}
+</p>
+
+<p>
+Accuracy:
+{{ item.accuracy }}%
+</p>
+
+<p>
+🤖 Recommendation:
+{{ item.recommendation }}
+</p>
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p>
+✅ No weak questions detected.
+</p>
+
+{% endif %}
+
+
+
+<h3>⭐ Strong Questions</h3>
+
+{% if analysis.strong_questions %}
+
+{% for item in analysis.strong_questions %}
+
+<div class="dashboard-card">
+
+<p>
+<strong>Question ID:</strong>
+{{ item.question_id }}
+</p>
+
+<p>
+Accuracy:
+{{ item.accuracy }}%
+</p>
+
+<p>
+🤖 Recommendation:
+{{ item.recommendation }}
+</p>
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p>
+No strong performance data available yet.
+</p>
+
+{% endif %}
+
+
+
+<button class="btn-primary">
+🤖 Generate Adaptive Quiz Version
+</button>
+
+
+</div>
+
+{% endblock %}

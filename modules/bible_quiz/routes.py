@@ -573,3 +573,38 @@ def quiz_analytics_data():
         "target_groups": target_groups
 
     })
+
+
+@bible_quiz_bp.route('/improve/<int:quiz_id>', methods=['GET'])
+@login_required
+def improve_quiz_with_ai(quiz_id):
+
+    from modules.bible_quiz.analytics_engine import analyze_quiz_performance
+    from models import QuizQuestionAnalytics
+
+    quiz = BibleQuiz.query.get_or_404(quiz_id)
+
+    analytics_records = []
+
+    for question in quiz.questions:
+
+        data = getattr(
+            question,
+            "analytics",
+            None
+        )
+
+        if data:
+            analytics_records.append(data)
+
+
+    analysis = analyze_quiz_performance(
+        analytics_records
+    )
+
+
+    return render_template(
+        "bible_quiz/improve_quiz.html",
+        quiz=quiz,
+        analysis=analysis
+    )
