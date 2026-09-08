@@ -227,6 +227,33 @@ class QuizQuestion(db.Model):
     scripture_ref = db.Column(db.String(150))
     explanation = db.Column(db.Text)
     difficulty = db.Column(db.String(10), default="Medium")
+
+    # AI Adaptive Metadata
+    age_group = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    target_group = db.Column(
+        db.String(100),
+        default="General Church"
+    )
+
+    question_style = db.Column(
+        db.String(50),
+        default="Knowledge"
+    )
+
+    question_type = db.Column(
+        db.String(50),
+        default="Multiple Choice"
+    )
+
+    ai_generated = db.Column(
+        db.Boolean,
+        default=False
+    )
+
     order_index = db.Column(db.Integer, default=0)
 
     @property
