@@ -275,6 +275,14 @@ Return ONLY JSON array:
                 scripture_ref=q.get('scripture_ref', ''),
                 explanation=q.get('explanation', ''),
                 difficulty=q.get('difficulty', 'Medium'),
+
+                # AI Intelligence Metadata
+                age_group=q.get('age_group', quiz.age_group),
+                target_group=q.get('target_group', quiz.target_group),
+                question_style=q.get('question_style', quiz.question_style),
+                question_type=q.get('question_type', quiz.question_type),
+                ai_generated=(status == 'ai'),
+
                 order_index=i,
             )
             question.options = q['options']

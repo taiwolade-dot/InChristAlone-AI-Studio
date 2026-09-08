@@ -107,7 +107,21 @@ Format:
                 text = text.split("```json")[1].split("```")[0].strip()
             data = json.loads(text)
             if isinstance(data, list) and len(data) > 0:
-                return data[:count], "ai"
+
+                  normalized = []
+
+                  for q in data[:count]:
+
+                      q.setdefault('age_group', age_group)
+                      q.setdefault('target_group', target_group)
+                      q.setdefault('question_style', question_style)
+                      q.setdefault('question_type', question_type)
+                      q.setdefault('difficulty', difficulty)
+                      q['ai_generated'] = True
+
+                      normalized.append(q)
+
+                  return normalized, 'ai'
         except Exception as e:
             print("AI Generation failed:", e)
 
