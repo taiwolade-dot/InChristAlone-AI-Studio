@@ -101,6 +101,12 @@ Question {{ item.question_id }}
 {{ item.reason }}
 </p>
 
+<button
+class="btn-primary"
+onclick="regenerateQuestion({{ item.question_id }})">
+🤖 Regenerate Question
+</button>
+
 </div>
 
 {% endfor %}
@@ -130,4 +136,34 @@ small group learning.
 </section>
 
 
-{% endblock %}
+
+
+<script>
+
+function regenerateQuestion(questionId){
+
+fetch(
+`/bible-quiz/question/${questionId}/regenerate`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+}
+}
+)
+
+.then(response=>response.json())
+
+.then(data=>{
+
+alert(data.message || data.error);
+
+location.reload();
+
+});
+
+}
+
+</script>
+
+\n{% endblock %}

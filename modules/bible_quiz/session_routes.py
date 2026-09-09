@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 
 from models import db, BibleQuiz, QuizLiveSession, QuizParticipant, QuizQuestion, QuizAnswer
+from modules.bible_quiz.learner_engine import update_learner_profile
 from modules.activity_log.service import log_activity
 from modules.bible_quiz.timer import seconds_remaining
 from modules.permissions import roles_required
@@ -488,6 +489,12 @@ def api_submit_answer(session_id):
         participant.score += base_points + speed_bonus
 
     db.session.commit()
+
+    # Update AI Learner Profile
+    try:
+        update_learner_profile(participant_id)
+    except Exception as e:
+        print("Learner profile update failed:", e)
 
     return jsonify({'is_correct': is_correct, 'correct_index': question.correct_index, 'score': participant.score})
 

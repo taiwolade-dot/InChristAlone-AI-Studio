@@ -695,3 +695,68 @@ class QuizParticipantProfile(db.Model):
             uselist=False
         )
     )
+
+
+class QuizLearnerProfile(db.Model):
+
+    __tablename__ = "quiz_learner_profiles"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    participant_id = db.Column(
+        db.Integer,
+        db.ForeignKey("quiz_participants.id"),
+        nullable=False,
+        unique=True
+    )
+
+
+    total_questions = db.Column(
+        db.Integer,
+        default=0
+    )
+
+
+    correct_answers = db.Column(
+        db.Integer,
+        default=0
+    )
+
+
+    accuracy_rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+
+    learning_level = db.Column(
+        db.String(50),
+        default="Beginner"
+    )
+
+
+    strong_topics = db.Column(
+        db.Text
+    )
+
+
+    weak_topics = db.Column(
+        db.Text
+    )
+
+
+    ai_recommendation = db.Column(
+        db.Text
+    )
+
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+

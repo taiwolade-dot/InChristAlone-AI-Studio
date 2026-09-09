@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 
 from models import db, BibleQuiz, QuizQuestion, QuizLiveSession, QuizParticipant, QuizAnswer
 from . import ai_generator
+from .adaptive_engine import regenerate_question
 
 bible_quiz_bp = Blueprint(
     'bible_quiz',
@@ -35,6 +36,53 @@ def dashboard():
         'bible_quiz/dashboard.html',
         quizzes=quizzes,
         ministry=ministry
+    )
+
+
+@bible_quiz_bp.route('/intelligence')
+@login_required
+def intelligence_dashboard():
+
+    from models import QuizQuestionAnalytics
+
+    analytics = QuizQuestionAnalytics.query.all()
+
+    total_questions = len(analytics)
+
+    total_attempts = sum(
+        a.times_answered for a in analytics
+    )
+
+    total_correct = sum(
+        a.correct_answers for a in analytics
+    )
+
+    average_accuracy = 0
+
+    if total_attempts:
+        average_accuracy = round(
+            (total_correct / total_attempts) * 100,
+            2
+        )
+
+    difficult_questions = sorted(
+        analytics,
+        key=lambda x: x.difficulty_score,
+        reverse=True
+    )[:10]
+
+    recommendations = [
+        a for a in analytics
+        if a.ai_recommendation
+    ]
+
+    return render_template(
+        'bible_quiz/intelligence.html',
+        total_questions=total_questions,
+        total_attempts=total_attempts,
+        average_accuracy=average_accuracy,
+        difficult_questions=difficult_questions,
+        recommendations=recommendations
     )
 
 
@@ -649,3 +697,64 @@ def improve_quiz_with_ai(quiz_id):
         analysis=analysis,
         recommendations=recommendations
     )
+
+
+@bible_quiz_bp.route(
+    '/question/<int:question_id>/regenerate',
+    methods=['POST']
+)
+@login_required
+def regenerate_quiz_question(question_id):
+
+    from models import QuizQuestion, QuizQuestionAnalytics
+
+    question = QuizQuestion.query.get_or_404(
+        question_id
+    )
+
+    analytics = QuizQuestionAnalytics.query.filter_by(
+        question_id=question.id
+    ).first()
+
+
+    if not analytics:
+        return jsonify({
+            "error": "No analytics available"
+        }), 400
+
+
+    improved = regenerate_question(
+        question,
+        analytics
+    )
+
+
+    if not improved:
+        return jsonify({
+            "error": "AI regeneration failed"
+        }), 500
+
+
+    question.text = improved["text"]
+    question.options = improved["options"]
+    question.correct_index = improved["correct_index"]
+    question.scripture_ref = improved.get(
+        "scripture_ref",
+        question.scripture_ref
+    )
+    question.explanation = improved.get(
+        "explanation",
+        question.explanation
+    )
+    question.difficulty = improved["difficulty"]
+    question.ai_generated = True
+
+
+    db.session.commit()
+
+
+    return jsonify({
+        "success": True,
+        "message": "Question regenerated successfully"
+    })
+
