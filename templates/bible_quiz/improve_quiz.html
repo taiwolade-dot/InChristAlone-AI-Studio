@@ -2,46 +2,70 @@
 
 {% block content %}
 
-<div class="dashboard-card">
+<section class="dashboard-card">
 
-<h2>🚀 Improve Quiz With AI</h2>
-
-<h3>📚 {{ quiz.title }}</h3>
+<h2>🤖 AI Quiz Improvement Dashboard</h2>
 
 <p>
-AI has analyzed the quiz performance and identified learning opportunities.
+Quiz: <strong>{{ quiz.title }}</strong>
 </p>
 
-
 <hr>
+
+<h3>📊 Performance Analysis</h3>
+
+<div class="dashboard-card">
+
+<p>
+Status:
+<strong>
+{{ analysis.status }}
+</strong>
+</p>
+
+<p>
+Average Accuracy:
+<strong>
+{{ analysis.average_accuracy }}%
+</strong>
+</p>
+
+</div>
 
 
 <h3>⚠️ Weak Questions</h3>
 
 {% if analysis.weak_questions %}
 
+<table class="table">
+
+<tr>
+<th>Question ID</th>
+<th>Accuracy</th>
+<th>Action</th>
+</tr>
+
 {% for item in analysis.weak_questions %}
 
-<div class="dashboard-card">
+<tr>
 
-<p>
-<strong>Question ID:</strong>
+<td>
 {{ item.question_id }}
-</p>
+</td>
 
-<p>
-Accuracy:
+<td>
 {{ item.accuracy }}%
-</p>
+</td>
 
-<p>
-🤖 Recommendation:
-{{ item.recommendation }}
-</p>
+<td>
+Review teaching material
+</td>
 
-</div>
+</tr>
 
 {% endfor %}
+
+</table>
 
 {% else %}
 
@@ -52,49 +76,58 @@ Accuracy:
 {% endif %}
 
 
+<hr>
 
-<h3>⭐ Strong Questions</h3>
 
-{% if analysis.strong_questions %}
+<h3>🤖 AI Recommendations</h3>
 
-{% for item in analysis.strong_questions %}
+
+{% if recommendations %}
+
+{% for item in recommendations %}
 
 <div class="dashboard-card">
 
+<h4>
+Question {{ item.question_id }}
+</h4>
+
 <p>
-<strong>Question ID:</strong>
-{{ item.question_id }}
+<strong>Recommended Action:</strong>
+{{ item.action }}
 </p>
 
 <p>
-Accuracy:
-{{ item.accuracy }}%
-</p>
-
-<p>
-🤖 Recommendation:
-{{ item.recommendation }}
+{{ item.reason }}
 </p>
 
 </div>
 
 {% endfor %}
 
+
 {% else %}
 
 <p>
-No strong performance data available yet.
+No recommendations available yet.
 </p>
 
 {% endif %}
 
 
-
-<button class="btn-primary">
-🤖 Generate Adaptive Quiz Version
-</button>
+<hr>
 
 
-</div>
+<h3>📖 Ministry Teaching Insight</h3>
+
+<p>
+Use these insights to improve Bible teaching,
+discipleship classes, youth training and
+small group learning.
+</p>
+
+
+</section>
+
 
 {% endblock %}

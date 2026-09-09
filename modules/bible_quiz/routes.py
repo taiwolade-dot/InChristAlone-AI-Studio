@@ -619,6 +619,7 @@ def quiz_analytics_data():
 def improve_quiz_with_ai(quiz_id):
 
     from modules.bible_quiz.analytics_engine import analyze_quiz_performance
+    from modules.bible_quiz.improvement_engine import generate_quiz_improvement
     from models import QuizQuestionAnalytics
 
     quiz = BibleQuiz.query.get_or_404(quiz_id)
@@ -645,5 +646,6 @@ def improve_quiz_with_ai(quiz_id):
     return render_template(
         "bible_quiz/improve_quiz.html",
         quiz=quiz,
-        analysis=analysis
+        analysis=analysis,
+        recommendations=recommendations
     )
