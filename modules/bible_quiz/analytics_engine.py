@@ -1,77 +1,52 @@
-def generate_recommendation(
-    accuracy_rate,
-    times_answered,
-    difficulty_score
-):
-    """
-    AI adaptive recommendation engine
-    """
+def analyze_quiz_performance(records):
 
-    if times_answered < 3:
-        return (
-            "Insufficient data. Continue collecting responses "
-            "before adjusting this question."
-        )
+    if not records:
+        return {
+            "status": "No analytics data available",
+            "weak_questions": [],
+            "average_accuracy": 0
+        }
 
-    if accuracy_rate >= 90:
-        return (
-            "Question appears too easy. "
-            "AI recommends increasing difficulty "
-            "or introducing deeper application questions."
-        )
-
-    if accuracy_rate <= 40:
-        return (
-            "Weak learning area detected. "
-            "AI recommends Bible teaching reinforcement "
-            "and simplified follow-up questions."
-        )
-
-    if difficulty_score >= 80:
-        return (
-            "High difficulty detected. "
-            "AI recommends reviewing biblical concepts "
-            "before reassessment."
-        )
-
-    return (
-        "Question performance is balanced. "
-        "Suitable for the current target group."
+    total_attempts = sum(
+        r.attempts for r in records
     )
 
+    total_correct = sum(
+        r.correct_answers for r in records
+    )
 
+    accuracy = 0
 
-def analyze_quiz_performance(analytics_records):
-    """
-    Analyze complete quiz performance
-    and identify learning gaps.
-    """
+    if total_attempts:
+        accuracy = round(
+            (total_correct / total_attempts) * 100,
+            1
+        )
 
     weak_questions = []
-    strong_questions = []
 
-    for item in analytics_records:
-
-        if item.accuracy_rate <= 40:
+    for r in records:
+        if r.accuracy_rate < 50:
             weak_questions.append({
-                "question_id": item.question_id,
-                "accuracy": item.accuracy_rate,
-                "recommendation":
-                    "Generate reinforcement questions"
+                "question_id": r.question_id,
+                "accuracy": r.accuracy_rate
             })
-
-
-        if item.accuracy_rate >= 90:
-            strong_questions.append({
-                "question_id": item.question_id,
-                "accuracy": item.accuracy_rate,
-                "recommendation":
-                    "Increase complexity"
-            })
-
 
     return {
+        "status": "Analysis completed",
+        "average_accuracy": accuracy,
         "weak_questions": weak_questions,
-        "strong_questions": strong_questions,
-        "total_questions": len(analytics_records)
+        "recommendation": generate_recommendation(accuracy)
     }
+
+
+def generate_recommendation(accuracy):
+
+    if accuracy < 50:
+        return "Recommend easier questions and revision-based Bible study."
+
+    elif accuracy < 75:
+        return "Maintain current difficulty and strengthen weak areas."
+
+    else:
+        return "Increase difficulty level for advanced learners."

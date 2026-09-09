@@ -15,6 +15,81 @@ AI-powered performance analysis based on participant responses.
 </div>
 
 
+<div class="dashboard-card" style="margin-top:1rem;">
+
+<h3>🤖 AI Learning Intelligence Summary</h3>
+
+<div style="display:flex; gap:1rem; flex-wrap:wrap;">
+
+<div class="dashboard-card">
+<h4>🧠 Learning Score</h4>
+<p style="font-size:2rem;">
+{{ learning_score }}%
+</p>
+</div>
+
+
+<div class="dashboard-card">
+<h4>📈 Average Accuracy</h4>
+<p style="font-size:2rem;">
+{{ average_accuracy }}%
+</p>
+</div>
+
+
+<div class="dashboard-card">
+<h4>🎯 Difficulty Index</h4>
+<p style="font-size:2rem;">
+{{ average_difficulty }}
+</p>
+</div>
+
+</div>
+
+
+{% if hardest_question %}
+
+<hr>
+
+<h4>🔥 Most Challenging Question</h4>
+
+<p>
+<strong>
+{{ hardest_question.question }}
+</strong>
+</p>
+
+<p>
+Difficulty Score:
+{{ hardest_question.difficulty_score }}
+</p>
+
+{% endif %}
+
+
+
+{% if easiest_question %}
+
+<h4>⭐ Strongest Question</h4>
+
+<p>
+<strong>
+{{ easiest_question.question }}
+</strong>
+</p>
+
+<p>
+Difficulty Score:
+{{ easiest_question.difficulty_score }}
+</p>
+
+{% endif %}
+
+
+</div>
+
+
+
 {% if analytics %}
 
 {% set total_attempts = analytics|sum(attribute='times_answered') %}

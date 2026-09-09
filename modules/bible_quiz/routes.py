@@ -429,10 +429,49 @@ def quiz_analytics(quiz_id):
         reverse=True
     )
 
+    average_accuracy = 0
+    average_difficulty = 0
+    learning_score = 0
+
+    if analytics:
+        average_accuracy = round(
+            sum(x["accuracy_rate"] for x in analytics) / len(analytics),
+            2
+        )
+
+        average_difficulty = round(
+            sum(x["difficulty_score"] for x in analytics) / len(analytics),
+            2
+        )
+
+        learning_score = round(
+            (average_accuracy + (100 - average_difficulty)) / 2,
+            2
+        )
+
+    hardest_question = None
+    easiest_question = None
+
+    if analytics:
+        hardest_question = max(
+            analytics,
+            key=lambda x: x["difficulty_score"]
+        )
+
+        easiest_question = min(
+            analytics,
+            key=lambda x: x["difficulty_score"]
+        )
+
     return render_template(
         "bible_quiz/analytics.html",
         quiz=quiz,
-        analytics=analytics
+        analytics=analytics,
+        average_accuracy=average_accuracy,
+        average_difficulty=average_difficulty,
+        learning_score=learning_score,
+        hardest_question=hardest_question,
+        easiest_question=easiest_question
     )
 
 

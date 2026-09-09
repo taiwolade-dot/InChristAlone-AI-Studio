@@ -427,23 +427,58 @@ def api_submit_answer(session_id):
         2
     )
 
-    if analytics.accuracy_rate < 40:
-        analytics.ai_recommendation = (
-            "Consider reviewing this topic. "
-            "Question may require simpler explanation."
+    # Adaptive AI Learning Intelligence Engine
+
+    if analytics.accuracy_rate <= 40:
+
+        analytics.difficulty_score = max(
+            analytics.difficulty_score,
+            75
         )
 
-    elif analytics.accuracy_rate > 85:
         analytics.ai_recommendation = (
-            "Strong mastery detected. "
-            "Consider advanced questions."
+            "High difficulty detected. "
+            "Review biblical concepts, simplify explanation, "
+            "and provide additional teaching support."
         )
+
+        difficulty_level = "Challenging"
+
+
+    elif analytics.accuracy_rate <= 60:
+
+        analytics.ai_recommendation = (
+            "Moderate learning gap detected. "
+            "Question is useful but requires reinforcement."
+        )
+
+        difficulty_level = "Intermediate"
+
+
+    elif analytics.accuracy_rate <= 85:
+
+        analytics.ai_recommendation = (
+            "Effective learning question. "
+            "Good balance between challenge and understanding."
+        )
+
+        difficulty_level = "Good"
+
 
     else:
+
         analytics.ai_recommendation = (
-            "Balanced performance. "
-            "Continue practice and reinforcement."
+            "High mastery detected. "
+            "Consider increasing complexity or theological depth."
         )
+
+        difficulty_level = "Easy"
+
+
+    # Store adaptive difficulty indicator
+    analytics.ai_recommendation += (
+        f" Suggested level: {difficulty_level}."
+    )
 
 
     participant = QuizParticipant.query.get(participant_id)
