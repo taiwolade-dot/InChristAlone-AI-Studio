@@ -42,6 +42,72 @@ bible_quiz_session_bp = Blueprint(
 )
 
 
+
+
+def update_learner_intelligence(participant_id):
+
+    from models import QuizLearnerProfile, QuizAnswer
+
+    profile = QuizLearnerProfile.query.filter_by(
+        participant_id=participant_id
+    ).first()
+
+    if not profile:
+        profile = QuizLearnerProfile(
+            participant_id=participant_id
+        )
+        db.session.add(profile)
+
+    answers = QuizAnswer.query.filter_by(
+        participant_id=participant_id
+    ).all()
+
+    total = len(answers)
+
+    correct = len([
+        a for a in answers
+        if a.is_correct
+    ])
+
+    profile.total_questions = total
+    profile.correct_answers = correct
+
+    if total:
+        profile.accuracy_rate = round(
+            (correct / total) * 100,
+            2
+        )
+
+    if profile.accuracy_rate >= 80:
+        profile.learning_level = "Advanced"
+
+    elif profile.accuracy_rate >= 50:
+        profile.learning_level = "Intermediate"
+
+    else:
+        profile.learning_level = "Beginner"
+
+    if profile.accuracy_rate < 50:
+        profile.ai_recommendation = (
+            "Review foundational Bible concepts "
+            "and attempt reinforcement questions."
+        )
+
+    elif profile.accuracy_rate < 80:
+        profile.ai_recommendation = (
+            "Continue practice with balanced "
+            "knowledge and application questions."
+        )
+
+    else:
+        profile.ai_recommendation = (
+            "Excellent performance. Introduce "
+            "advanced theological questions."
+        )
+
+    db.session.commit()
+
+
 @bible_quiz_session_bp.route('/bible-quiz/<int:quiz_id>/start', methods=['GET', 'POST'])
 @login_required
 @roles_required(
@@ -393,6 +459,17 @@ def api_submit_answer(session_id):
         time_taken_ms=time_taken_ms,
     )
     db.session.add(answer)
+
+    # Update participant score
+    participant = QuizParticipant.query.get(participant_id)
+
+    if is_correct:
+        participant.score += 1
+
+    # Adaptive Learner Intelligence Update
+    update_learner_intelligence(
+        participant_id
+    )
 
     # AI Quiz Analytics Engine
     from models import QuizQuestionAnalytics

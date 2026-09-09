@@ -103,6 +103,7 @@ h1 {
 </a>
 
 <h1>📖 BIBLE QUIZ CHALLENGE</h1>
+{% if quiz_session.status == "waiting" %}
 <div class="qr-box">
     <h2>📱 Scan to Join</h2>
 
@@ -112,26 +113,43 @@ h1 {
 
     <h3>PIN: {{ quiz_session.pin_code }}</h3>
 
-<p style="font-size:14px; word-break:break-all;">
-    {{ join_url }}
-</p>
+    <p style="font-size:14px; word-break:break-all;">
+        {{ join_url }}
+    </p>
 </div>
+{% endif %}
 
 
 
 <div class="progress" id="progress"></div>
 
+<div class="progress" id="progress"></div>
+
+{% if quiz_session.status == "waiting" %}
+
+<div class="question" id="question">
+    ⏳ Waiting for host to start the quiz...
+</div>
+
+<div class="options" id="options"></div>
+
+<div class="timer" id="timer" style="display:none;">
+</div>
+
+{% else %}
+
 <div class="question" id="question">
 Waiting...
 </div>
 
-
 <div class="options" id="options"></div>
 
-
 <div class="timer" id="timer">
-20
 </div>
+
+{% endif %}
+
+
 
 
 <div class="leaderboard">
@@ -158,6 +176,24 @@ fetch(`/api/bible-quiz/session/${sessionId}/state`)
 .then(r=>r.json())
 
 .then(data=>{
+
+
+if(data.status==="waiting"){
+
+    document.getElementById("progress").innerHTML = "";
+
+    document.getElementById("question").innerHTML =
+    "⏳ Waiting for host to start the quiz...";
+
+    document.getElementById("options").innerHTML = "";
+
+document.getElementById("timer").style.display = "none";
+document.getElementById("timer").style.display = "block";
+    document.getElementById("timer").innerHTML = "";
+
+    return;
+
+}
 
 
 if(data.status==="finished"){
@@ -220,6 +256,7 @@ ${String.fromCharCode(65+i)}. ${o}
 document.getElementById("options").innerHTML=html;
 
 
+document.getElementById("timer").style.display = "block";
 document.getElementById("timer").innerHTML =
 data.question.seconds;
 
