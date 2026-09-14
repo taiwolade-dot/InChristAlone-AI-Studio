@@ -40,6 +40,42 @@ None
 
 <div class="insight-card">
 
+
+<div class="insight-card">
+
+<h2>Latest Archived Report</h2>
+
+{% if statistics.latest_report %}
+
+<p>
+<strong>Title:</strong>
+{{ statistics.latest_report.title }}
+</p>
+
+<p>
+<strong>Generated:</strong>
+{{ statistics.latest_report.generated_on }}
+</p>
+
+<p>
+<strong>File:</strong>
+{{ statistics.latest_report.file_path }}
+</p>
+
+<a href="/download-report/{{ statistics.latest_report.id }}">
+<button>
+Download Latest Archived Report
+</button>
+</a>
+
+{% else %}
+
+<p>No reports available.</p>
+
+{% endif %}
+
+</div>
+
 <h2>Archived Leadership Reports</h2>
 
 {% if reports %}
