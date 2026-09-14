@@ -10,6 +10,16 @@ def save_ministry_memory(
     importance="Medium",
     user_id=None
 ):
+
+    existing = MinistryMemory.query.filter_by(
+        title=title,
+        content=content,
+        user_id=user_id
+    ).first()
+
+    if existing:
+        return existing
+
     memory = MinistryMemory(
         user_id=user_id,
         memory_type=memory_type,
@@ -185,32 +195,3 @@ def get_memory_timeline(user_id=None, limit=10):
     ]
 
 
-def get_memory_timeline(user_id=None, limit=10):
-
-    query = MinistryMemory.query
-
-    if user_id:
-        query = query.filter_by(
-            user_id=user_id
-        )
-
-    memories = (
-        query
-        .order_by(
-            MinistryMemory.created_at.desc()
-        )
-        .limit(limit)
-        .all()
-    )
-
-    return [
-        {
-            "date": item.created_at.strftime("%Y-%m-%d")
-                if item.created_at else "Unknown",
-            "title": item.title,
-            "type": item.memory_type,
-            "importance": item.importance,
-            "source": item.source
-        }
-        for item in memories
-    ]

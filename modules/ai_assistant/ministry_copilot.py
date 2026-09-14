@@ -12,7 +12,10 @@ from modules.ministry_intelligence.impact_analyzer import generate_ministry_impa
 from modules.ministry_intelligence.continuous_improvement import generate_continuous_improvement_plan
 from modules.ministry_intelligence.knowledge_engine import generate_ministry_knowledge_insights
 from modules.ministry_intelligence.prediction import generate_predictive_ministry_insights
-from .memory_engine import summarize_ministry_memory
+from .memory_engine import (
+    summarize_ministry_memory,
+    save_ministry_memory
+)
 
 
 
@@ -23,6 +26,76 @@ def build_forecast_comparison(comparison_report):
         "health_change": 0,
         "growth_change": 0,
         "current_risk": "Low"
+    }
+
+
+
+def detect_memory_worthy_insight(
+    recommendations,
+    knowledge,
+    predictions
+):
+
+    combined = f"""
+    {recommendations}
+    {knowledge}
+    {predictions}
+    """
+
+    keywords = [
+        "growth",
+        "opportunity",
+        "risk",
+        "strategy",
+        "improvement",
+        "development"
+    ]
+
+    score = 0
+
+    for keyword in keywords:
+        if keyword.lower() in combined.lower():
+            score += 1
+
+    return {
+        "worth_saving": score >= 2,
+        "score": score,
+        "content": combined[:500]
+    }
+
+
+
+def detect_memory_worthy_insight(
+    recommendations,
+    knowledge,
+    predictions
+):
+
+    combined = f"""
+    {recommendations}
+    {knowledge}
+    {predictions}
+    """
+
+    keywords = [
+        "growth",
+        "opportunity",
+        "risk",
+        "strategy",
+        "improvement",
+        "development"
+    ]
+
+    score = 0
+
+    for keyword in keywords:
+        if keyword.lower() in combined.lower():
+            score += 1
+
+    return {
+        "worth_saving": score >= 2,
+        "score": score,
+        "content": combined[:500]
     }
 
 
@@ -107,6 +180,20 @@ def generate_ministry_copilot_context():
         impact_analysis,
         improvement
     )
+
+    memory_insight = detect_memory_worthy_insight(
+        recommendations,
+        knowledge,
+        predictions
+    )
+
+    if memory_insight["worth_saving"]:
+        save_ministry_memory(
+            title="AI Ministry Auto-Learned Insight",
+            content=memory_insight["content"],
+            memory_type="Strategic Insight",
+            importance="High"
+        )
 
     return {
         "summary": summary,
