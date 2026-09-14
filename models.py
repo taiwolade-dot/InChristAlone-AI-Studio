@@ -1056,3 +1056,54 @@ class MinistryReportAnalysis(db.Model):
 
     def __repr__(self):
         return f"<MinistryReportAnalysis {self.report_id}>"
+
+
+class MinistryMemory(db.Model):
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        nullable=True
+    )
+
+    memory_type = db.Column(
+        db.String(50),
+        default="Insight"
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    content = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    source = db.Column(
+        db.String(100),
+        default="AI Ministry Copilot"
+    )
+
+    importance = db.Column(
+        db.String(20),
+        default="Medium"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryMemory {self.title}>"

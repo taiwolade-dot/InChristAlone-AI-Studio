@@ -12,6 +12,7 @@ from modules.ministry_intelligence.impact_analyzer import generate_ministry_impa
 from modules.ministry_intelligence.continuous_improvement import generate_continuous_improvement_plan
 from modules.ministry_intelligence.knowledge_engine import generate_ministry_knowledge_insights
 from modules.ministry_intelligence.prediction import generate_predictive_ministry_insights
+from .memory_engine import summarize_ministry_memory
 
 
 
@@ -32,6 +33,8 @@ def generate_ministry_copilot_context():
     health = calculate_ministry_health(summary)
 
     analytics = generate_ministry_analytics()
+
+    memory_context = summarize_ministry_memory()
 
     comparison_report = generate_comparative_report()
 
@@ -118,7 +121,8 @@ def generate_ministry_copilot_context():
         "impact_analysis": impact_analysis,
         "continuous_improvement": improvement,
         "knowledge": knowledge,
-        "predictions": predictions
+        "predictions": predictions,
+        "memory_context": memory_context
     }
 
 
