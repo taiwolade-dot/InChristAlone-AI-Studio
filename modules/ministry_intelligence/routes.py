@@ -19,6 +19,7 @@ from .report import generate_ministry_report
 from .export import generate_export_report
 from .documents import generate_ministry_document
 from .pdf_generator import generate_pdf_report
+from .report_manager import create_report_record
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -151,6 +152,14 @@ def download_ministry_report():
     generate_pdf_report(
         document,
         filename
+    )
+
+    create_report_record(
+        title=document.get("title"),
+        report_type="Ministry Intelligence",
+        generated_by=document.get("metadata", {}).get("generated_by"),
+        generated_on=document.get("metadata", {}).get("generated_on"),
+        file_path=filename
     )
 
     return send_file(
