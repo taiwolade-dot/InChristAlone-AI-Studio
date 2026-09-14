@@ -2,107 +2,31 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 import os
 import uuid
 
+from modules.content_generator.flyer_engine.layout_engine import FlyerLayout
 
-# ==============================
-# AI THEME SELECTOR
-# ==============================
+from .flyer_engine.fonts import load_font
+from .flyer_engine.themes import THEMES, detect_flyer_theme
+from .flyer_engine.background import (
+    create_flyer_canvas,
+    add_background_gradient
+)
+from .flyer_engine.decorations import add_decorative_effects
+from .flyer_engine.portraits import (
+    resize_image,
+    create_portrait
+)
+from .flyer_engine.speakers import place_speakers
+from .flyer_engine.logo import (
+    add_logo,
+    add_footer_branding
+)
+from .flyer_engine.text import (
+    smart_font_size,
+    calculate_content_space,
+    draw_wrapped_text
+)
+from .flyer_engine.premium import add_premium_decoration
 
-def detect_flyer_theme(
-        title="",
-        theme="default"
-):
-
-    if theme and theme != "default":
-        return theme
-
-    content = title.lower()
-
-
-    if any(word in content for word in [
-        "fasting",
-        "prayer",
-        "intercession",
-        "seeking god",
-        "presence"
-    ]):
-        return "fasting"
-
-
-    if any(word in content for word in [
-        "revival",
-        "awakening",
-        "fire",
-        "power"
-    ]):
-        return "revival"
-
-
-    if any(word in content for word in [
-        "youth",
-        "teen",
-        "camp",
-        "young"
-    ]):
-        return "youth"
-
-
-    if any(word in content for word in [
-        "conference",
-        "seminar",
-        "leadership",
-        "training"
-    ]):
-        return "conference"
-
-
-    return "prayer"
-
-
-
-
-# ==============================
-# AI FONT PAIRING ENGINE
-# ==============================
-
-def get_ai_font_pairing(theme):
-    font_pairs = {
-        'fasting': {'title_font_family':'serif', 'verse_font_family':'serif', 'speaker_font_family':'sans'},
-        'revival': {'title_font_family':'bold', 'verse_font_family':'serif', 'speaker_font_family':'sans'},
-        'youth': {'title_font_family':'bold', 'verse_font_family':'sans', 'speaker_font_family':'sans'},
-        'conference': {'title_font_family':'sans', 'verse_font_family':'serif', 'speaker_font_family':'sans'},
-        'prayer': {'title_font_family':'serif', 'verse_font_family':'serif', 'speaker_font_family':'sans'}
-    }
-    return font_pairs.get(theme, font_pairs['prayer'])
-
-# ==============================
-# FONT ENGINE
-# ==============================
-
-def load_font(size, family="sans"):
-    font_map = {
-        "sans": [
-            "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSans.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-        ],
-        "bold": [
-            "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-        ],
-        "serif": [
-            "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSerif.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"
-        ],
-        "mono": [
-            "/data/data/com.termux/files/usr/share/fonts/TTF/DejaVuSansMono.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-        ]
-    }
-
-    for path in font_map.get(family, font_map["sans"]):
-        if os.path.exists(path):
-            return ImageFont.truetype(path, size)
-
-    return ImageFont.load_default()
 
 # ==============================
 # AI FLYER THEME DECISION ENGINE
@@ -217,439 +141,8 @@ THEMES = {
 # CANVAS CREATOR
 # ==============================
 
-def create_flyer_canvas(
-        width=1080,
-        height=1350,
-        theme="default"
-):
-
-    config = THEMES.get(
-        theme,
-        THEMES["default"]
-    )
-
-    canvas = Image.new(
-        "RGBA",
-        (width, height),
-        config["primary"]
-    )
-
-    draw = ImageDraw.Draw(canvas)
-
-    return canvas, draw, config
-
-
 # ==============================
-# BACKGROUND EFFECT
-# ==============================
-
-def add_background_gradient(
-        flyer,
-        theme="default"
-):
-
-    config = THEMES.get(
-        theme,
-        THEMES["default"]
-    )
-
-    overlay = Image.new(
-        "RGBA",
-        flyer.size,
-        (0,0,0,0)
-    )
-
-    draw = ImageDraw.Draw(overlay)
-
-    primary = config["primary"]
-    secondary = config["secondary"]
-
-    # Vertical gradient
-    for y in range(flyer.height):
-
-        ratio = y / flyer.height
-
-        color = (
-            int(primary[0]*(1-ratio)+secondary[0]*ratio),
-            int(primary[1]*(1-ratio)+secondary[1]*ratio),
-            int(primary[2]*(1-ratio)+secondary[2]*ratio),
-            255
-        )
-
-        draw.line(
-            [(0,y),(flyer.width,y)],
-            fill=color
-        )
-
-    # Artistic glow
-    glow = Image.new(
-        "RGBA",
-        flyer.size,
-        (0,0,0,0)
-    )
-
-    glow_draw = ImageDraw.Draw(glow)
-
-    cx = flyer.width // 2
-    cy = flyer.height // 3
-
-    glow_draw.ellipse(
-        (
-            cx-350,
-            cy-350,
-            cx+350,
-            cy+350
-        ),
-        fill=(
-            secondary[0],
-            secondary[1],
-            secondary[2],
-            90
-        )
-    )
-
-    glow = glow.filter(
-        ImageFilter.GaussianBlur(80)
-    )
-
-    overlay = Image.alpha_composite(
-        overlay,
-        glow
-    )
-
-    # Light rays
-    for i in range(8):
-
-        x = i * (flyer.width//8)
-
-        draw.line(
-            [
-                (cx,0),
-                (x,flyer.height)
-            ],
-            fill=(
-                255,
-                255,
-                255,
-                25
-            ),
-            width=3
-        )
-
-    overlay = overlay.filter(
-        ImageFilter.GaussianBlur(2)
-    )
-
-    flyer.alpha_composite(
-        overlay
-    )
-
-
-# ==============================
-# IMAGE PROCESSING
-# ==============================
-
-def resize_image(
-        image_path,
-        size
-):
-
-    img = Image.open(
-        image_path
-    ).convert("RGBA")
-
-    img.thumbnail(
-        size
-    )
-
-    return img# ==============================
-# PORTRAIT PROCESSOR V4
-# ==============================
-
-def create_portrait(
-        image_path,
-        size=240,
-        border_color=(255,215,0,255)
-):
-
-    img = Image.open(
-        image_path
-    ).convert("RGBA")
-
-    img.thumbnail(
-        (size,size)
-    )
-
-    canvas = Image.new(
-        "RGBA",
-        (size,size),
-        (0,0,0,0)
-    )
-
-    x = (size-img.width)//2
-    y = (size-img.height)//2
-
-    canvas.paste(
-        img,
-        (x,y),
-        img
-    )
-
-    mask = Image.new(
-        "L",
-        (size,size),
-        0
-    )
-
-    mask_draw = ImageDraw.Draw(mask)
-
-    mask_draw.ellipse(
-        (0,0,size,size),
-        fill=255
-    )
-
-    canvas.putalpha(mask)
-
-    # Soft shadow
-    shadow = Image.new(
-        "RGBA",
-        (size+40,size+40),
-        (0,0,0,0)
-    )
-
-    shadow_draw = ImageDraw.Draw(shadow)
-
-    shadow_draw.ellipse(
-        (10,15,size+30,size+35),
-        fill=(0,0,0,120)
-    )
-
-    shadow = shadow.filter(
-        ImageFilter.GaussianBlur(12)
-    )
-
-    # Gold glass frame
-    frame = Image.new(
-        "RGBA",
-        (size+30,size+30),
-        (0,0,0,0)
-    )
-
-    frame_draw = ImageDraw.Draw(frame)
-
-    frame_draw.ellipse(
-        (5,5,size+25,size+25),
-        outline=border_color,
-        width=8
-    )
-
-    frame.alpha_composite(
-        shadow
-    )
-
-    frame.alpha_composite(
-        canvas,
-        (15,15)
-    )
-
-    return frame
-
-
-# ==============================
-# SPEAKER PLACEMENT V4
-# ==============================
-
-
-def place_speakers(
-        flyer,
-        speakers,
-        theme="default",
-        speaker_name_color="gold",
-        speaker_layout="bottom"
-):
-
-    if not speakers:
-        return
-
-    config = THEMES.get(
-        theme,
-        THEMES["default"]
-    )
-
-    width, height = flyer.size
-    draw = ImageDraw.Draw(flyer)
-
-    count = min(len(speakers), 5)
-
-    # Dynamic sizing with layout control
-
-    if speaker_layout == "side":
-
-        portrait_size = 150
-        start_y = 430
-
-        positions = []
-
-        for i in range(count):
-            positions.append(
-                (
-                    70,
-                    start_y + (i * 170)
-                )
-            )
-
-    elif speaker_layout == "center":
-
-        portrait_size = 200
-        start_y = int(height * 0.58)
-
-        total_width = count * portrait_size + (count-1)*30
-        start_x = (width - total_width)//2
-
-        positions = []
-
-        for i in range(count):
-            positions.append(
-                (
-                    start_x + i*(portrait_size+30),
-                    start_y
-                )
-            )
-
-    else:
-
-        if count == 1:
-
-            portrait_size = 280
-            start_y = int(height * 0.56)
-
-            positions = [
-                ((width-portrait_size)//2, start_y)
-            ]
-
-        elif count == 2:
-
-            portrait_size = 220
-            start_y = int(height * 0.60)
-
-            positions = [
-                (int(width*0.18), start_y),
-                (int(width*0.58), start_y)
-            ]
-
-        else:
-
-            portrait_size = 190
-            start_y = int(height * 0.61)
-
-            spacing = width // (count+1)
-
-            positions = []
-
-            for i in range(count):
-                positions.append(
-                    (
-                        spacing*(i+1)-portrait_size//2,
-                        start_y
-                    )
-                )
-
-    name_font = load_font(28)
-    title_font = load_font(
-        title_font_size,
-        title_font_family
-    )
-
-    verse_font = load_font(
-        verse_font_size,
-        verse_font_family
-    )
-
-    info_font = load_font(
-        speaker_font_size,
-        speaker_font_family
-    )
-
-# ==============================
-# LOGO HANDLER V4
-# ==============================
-
-def add_logo(
-        flyer,
-        logo_path,
-        logo_position="top_right"
-):
-
-    if not logo_path:
-        return
-
-
-    if not os.path.exists(
-        logo_path
-    ):
-        return
-
-
-    logo = Image.open(
-        logo_path
-    ).convert("RGBA")
-
-
-    logo.thumbnail(
-        (180,180)
-    )
-
-
-    shadow = Image.new(
-        "RGBA",
-        logo.size,
-        (0,0,0,120)
-    )
-
-
-    positions = {
-        "top_left": (35,35),
-        "top_right": (flyer.width-logo.width-45,35),
-        "bottom_left": (35,flyer.height-logo.height-45),
-        "bottom_right": (flyer.width-logo.width-45,flyer.height-logo.height-45)
-    }
-
-    x,y = positions.get(
-        logo_position,
-        positions["top_right"]
-    )
-
-    flyer.alpha_composite(
-        shadow,
-        (
-            x+10,
-            y+10
-        )
-    )
-
-    flyer.alpha_composite(
-        logo,
-        (
-            x,
-            y
-        )
-    )
-
-
-    flyer.alpha_composite(
-        logo,
-        (
-            flyer.width-logo.width-45,
-            35
-        )
-    )
-
-
-
-
-
-# ==============================
-# AI FLYER INTELLIGENCE ENGINE
+# DECORATIVE EFFECT ENGINE
 # ==============================
 
 def analyze_event_style(
@@ -729,67 +222,9 @@ def analyze_event_style(
 # SMART LAYOUT ENGINE
 # ==============================
 
-def smart_font_size(
-        text,
-        max_size=70,
-        min_size=36,
-        limit=22
-):
-
-    if not text:
-        return max_size
-
-
-    length = len(text)
-
-
-    if length <= limit:
-        return max_size
-
-    reduction = (
-        length - limit
-    ) * 2
-
-
-    size = max_size - reduction
-
-
-    if size < min_size:
-        size = min_size
-
-
-    return size
-
-
-
-def calculate_content_space(
-        speakers,
-        verse
-):
-
-    space = {
-        "title_y":80,
-        "verse_y":280,
-        "speaker_y":780
-    }
-
-
-    if speakers and len(speakers) >= 3:
-
-        space["speaker_y"] = 720
-        space["verse_y"] = 250
-
-
-    if len(verse) > 120:
-
-        space["verse_y"] = 230
-
-
-    return space
-
 
 # ==============================
-# PREMIUM DECORATION ENGINE
+# PREMIUM DECORATION ENGINE V5
 # ==============================
 
 def add_premium_decoration(
@@ -802,167 +237,93 @@ def add_premium_decoration(
         THEMES["default"]
     )
 
-    draw = ImageDraw.Draw(flyer)
-
-    width, height = flyer.size
-
-
-    # Outer gold frame
-
-    draw.rounded_rectangle(
-        (
-            25,
-            25,
-            width-25,
-            height-25
-        ),
-        radius=35,
-        outline=config["secondary"],
-        width=8
-    )
-
-
-    # Inner soft frame
-
-    draw.rounded_rectangle(
-        (
-            45,
-            45,
-            width-45,
-            height-45
-        ),
-        radius=30,
-        outline=(
-            255,
-            255,
-            255,
-            80
-        ),
-        width=3
-    )
-
-
-    # Light particles
-
-    particle_layer = Image.new(
+    overlay = Image.new(
         "RGBA",
         flyer.size,
         (0,0,0,0)
     )
 
-    particle_draw = ImageDraw.Draw(
-        particle_layer
+    draw = ImageDraw.Draw(
+        overlay
+    )
+
+    gold = (
+        config["secondary"][0],
+        config["secondary"][1],
+        config["secondary"][2],
+        180
+    )
+
+    # Elegant border
+
+    draw.rounded_rectangle(
+        (
+            25,
+            25,
+            flyer.width-25,
+            flyer.height-25
+        ),
+        radius=35,
+        outline=gold,
+        width=8
     )
 
 
-    positions = [
-        (100,150),
-        (900,180),
-        (150,900),
-        (850,1100),
-        (500,750)
+    # Corner ornaments
+
+    size = 80
+
+    corners = [
+        (40,40),
+        (flyer.width-120,40),
+        (40,flyer.height-120),
+        (flyer.width-120,flyer.height-120)
     ]
 
 
-    for x,y in positions:
+    for x,y in corners:
 
-        particle_draw.ellipse(
+        draw.arc(
             (
-                x-20,
-                y-20,
-                x+20,
-                y+20
+                x,
+                y,
+                x+size,
+                y+size
             ),
-            fill=(
-                config["secondary"][0],
-                config["secondary"][1],
-                config["secondary"][2],
-                70
-            )
+            0,
+            180,
+            fill=gold,
+            width=6
         )
 
 
-    particle_layer = particle_layer.filter(
-        ImageFilter.GaussianBlur(15)
+    # Light particles
+
+    for i in range(18):
+
+        x = (i*73) % flyer.width
+        y = (i*137) % flyer.height
+
+        draw.ellipse(
+            (
+                x,
+                y,
+                x+8,
+                y+8
+            ),
+            fill=gold
+        )
+
+
+    overlay = overlay.filter(
+        ImageFilter.GaussianBlur(1)
     )
 
 
     flyer.alpha_composite(
-        particle_layer
+        overlay
     )
 
-
-# ==============================
-# TEXT WRAPPING ENGINE V4
-# ==============================
-
-def draw_wrapped_text(
-        draw,
-        text,
-        position,
-        font,
-        max_width,
-        fill="white",
-        spacing=10
-):
-
-    if not text:
-        return
-
-
-    words = text.split()
-
-    lines = []
-
-    current = ""
-
-
-    for word in words:
-
-        test = current + " " + word
-
-        if draw.textlength(
-            test,
-            font=font
-        ) <= max_width:
-
-            current = test.strip()
-
-        else:
-
-            if current:
-                lines.append(
-                    current
-                )
-
-            current = word
-
-
-    if current:
-        lines.append(
-            current
-        )
-
-
-    x,y = position
-
-
-    for line in lines:
-
-        draw.text(
-            (x,y),
-            line,
-            font=font,
-            fill=fill
-        )
-
-        y += font.size + spacing
-
-
-
-# ==============================
-# MAIN FLYER GENERATOR V4
-# ==============================
 
 def generate_flyer_v5(
         title,
@@ -973,8 +334,9 @@ def generate_flyer_v5(
         speakers=None,
         logo_path=None,
         design_settings=None,
+        layout=None,
         output_dir="static/generated"
-):
+    ):
 
     # ==============================
     # AI DESIGN DECISION ENGINE
@@ -984,6 +346,86 @@ def generate_flyer_v5(
         title,
         theme
     )
+
+
+    # ==============================
+    # AI COMPOSITION INTELLIGENCE
+    # ==============================
+
+    def analyze_composition(title, speakers):
+
+        title_lower = title.lower()
+
+        if "conference" in title_lower:
+            event_type = "conference"
+
+        elif "revival" in title_lower:
+            event_type = "revival"
+
+        elif "training" in title_lower:
+            event_type = "training"
+
+        elif "worship" in title_lower:
+            event_type = "worship"
+
+        else:
+            event_type = "general"
+
+
+        speaker_count = len(
+            speakers
+            if speakers
+            else []
+        )
+
+
+        if speaker_count == 1:
+            layout_style = "hero"
+
+        elif speaker_count == 2:
+            layout_style = "balanced"
+
+        elif speaker_count == 3:
+            layout_style = "triangle"
+
+        else:
+            layout_style = "panel"
+
+
+        return {
+            "event_type": event_type,
+            "layout_style": layout_style,
+            "speaker_count": speaker_count
+        }
+
+
+    composition = analyze_composition(
+        title,
+        speakers
+    )
+
+    # ==============================
+    # AI ART DIRECTOR PERSONALITY
+    # ==============================
+
+    event_type = composition.get(
+        "event_type",
+        "general"
+    )
+
+    personality_map = {
+        "conference": "conference",
+        "revival": "revival",
+        "training": "conference",
+        "worship": "prayer",
+        "general": theme
+    }
+
+    theme_personality = personality_map.get(
+        event_type,
+        theme
+    )
+
 
     if design_settings is None:
         design_settings = {}
@@ -1003,14 +445,53 @@ def generate_flyer_v5(
         "gold"
     )
 
+    def normalize_color(color):
+        colors = {
+            "white": (255,255,255),
+            "black": (0,0,0),
+            "gold": (255,215,0),
+            "yellow": (255,255,0),
+            "blue": (0,120,255),
+            "green": (0,200,100),
+            "red": (255,60,60)
+        }
+
+        if isinstance(color, tuple):
+            return color
+
+        if isinstance(color, str):
+            return colors.get(
+                color.lower(),
+                (255,255,255)
+            )
+
+        return (255,255,255)
+
+    title_color = normalize_color(title_color)
+    verse_color = normalize_color(verse_color)
+    speaker_name_color = normalize_color(speaker_name_color)
+
     speaker_layout = design_settings.get(
         "speaker_layout",
-        "bottom"
+        composition.get(
+            "layout_style",
+            "bottom"
+        )
     )
+
+    # Early visual profile fallback
+    visual_profile = {
+        "logo_position": "top_left",
+        "speaker_priority": "medium",
+        "verse_priority": "medium"
+    }
 
     logo_position = design_settings.get(
         "logo_position",
-        "top_left"
+        visual_profile.get(
+            "logo_position",
+            "top_left"
+        )
     )
 
     title_font_family = design_settings.get(
@@ -1030,30 +511,191 @@ def generate_flyer_v5(
 
 
     flyer, draw, config = create_flyer_canvas(
-        theme=theme
+        theme=theme_personality
     )
 
 
     add_background_gradient(
         flyer,
-        theme
+        theme_personality
+    )
+
+    add_decorative_effects(
+        flyer,
+        theme_personality
     )
 
 
-    title_font_size = design_settings.get(
-        "title_font_size",
-        70
+    # ==============================
+    # LAYOUT INTELLIGENCE ENGINE
+    # ==============================
+
+    layout_engine = FlyerLayout(
+        width=flyer.width,
+        height=flyer.height,
+        speakers=len(speakers or [])
     )
 
-    verse_font_size = design_settings.get(
-        "verse_font_size",
-        34
+
+    # ==============================
+    # AI ADAPTIVE TITLE SIZE ENGINE
+    # ==============================
+
+    if "title_font_size" in design_settings:
+
+        title_font_size = design_settings.get(
+            "title_font_size"
+        )
+
+    else:
+
+        title_length = len(
+            title
+        )
+
+        event_type = composition.get(
+            "event_type",
+            "general"
+        )
+
+        # ==============================
+        # AI VISUAL HIERARCHY PROFILE
+        # ==============================
+
+        hierarchy_profiles = {
+            "conference": {
+                "title_priority": "high",
+                "verse_priority": "medium",
+                "speaker_priority": "high",
+                "logo_position": "top_left"
+            },
+
+            "revival": {
+                "title_priority": "high",
+                "verse_priority": "very_high",
+                "speaker_priority": "medium",
+                "logo_position": "top_center"
+            },
+
+            "training": {
+                "title_priority": "medium",
+                "verse_priority": "low",
+                "speaker_priority": "high",
+                "logo_position": "top_left"
+            },
+
+            "worship": {
+                "title_priority": "high",
+                "verse_priority": "high",
+                "speaker_priority": "medium",
+                "logo_position": "top_center"
+            },
+
+            "general": {
+                "title_priority": "medium",
+                "verse_priority": "medium",
+                "speaker_priority": "medium",
+                "logo_position": "top_left"
+            }
+        }
+
+        visual_profile = hierarchy_profiles.get(
+            event_type,
+            hierarchy_profiles["general"]
+        )
+
+        if event_type == "conference":
+
+            if title_length <= 45:
+                title_font_size = 82
+            elif title_length <= 70:
+                title_font_size = 72
+            else:
+                title_font_size = 62
+
+        elif event_type == "revival":
+
+            if title_length <= 45:
+                title_font_size = 76
+            elif title_length <= 70:
+                title_font_size = 68
+            else:
+                title_font_size = 58
+
+        elif event_type == "training":
+
+            if title_length <= 45:
+                title_font_size = 70
+            elif title_length <= 70:
+                title_font_size = 62
+            else:
+                title_font_size = 54
+
+        else:
+
+            if title_length <= 25:
+                title_font_size = 82
+
+            elif title_length <= 45:
+                title_font_size = 72
+
+            elif title_length <= 70:
+                title_font_size = 62
+
+            else:
+                title_font_size = 52
+
+
+    event_type = composition.get(
+        "event_type",
+        "general"
     )
 
-    speaker_font_size = design_settings.get(
-        "speaker_font_size",
-        28
-    )
+    if "verse_font_size" in design_settings:
+        verse_font_size = design_settings.get(
+            "verse_font_size"
+        )
+
+    else:
+
+        verse_priority = visual_profile.get(
+            "verse_priority",
+            "medium"
+        )
+
+        if verse_priority == "very_high":
+            verse_font_size = 42
+
+        elif verse_priority == "high":
+            verse_font_size = 36
+
+        elif verse_priority == "low":
+            verse_font_size = 30
+
+        else:
+            verse_font_size = 34
+
+
+    if "speaker_font_size" in design_settings:
+        speaker_font_size = design_settings.get(
+            "speaker_font_size"
+        )
+
+    else:
+
+        speaker_priority = visual_profile.get(
+            "speaker_priority",
+            "medium"
+        )
+
+        if speaker_priority == "high":
+            speaker_font_size = 32
+
+        elif speaker_priority == "low":
+            speaker_font_size = 26
+
+        else:
+            speaker_font_size = 28
     
     title_font = load_font(
     title_font_size,
@@ -1071,280 +713,136 @@ def generate_flyer_v5(
     )
     
     # ==============================
-# PREMIUM TITLE AREA
-    # ==============================
-
-    shadow = Image.new(
-        "RGBA",
-        flyer.size,
-        (0,0,0,0)
-    )
-
-    shadow_draw = ImageDraw.Draw(shadow)
-
-    shadow_draw.text(
-        (75,85),
-        title,
-        font=title_font,
-        fill=(0,0,0,150)
-    )
-
-    shadow = shadow.filter(
-        ImageFilter.GaussianBlur(6)
-    )
-
-    flyer.alpha_composite(shadow)
-
-    draw_wrapped_text(
-        draw,
-        title,
-        (70,80),
-        title_font,
-        940,
-        title_color
-    )
-
-
-    # ==============================
-    # VERSE PANEL
-    # ==============================
-
-    panel = Image.new(
-        "RGBA",
-        (950,150),
-        (0,0,0,90)
-    )
-
-    flyer.alpha_composite(
-        panel,
-        (65,260)
-    )
-
-    draw_wrapped_text(
-        draw,
-        bible_verse,
-        (90,290),
-        verse_font,
-        880,
-        verse_color
-    )
-
-
-    # ==============================
-    # EVENT DETAILS CARD
-    # ==============================
-
-    draw.rounded_rectangle(
-        (60,450,1020,590),
-        radius=25,
-        fill=(0,0,0,100)
-    )
-
-    draw.text(
-        (90,475),
-        event_date,
-        font=info_font,
-        fill="white"
-    )
-
-    draw.text(
-        (90,535),
-        venue,
-        font=info_font,
-        fill="white"
-    )
-
-
-    # Speakers
-
-    place_speakers(
-        flyer,
-        speakers or [],
-        theme,
-        speaker_name_color,
-        speaker_layout
-    )
-
-
-    # Logo
-
-    add_logo(
-        flyer,
-        logo_path,
-        logo_position
-    )
-
-
-    os.makedirs(
-        output_dir,
-        exist_ok=True
-    )
-
-
-    filename = (
-        "flyer_v4_" +
-        str(uuid.uuid4()) +
-        ".png"
-    )
-
-
-    path = os.path.join(
-        output_dir,
-        filename
-    )
-
-
-    flyer.convert(
-        "RGB"
-    ).save(
-        path,
-        quality=95
-    )
-
-
-    return path
-
-
-
-
-
-# ==============================
-# AI COMPOSER PIPELINE
-# ==============================
-
-def ai_compose_flyer(
-        title,
-        bible_verse="",
-        event_date="",
-        venue="",
-        speakers=None,
-        logo_path=None,
-        theme="default",
-        output_dir="static/generated"
-):
-
-    # AI understanding
-
-    style = analyze_event_style(
-        title,
-        bible_verse,
-        speakers
-    )
-
-
-    # Theme decision
-
-    theme = detect_flyer_theme(
-        title,
-        theme
-    )
-
-
-    # Layout preparation
-
-    layout = calculate_content_space(
-        speakers,
-        bible_verse
-    )
-
-
-    # Generate flyer
-
-    flyer_path = generate_flyer_v5(
-        title=title,
-        bible_verse=bible_verse,
-        theme=theme,
-        event_date=event_date,
-        venue=venue,
-        speakers=speakers,
-        logo_path=logo_path,
-        output_dir=output_dir
-    )
-
-
-    return {
-        "file": flyer_path,
-        "theme": theme,
-        "style": style,
-        "layout": layout
-    }
-
-
-# ==============================
-# EXPORT HELPERS
-# ==============================
-
-def export_pdf(
-        image_path,
-        pdf_path
-):
-
-    img = Image.open(
-        image_path
-    ).convert(
-        "RGB"
-    )
-
-
-    img.save(
-        pdf_path,
-        "PDF",
-        resolution=100.0
-    )
-    # ==============================
     # PREMIUM TITLE AREA
     # ==============================
 
+    title_x, title_y = layout_engine.title_position()
+
+
+    glow = Image.new(
+        "RGBA",
+        flyer.size,
+        (0,0,0,0)
+    )
+
+    glow_draw = ImageDraw.Draw(
+        glow
+    )
+
+    glow_draw.text(
+        (
+            title_x,
+            title_y
+        ),
+        title,
+        font=title_font,
+        fill=(
+            title_color[0],
+            title_color[1],
+            title_color[2],
+            120
+        )
+    )
+
+    glow = glow.filter(
+        ImageFilter.GaussianBlur(12)
+    )
+
+    flyer.alpha_composite(
+        glow
+    )
+
+
     shadow = Image.new(
         "RGBA",
         flyer.size,
         (0,0,0,0)
     )
 
-    shadow_draw = ImageDraw.Draw(shadow)
+    shadow_draw = ImageDraw.Draw(
+        shadow
+    )
 
     shadow_draw.text(
-        (75,85),
+        (
+            title_x+5,
+            title_y+8
+        ),
         title,
         font=title_font,
-        fill=(0,0,0,150)
+        fill=(0,0,0,160)
     )
 
     shadow = shadow.filter(
-        ImageFilter.GaussianBlur(6)
+        ImageFilter.GaussianBlur(5)
     )
 
-    flyer.alpha_composite(shadow)
+    flyer.alpha_composite(
+        shadow
+    )
+
 
     draw_wrapped_text(
         draw,
         title,
-        (70,80),
+        (
+            title_x,
+            title_y
+        ),
         title_font,
         940,
         title_color
     )
 
 
-    # ==============================
-    # VERSE PANEL
-    # ==============================
+# VERSE PANEL
+# ==============================
 
-    panel = Image.new(
-        "RGBA",
-        (950,150),
-        (0,0,0,90)
+    verse_x, verse_y = layout_engine.verse_position()
+
+    verse_height = 170
+
+    verse_panel = Image.new(
+    "RGBA",
+    flyer.size,
+    (0,0,0,0)
+    )
+
+    verse_draw = ImageDraw.Draw(
+    verse_panel
+    )
+
+    verse_draw.rounded_rectangle(
+    (
+        65,
+        verse_y-35,
+        flyer.width-65,
+        verse_y+verse_height-35
+    ),
+    radius=35,
+    fill=(0,0,0,110),
+    outline=(
+        config["secondary"][0],
+        config["secondary"][1],
+        config["secondary"][2],
+        180
+    ),
+    width=3
+    )
+
+    verse_panel = verse_panel.filter(
+    ImageFilter.GaussianBlur(1)
     )
 
     flyer.alpha_composite(
-        panel,
-        (65,260)
+    verse_panel
     )
+
 
     draw_wrapped_text(
         draw,
         bible_verse,
-        (90,290),
+        (verse_x + 20, verse_y),
         verse_font,
         880,
         verse_color
@@ -1355,21 +853,28 @@ def export_pdf(
     # EVENT DETAILS CARD
     # ==============================
 
+    info_x, info_y = layout_engine.event_info_position()
+
     draw.rounded_rectangle(
-        (60,450,1020,590),
+        (
+            info_x-10,
+            info_y,
+            flyer.width-60,
+            info_y+140
+        ),
         radius=25,
         fill=(0,0,0,100)
     )
 
     draw.text(
-        (90,475),
+        (info_x+20, info_y+25),
         event_date,
         font=info_font,
         fill="white"
     )
 
     draw.text(
-        (90,535),
+        (info_x+20, info_y+85),
         venue,
         font=info_font,
         fill="white"
@@ -1379,12 +884,11 @@ def export_pdf(
     # Speakers
 
     place_speakers(
-        flyer,
-        speakers or [],
-        theme,
-        speaker_name_color,
-        speaker_layout
-    )
+          flyer,
+          speakers or [],
+            theme,
+            positions=layout_engine.speaker_position()
+      )
 
 
     # Logo
@@ -1393,6 +897,21 @@ def export_pdf(
         flyer,
         logo_path,
         logo_position
+    )
+
+
+
+    add_footer_branding(
+        flyer,
+        theme
+    )
+
+
+    # Premium Decorations
+
+    add_premium_decoration(
+        flyer,
+        theme
     )
 
 
@@ -1461,6 +980,63 @@ def ai_compose_flyer(
     )
 
 
+    # ==============================
+    # AI COMPOSITION INTELLIGENCE
+    # ==============================
+
+    def analyze_composition(title, speakers):
+
+        title_lower = title.lower()
+
+        if "conference" in title_lower:
+            event_type = "conference"
+
+        elif "revival" in title_lower:
+            event_type = "revival"
+
+        elif "training" in title_lower:
+            event_type = "training"
+
+        elif "worship" in title_lower:
+            event_type = "worship"
+
+        else:
+            event_type = "general"
+
+
+        speaker_count = len(
+            speakers
+            if speakers
+            else []
+        )
+
+
+        if speaker_count == 1:
+            layout_style = "hero"
+
+        elif speaker_count == 2:
+            layout_style = "balanced"
+
+        elif speaker_count == 3:
+            layout_style = "triangle"
+
+        else:
+            layout_style = "panel"
+
+
+        return {
+            "event_type": event_type,
+            "layout_style": layout_style,
+            "speaker_count": speaker_count
+        }
+
+
+    composition = analyze_composition(
+        title,
+        speakers
+    )
+
+
     # Layout preparation
 
     layout = calculate_content_space(
@@ -1479,6 +1055,7 @@ def ai_compose_flyer(
         venue=venue,
         speakers=speakers,
         logo_path=logo_path,
+          layout=layout,
         output_dir=output_dir
     )
 
@@ -1512,3 +1089,5 @@ def export_pdf(
         "PDF",
         resolution=100.0
     )
+    # ==============================
+# ==============================
