@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="card shadow p-4 text-center">
+
+    {% if profile.logo_filename %}
+    <img src="{{ url_for('church_management.static', filename='uploads/' + profile.logo_filename) }}"
+         class="rounded mx-auto d-block mb-3"
+         style="max-width:160px;">
+    {% endif %}
+
+    <h2>{{ profile.church_name }}</h2>
+
+    {% if profile.motto %}
+    <h5 class="text-muted">
+        "{{ profile.motto }}"
+    </h5>
+    {% endif %}
+
+</div>
+
+
+<div class="card mt-4 p-4">
+
+<h4>About Us</h4>
+
+<p>
+{{ profile.vision }}
+</p>
+
+<p>
+{{ profile.mission }}
+</p>
+
+</div>
+
+
+<div class="card mt-4 p-4">
+
+<h4>Church Identity</h4>
+
+{% if profile.founded_date %}
+<p>
+<strong>Founded:</strong>
+{{ profile.founded_date }}
+</p>
+{% endif %}
+
+{% if profile.organized_date %}
+<p>
+<strong>Date Church Was Organized:</strong>
+{{ profile.organized_date }}
+</p>
+{% endif %}
+
+
+<p>
+<strong>Denomination:</strong>
+{{ profile.denomination }}
+</p>
+
+<p>
+<strong>Association:</strong>
+{{ profile.association }}
+</p>
+
+<p>
+<strong>Conference:</strong>
+{{ profile.conference }}
+</p>
+
+</div>
+
+
+<div class="card mt-4 p-4">
+
+<h4>Statement of Faith</h4>
+
+<p>
+{{ profile.statement_of_faith }}
+</p>
+
+</div>
+
+
+<div class="card mt-4 p-4">
+
+<h4>Pastor Profile</h4>
+
+<p>
+Manage and view the Pastor Profile connected to this Church.
+</p>
+
+<a href="{{ url_for('pastor_management.pastor_profile') }}"
+class="btn btn-primary">
+View Pastor Profile
+</a>
+
+</div>
+
+
+<div class="card mt-4 p-4">
+
+<h4>Contact Information</h4>
+
+<p>
+<strong>Address:</strong>
+{{ profile.address }}
+</p>
+
+<p>
+<strong>Phone:</strong>
+{{ profile.phone }}
+</p>
+
+<p>
+<strong>Email:</strong>
+{{ profile.email }}
+</p>
+
+<p>
+<strong>Website:</strong>
+{{ profile.website }}
+</p>
+
+</div>
+
+
+</div>
+
+{% endblock %}

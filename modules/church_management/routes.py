@@ -1,17 +1,41 @@
-from datetime import datetime
+from datetime import datetime, date
 from functools import wraps
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
 
-from models import db, Member
+from models import db, Member, ChurchProfile
 
 church_management_bp = Blueprint(
     'church_management',
     __name__,
     url_prefix='/church-management',
-    template_folder='../../templates/church_management'
+    template_folder='templates',
+    static_folder='static',
+    static_url_path='/church-management/static'
 )
+
+
+
+UPLOAD_FOLDER = 'modules/church_management/static/uploads'
+
+ALLOWED_EXTENSIONS = {
+    'png',
+    'jpg',
+    'jpeg',
+    'webp'
+}
+
+
+def allowed_file(filename):
+    return (
+        '.' in filename
+        and filename.rsplit('.', 1)[1].lower()
+        in ALLOWED_EXTENSIONS
+    )
+
+
 
 
 def admin_required(f):
@@ -22,6 +46,159 @@ def admin_required(f):
             return redirect(url_for('dashboard'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+@church_management_bp.route('/profile', methods=['GET'])
+@login_required
+@admin_required
+def church_profile():
+
+    profile = ChurchProfile.query.filter_by(
+        owner_id=current_user.id
+    ).first()
+
+    if not profile:
+        return redirect(
+            url_for('church_management.create_church_profile')
+        )
+
+    return render_template(
+        'church_management/profile.html',
+        profile=profile
+    )
+
+
+@church_management_bp.route('/profile/create', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_church_profile():
+
+    if request.method == 'POST':
+
+        logo_filename = None
+
+        logo = request.files.get('logo')
+
+        if logo and allowed_file(logo.filename):
+            filename = secure_filename(logo.filename)
+            logo.save(
+                f'{UPLOAD_FOLDER}/{filename}'
+            )
+            logo_filename = filename
+
+
+        founded_date = (
+            datetime.strptime(request.form.get("founded_date"), "%Y-%m-%d").date()
+            if request.form.get("founded_date") else None
+        )
+
+        organized_date = (
+            datetime.strptime(request.form.get("organized_date"), "%Y-%m-%d").date()
+            if request.form.get("organized_date") else None
+        )
+
+        profile = ChurchProfile(
+            owner_id=current_user.id,
+            church_name=request.form.get('church_name'),
+            motto=request.form.get('motto'),
+            vision=request.form.get('vision'),
+            mission=request.form.get('mission'),
+            denomination=request.form.get('denomination'),
+            association=request.form.get('association'),
+            conference=request.form.get('conference'),
+            address=request.form.get('address'),
+            phone=request.form.get('phone'),
+            email=request.form.get('email'),
+            website=request.form.get('website'),
+            logo_filename=logo_filename,
+            founded_date=founded_date,
+            organized_date=organized_date,
+            statement_of_faith=request.form.get('statement_of_faith')
+        )
+
+        db.session.add(profile)
+        db.session.commit()
+
+        flash(
+            'Church Profile created successfully.',
+            'success'
+        )
+
+        return redirect(
+            url_for('church_management.church_profile')
+        )
+
+    return render_template(
+        'church_management/profile_form.html'
+    )
+
+
+@church_management_bp.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_church_profile():
+
+    profile = ChurchProfile.query.filter_by(
+        owner_id=current_user.id
+    ).first()
+
+    if not profile:
+        return redirect(
+            url_for('church_management.create_church_profile')
+        )
+
+    if request.method == 'POST':
+
+        logo = request.files.get('logo')
+
+        if logo and allowed_file(logo.filename):
+            filename = secure_filename(logo.filename)
+            logo.save(
+                f'{UPLOAD_FOLDER}/{filename}'
+            )
+            profile.logo_filename = filename
+
+
+        edit_founded_date = (
+            datetime.strptime(request.form.get("founded_date"), "%Y-%m-%d").date()
+            if request.form.get("founded_date") else None
+        )
+
+        edit_organized_date = (
+            datetime.strptime(request.form.get("organized_date"), "%Y-%m-%d").date()
+            if request.form.get("organized_date") else None
+        )
+
+        profile.church_name = request.form.get('church_name')
+        profile.motto = request.form.get('motto')
+        profile.vision = request.form.get('vision')
+        profile.mission = request.form.get('mission')
+        profile.denomination = request.form.get('denomination')
+        profile.association = request.form.get('association')
+        profile.conference = request.form.get('conference')
+        profile.address = request.form.get('address')
+        profile.phone = request.form.get('phone')
+        profile.email = request.form.get('email')
+        profile.website = request.form.get('website')
+        profile.founded_date = edit_founded_date
+        profile.organized_date = edit_organized_date
+        profile.statement_of_faith = request.form.get('statement_of_faith')
+
+        db.session.commit()
+
+        flash(
+            'Church Profile updated successfully.',
+            'success'
+        )
+
+        return redirect(
+            url_for('church_management.church_profile')
+        )
+
+    return render_template(
+        'church_management/profile_form.html',
+        profile=profile
+    )
 
 
 @church_management_bp.route('/', methods=['GET'])
