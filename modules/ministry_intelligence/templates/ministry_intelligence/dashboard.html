@@ -79,6 +79,33 @@
 </div>
 
 
+
+<div class="insight-card">
+
+<h2>Ministry Analytics</h2>
+
+<h3>Member Growth</h3>
+<ul>
+{% for month, count in analytics.member_growth.items() %}
+    <li>{{ month }} : {{ count }} new member(s)</li>
+{% endfor %}
+</ul>
+
+<h3>Event Activity</h3>
+<ul>
+{% for month, count in analytics.event_activity.items() %}
+    <li>{{ month }} : {{ count }} event(s)</li>
+{% endfor %}
+</ul>
+
+<h3>Quiz Engagement</h3>
+<p>
+Total Participants:
+{{ analytics.quiz_engagement.total_participants }}
+</p>
+
+</div>
+
 </div>
 
 {% endblock %}
