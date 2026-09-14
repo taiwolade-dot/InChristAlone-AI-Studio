@@ -204,5 +204,33 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Church Comparative Intelligence</h2>
+
+<h3>Church Profiles</h3>
+
+<ul>
+{% for church in comparative_report.church_profiles %}
+    <li>
+        <strong>{{ church.church_name }}</strong><br>
+        Association: {{ church.association }}<br>
+        Conference: {{ church.conference }}<br>
+        Pastors: {{ church.pastors }}
+    </li>
+{% endfor %}
+</ul>
+
+<h3>Church Activity</h3>
+
+<ul>
+{% for church, count in comparative_report.church_activity.items() %}
+    <li>{{ church }} : {{ count }} event(s)</li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 

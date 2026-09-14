@@ -9,6 +9,7 @@ from .health import calculate_ministry_health
 from .analytics import generate_ministry_analytics
 from .recommendations import generate_ministry_recommendations
 from .health_insights import generate_health_insights
+from .comparative import generate_comparative_report
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -40,6 +41,8 @@ def dashboard():
         analytics
     )
 
+    comparative_report = generate_comparative_report()
+
     return render_template(
         "ministry_intelligence/dashboard.html",
         summary=ministry_summary,
@@ -48,5 +51,6 @@ def dashboard():
         health_insights=health_insights,
         analytics=analytics,
         chart_data=json.dumps(chart_data),
-        recommendations=recommendations
+        recommendations=recommendations,
+        comparative_report=comparative_report
     )
