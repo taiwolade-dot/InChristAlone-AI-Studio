@@ -2,27 +2,71 @@
 
 {% block content %}
 
+<div class="ministry-dashboard">
+
 <h1>Ministry Intelligence Dashboard</h1>
 
-<div>
+<div class="health-card">
     <h2>Ministry Health Score</h2>
-    <h1>{{ health_score }} / 100</h1>
+    <div class="health-score">
+        {{ health_score }}/100
+    </div>
 </div>
 
-<hr>
 
-<h2>Ministry Overview</h2>
+<div class="metric-grid">
 
-<div>
-    <p>Pastors: {{ summary.pastors }}</p>
-    <p>Churches: {{ summary.churches }}</p>
-    <p>Members: {{ summary.members }}</p>
-    <p>Events: {{ summary.events }}</p>
-    <p>Bible Quiz Participants: {{ summary.quiz_participants }}</p>
-    <p>Bible Quiz Accuracy: {{ summary.quiz_accuracy }}%</p>
+    <div class="metric-card">
+        <h3>Pastors</h3>
+        <div class="metric-value">
+            {{ summary.pastors }}
+        </div>
+    </div>
+
+
+    <div class="metric-card">
+        <h3>Churches</h3>
+        <div class="metric-value">
+            {{ summary.churches }}
+        </div>
+    </div>
+
+
+    <div class="metric-card">
+        <h3>Members</h3>
+        <div class="metric-value">
+            {{ summary.members }}
+        </div>
+    </div>
+
+
+    <div class="metric-card">
+        <h3>Events</h3>
+        <div class="metric-value">
+            {{ summary.events }}
+        </div>
+    </div>
+
+
+    <div class="metric-card">
+        <h3>Quiz Participants</h3>
+        <div class="metric-value">
+            {{ summary.quiz_participants }}
+        </div>
+    </div>
+
+
+    <div class="metric-card">
+        <h3>Quiz Accuracy</h3>
+        <div class="metric-value">
+            {{ summary.quiz_accuracy }}%
+        </div>
+    </div>
+
 </div>
 
-<hr>
+
+<div class="insight-card">
 
 <h2>AI Ministry Insights</h2>
 
@@ -31,6 +75,11 @@
     <li>{{ insight }}</li>
 {% endfor %}
 </ul>
+
+</div>
+
+
+</div>
 
 {% endblock %}
 

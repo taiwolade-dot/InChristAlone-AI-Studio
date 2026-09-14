@@ -985,3 +985,66 @@ body {
 
 
 
+
+/* ==== Ministry Intelligence Dashboard ==== */
+
+.ministry-dashboard {
+    margin-top: 1rem;
+}
+
+.health-card {
+    background: var(--royal-blue);
+    color: var(--white);
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-bottom: 4px solid var(--gold);
+}
+
+.health-card h2 {
+    color: var(--gold-light);
+}
+
+.health-score {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--white);
+    padding: 1.2rem;
+    border-radius: 8px;
+    text-align: center;
+    border-top: 3px solid var(--gold);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.metric-card h3 {
+    color: var(--royal-blue);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--royal-blue-dark);
+}
+
+.insight-card {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 5px solid var(--gold);
+}
+
+.insight-card li {
+    margin-bottom: 0.6rem;
+}
+
