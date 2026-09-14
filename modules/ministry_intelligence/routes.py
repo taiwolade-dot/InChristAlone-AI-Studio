@@ -195,6 +195,42 @@ def ministry_report_comparison():
         comparison=comparison
     )
 
+
+
+@ministry_intelligence_bp.route("/ministry-executive-dashboard")
+def ministry_executive_dashboard():
+
+    ministry_summary = get_ministry_summary()
+
+    health_score = calculate_ministry_health(
+        ministry_summary
+    )
+
+    statistics = get_report_statistics()
+
+    reports = get_report_history()
+
+    comparison = None
+
+    if len(reports) >= 2:
+        comparison = compare_reports(
+            reports[1].id,
+            reports[0].id
+        )
+
+    recommendations = generate_ministry_recommendations(
+        ministry_summary,
+        generate_ministry_analytics()
+    )
+
+    return render_template(
+        "ministry_intelligence/executive_dashboard.html",
+        health_score=health_score,
+        statistics=statistics,
+        comparison=comparison,
+        recommendations=recommendations
+    )
+
 @ministry_intelligence_bp.route("/ministry-reports")
 def ministry_reports():
 

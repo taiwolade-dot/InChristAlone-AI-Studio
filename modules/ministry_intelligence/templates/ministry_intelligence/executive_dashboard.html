@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="ministry-dashboard">
+
+<h1>AI Ministry Intelligence Executive Dashboard</h1>
+
+
+<div class="metric-grid">
+
+<div class="metric-card">
+<h3>Ministry Health Score</h3>
+<div class="metric-value">
+{{ health_score }}
+</div>
+</div>
+
+
+<div class="metric-card">
+<h3>Total Reports</h3>
+<div class="metric-value">
+{{ statistics.total_reports }}
+</div>
+</div>
+
+
+<div class="metric-card">
+<h3>Report Types</h3>
+<div class="metric-value">
+{{ statistics.report_types }}
+</div>
+</div>
+
+</div>
+
+
+<div class="insight-card">
+
+<h2>Comparison Insight</h2>
+
+{% if comparison %}
+
+<p>
+Health Change:
+{{ comparison.health_change }}
+</p>
+
+<p>
+Growth Change:
+{{ comparison.growth_change }}
+</p>
+
+<p>
+Risk:
+{{ comparison.previous_risk }}
+→
+{{ comparison.current_risk }}
+</p>
+
+{% else %}
+
+<p>No comparison available.</p>
+
+{% endif %}
+
+</div>
+
+
+<div class="insight-card">
+
+<h2>Strategic Recommendations</h2>
+
+{% for item in recommendations %}
+
+<p>
+{{ item }}
+</p>
+
+{% endfor %}
+
+</div>
+
+
+</div>
+
+{% endblock %}
