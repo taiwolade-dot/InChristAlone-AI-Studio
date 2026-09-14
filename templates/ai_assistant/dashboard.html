@@ -157,4 +157,46 @@
 
 </div>
 
+
+<div class="card">
+<h3>🕸️ Ministry Knowledge Graph</h3>
+
+{% if data.memory_graph %}
+
+<h4>🔗 Connected Relationships</h4>
+
+<p>
+<strong>Total Connections:</strong>
+{{ data.memory_graph|length }}
+</p>
+
+
+{% for item in data.memory_graph %}
+
+<h4>🧠 {{ item.source }}</h4>
+
+<p>
+↔
+</p>
+
+<h4>🧠 {{ item.target }}</h4>
+
+<p>
+<strong>Relationship:</strong>
+{{ item.relationship }}
+</p>
+
+<hr>
+
+{% endfor %}
+
+
+{% else %}
+
+<p>No knowledge relationships available yet.</p>
+
+{% endif %}
+
+</div>
+
 {% endblock %}

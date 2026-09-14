@@ -3,6 +3,7 @@ from sqlalchemy import func
 
 from .ministry_copilot import generate_ministry_copilot_context
 from .memory_engine import get_memory_statistics, get_memory_timeline
+from .knowledge_graph import build_memory_graph
 
 
 def get_ai_dashboard(user_id):
@@ -49,6 +50,8 @@ def get_ai_dashboard(user_id):
 
     memory_timeline = get_memory_timeline(user_id)
 
+    memory_graph = build_memory_graph(user_id)
+
 
     return {
         "total": total,
@@ -56,5 +59,6 @@ def get_ai_dashboard(user_id):
         "usage": usage,
         "copilot": copilot,
         "memory_stats": memory_stats,
-        "memory_timeline": memory_timeline
+        "memory_timeline": memory_timeline,
+        "memory_graph": memory_graph
     }
