@@ -43,9 +43,11 @@ def dashboard():
 @login_required
 def intelligence_dashboard():
 
-    from models import QuizQuestionAnalytics
+    from models import QuizQuestionAnalytics, QuizLearnerProfile
 
     analytics = QuizQuestionAnalytics.query.all()
+
+    learner_profiles = QuizLearnerProfile.query.all()
 
     total_questions = len(analytics)
 
@@ -76,13 +78,151 @@ def intelligence_dashboard():
         if a.ai_recommendation
     ]
 
+    # AI Ministry Insight Engine
+    mastery_questions = sorted(
+        analytics,
+        key=lambda x: x.accuracy_rate,
+        reverse=True
+    )[:10]
+
+    teaching_attention = sorted(
+        analytics,
+        key=lambda x: x.accuracy_rate
+    )[:10]
+
+    if average_accuracy >= 80:
+        ai_summary = (
+            "Excellent biblical knowledge performance. "
+            "Consider introducing deeper theological questions."
+        )
+    elif average_accuracy >= 50:
+        ai_summary = (
+            "Good learning progress detected. "
+            "Continue reinforcement and guided teaching."
+        )
+    else:
+        ai_summary = (
+            "Learning gaps detected. "
+            "Consider focused teaching and revision sessions."
+        )
+
+
+    # AI Learner Development Intelligence
+
+    total_learners = len(learner_profiles)
+
+    knowledge_distribution = {
+        "Beginner": 0,
+        "Developing": 0,
+        "Advanced": 0
+    }
+
+    difficulty_distribution = {
+        "Easy": 0,
+        "Medium": 0,
+        "Advanced": 0
+    }
+
+    for profile in learner_profiles:
+
+        level = profile.learning_level
+
+        if level in knowledge_distribution:
+            knowledge_distribution[level] += 1
+
+        recommended = profile.learning_level
+
+        if recommended == "Beginner":
+            difficulty_distribution["Easy"] += 1
+        elif recommended == "Developing":
+            difficulty_distribution["Medium"] += 1
+        elif recommended == "Advanced":
+            difficulty_distribution["Advanced"] += 1
+
+
+    if total_learners >= 10:
+        learner_summary = (
+            "Strong learner participation detected. "
+            "AI recommends differentiated Bible teaching pathways."
+        )
+
+    elif total_learners > 0:
+        learner_summary = (
+            "Early learner development data available. "
+            "Continue quiz participation for deeper AI insights."
+        )
+
+    else:
+        learner_summary = (
+            "No learner profiles available yet. "
+            "Profiles will develop after quiz participation."
+        )
+
+
+
+    # Analytics Visualization Data
+    accuracy_chart = [
+        round(a.accuracy_rate, 2)
+        for a in analytics
+    ]
+
+    difficulty_chart = [
+        round(a.difficulty_score, 2)
+        for a in analytics
+    ]
+
+    question_labels = [
+        f"Q{a.question_id}"
+        for a in analytics
+    ]
+
+
+    # AI Learner Visualization Data
+
+    learner_level_chart = {
+        "Beginner": 0,
+        "Intermediate": 0,
+        "Advanced": 0
+    }
+
+    learner_labels = []
+    learner_accuracy_chart = []
+
+    for profile in learner_profiles:
+
+        if profile.learning_level in learner_level_chart:
+            learner_level_chart[profile.learning_level] += 1
+
+        learner_labels.append(
+            f"Participant {profile.participant_id}"
+        )
+
+        learner_accuracy_chart.append(
+            round(profile.accuracy_rate, 2)
+        )
+
+
     return render_template(
         'bible_quiz/intelligence.html',
         total_questions=total_questions,
         total_attempts=total_attempts,
         average_accuracy=average_accuracy,
         difficult_questions=difficult_questions,
-        recommendations=recommendations
+        recommendations=recommendations,
+        mastery_questions=mastery_questions,
+        teaching_attention=teaching_attention,
+        ai_summary=ai_summary,
+        accuracy_chart=accuracy_chart,
+        difficulty_chart=difficulty_chart,
+        question_labels=question_labels,
+          learner_profiles=learner_profiles,
+          total_learners=total_learners,
+          knowledge_distribution=knowledge_distribution,
+          difficulty_distribution=difficulty_distribution,
+          learner_summary=learner_summary,
+          learner_level_chart=learner_level_chart,
+          learner_labels=learner_labels,
+          learner_accuracy_chart=learner_accuracy_chart
     )
 
 
@@ -511,6 +651,32 @@ def quiz_analytics(quiz_id):
             key=lambda x: x["difficulty_score"]
         )
 
+    # Advanced AI Analytics Visualization Data
+
+    difficulty_distribution = {
+        "Easy": 0,
+        "Medium": 0,
+        "Hard": 0
+    }
+
+    for item in analytics:
+        score = item["difficulty_score"]
+
+        if score < 40:
+            difficulty_distribution["Easy"] += 1
+        elif score < 70:
+            difficulty_distribution["Medium"] += 1
+        else:
+            difficulty_distribution["Hard"] += 1
+
+
+    learning_metrics = {
+        "Accuracy": average_accuracy,
+        "Learning Score": learning_score,
+        "Difficulty Handling": round(100 - average_difficulty, 2)
+    }
+
+
     return render_template(
         "bible_quiz/analytics.html",
         quiz=quiz,
@@ -519,7 +685,9 @@ def quiz_analytics(quiz_id):
         average_difficulty=average_difficulty,
         learning_score=learning_score,
         hardest_question=hardest_question,
-        easiest_question=easiest_question
+        easiest_question=easiest_question,
+        difficulty_distribution=difficulty_distribution,
+        learning_metrics=learning_metrics
     )
 
 
@@ -687,6 +855,10 @@ def improve_quiz_with_ai(quiz_id):
 
 
     analysis = analyze_quiz_performance(
+        analytics_records
+    )
+
+    recommendations = generate_quiz_improvement(
         analytics_records
     )
 
