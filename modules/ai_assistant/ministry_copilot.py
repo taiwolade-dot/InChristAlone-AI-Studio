@@ -17,6 +17,12 @@ from .memory_engine import (
     save_ministry_memory
 )
 
+from .knowledge_graph import build_memory_graph
+from .graph_reasoning import (
+    generate_graph_reasoning,
+    generate_ministry_insight
+)
+
 
 
 
@@ -65,38 +71,7 @@ def detect_memory_worthy_insight(
 
 
 
-def detect_memory_worthy_insight(
-    recommendations,
-    knowledge,
-    predictions
-):
 
-    combined = f"""
-    {recommendations}
-    {knowledge}
-    {predictions}
-    """
-
-    keywords = [
-        "growth",
-        "opportunity",
-        "risk",
-        "strategy",
-        "improvement",
-        "development"
-    ]
-
-    score = 0
-
-    for keyword in keywords:
-        if keyword.lower() in combined.lower():
-            score += 1
-
-    return {
-        "worth_saving": score >= 2,
-        "score": score,
-        "content": combined[:500]
-    }
 
 
 def generate_ministry_copilot_context():
@@ -108,6 +83,16 @@ def generate_ministry_copilot_context():
     analytics = generate_ministry_analytics()
 
     memory_context = summarize_ministry_memory()
+
+    memory_graph = build_memory_graph()
+
+    graph_reasoning = generate_graph_reasoning(
+        memory_graph
+    )
+
+    graph_insight = generate_ministry_insight(
+        graph_reasoning
+    )
 
     comparison_report = generate_comparative_report()
 
@@ -209,7 +194,9 @@ def generate_ministry_copilot_context():
         "continuous_improvement": improvement,
         "knowledge": knowledge,
         "predictions": predictions,
-        "memory_context": memory_context
+        "memory_context": memory_context,
+        "graph_reasoning": graph_reasoning,
+        "graph_insight": graph_insight
     }
 
 
@@ -234,4 +221,7 @@ Knowledge Insights:
 
 Predictive Insights:
 {context['predictions']}
+
+🕸️ Knowledge Graph Insight:
+{context['graph_insight']}
 """
