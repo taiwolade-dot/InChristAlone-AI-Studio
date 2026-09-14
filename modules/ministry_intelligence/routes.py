@@ -1,3 +1,5 @@
+import json
+
 from flask import render_template
 
 from . import ministry_intelligence_bp
@@ -22,10 +24,16 @@ def dashboard():
 
     analytics = generate_ministry_analytics()
 
+    chart_data = {
+        "member_growth": analytics["member_growth"],
+        "event_activity": analytics["event_activity"]
+    }
+
     return render_template(
         "ministry_intelligence/dashboard.html",
         summary=ministry_summary,
         insights=insights,
         health_score=health_score,
-        analytics=analytics
+        analytics=analytics,
+        chart_data=json.dumps(chart_data)
     )

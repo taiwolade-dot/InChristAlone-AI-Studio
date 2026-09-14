@@ -108,5 +108,60 @@ Total Participants:
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Visual Analytics</h2>
+
+<div>
+    <h3>Member Growth Trend</h3>
+    <canvas id="memberGrowthChart"></canvas>
+</div>
+
+<br>
+
+<div>
+    <h3>Event Activity Trend</h3>
+    <canvas id="eventActivityChart"></canvas>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const chartData = {{ chart_data|safe }};
+
+new Chart(
+    document.getElementById("memberGrowthChart"),
+    {
+        type: "line",
+        data: {
+            labels: Object.keys(chartData.member_growth),
+            datasets: [{
+                label: "New Members",
+                data: Object.values(chartData.member_growth)
+            }]
+        }
+    }
+);
+
+
+new Chart(
+    document.getElementById("eventActivityChart"),
+    {
+        type: "bar",
+        data: {
+            labels: Object.keys(chartData.event_activity),
+            datasets: [{
+                label: "Events",
+                data: Object.values(chartData.event_activity)
+            }]
+        }
+    }
+);
+
+</script>
+
 {% endblock %}
 
