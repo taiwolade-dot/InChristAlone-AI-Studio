@@ -451,6 +451,54 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Ministry Knowledge Intelligence</h2>
+
+<h3>Knowledge Patterns</h3>
+<ul>
+{% for item in knowledge_insights.knowledge_patterns %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Historical Insights</h3>
+<ul>
+{% for item in knowledge_insights.historical_insights %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Best Practices</h3>
+<ul>
+{% for item in knowledge_insights.best_practices %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Learning Points</h3>
+<ul>
+{% for item in knowledge_insights.learning_points %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Adaptive Recommendations</h3>
+<ul>
+{% for item in knowledge_insights.adaptive_recommendations %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}

@@ -29,6 +29,7 @@ from .scenario_simulator import generate_ministry_scenarios
 from .recommendation_optimizer import generate_optimized_recommendations
 from .impact_analyzer import generate_ministry_impact_analysis
 from .continuous_improvement import generate_continuous_improvement_plan
+from .knowledge_engine import generate_ministry_knowledge_insights
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -278,6 +279,13 @@ def ministry_executive_dashboard():
         strategic_plan
     )
 
+    knowledge_insights = generate_ministry_knowledge_insights(
+        comparison,
+        forecast,
+        impact_analysis,
+        continuous_improvement
+    )
+
     chart_data = {
         "health_change": comparison["health_change"] if comparison else 0,
         "growth_change": comparison["growth_change"] if comparison else 0,
@@ -301,6 +309,7 @@ def ministry_executive_dashboard():
         optimized_recommendations=optimized_recommendations,
         impact_analysis=impact_analysis,
         continuous_improvement=continuous_improvement,
+        knowledge_insights=knowledge_insights,
         chart_data=json.dumps(chart_data)
     )
 
