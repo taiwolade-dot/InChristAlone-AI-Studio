@@ -395,6 +395,62 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Continuous Improvement Intelligence</h2>
+
+<h3>Performance Review</h3>
+<ul>
+{% for item in continuous_improvement.performance_review %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Identified Gaps</h3>
+<ul>
+{% for item in continuous_improvement.identified_gaps %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Improvement Recommendations</h3>
+<ul>
+{% for item in continuous_improvement.improvement_recommendations %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Learning Feedback Loop</h3>
+<ul>
+{% for item in continuous_improvement.learning_feedback %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Strategy Adjustments</h3>
+<ul>
+{% for item in continuous_improvement.strategy_adjustments %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Next Action Plan</h3>
+<ul>
+{% for item in continuous_improvement.next_action_plan %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
