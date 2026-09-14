@@ -250,6 +250,55 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Scenario Simulation</h2>
+
+
+<h3>Growth Scenario</h3>
+<ul>
+{% for item in scenarios.growth_scenario %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Stability Scenario</h3>
+<ul>
+{% for item in scenarios.stability_scenario %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Risk Scenario</h3>
+<ul>
+{% for item in scenarios.risk_scenario %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Intervention Scenario</h3>
+<ul>
+{% for item in scenarios.intervention_scenario %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Recommended Future Path</h3>
+<ul>
+{% for item in scenarios.recommended_path %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
