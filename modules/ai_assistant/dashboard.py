@@ -1,6 +1,8 @@
 from models import AIConversation
 from sqlalchemy import func
 
+from .ministry_copilot import generate_ministry_copilot_context
+
 
 def get_ai_dashboard(user_id):
 
@@ -40,8 +42,12 @@ def get_ai_dashboard(user_id):
         usage[module] = count
 
 
+    copilot = generate_ministry_copilot_context()
+
+
     return {
         "total": total,
         "recent": recent,
-        "usage": usage
+        "usage": usage,
+        "copilot": copilot
     }
