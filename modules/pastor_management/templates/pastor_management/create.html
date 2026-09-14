@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Create Pastor Profile</h2>
+
+<form method="POST" enctype="multipart/form-data">
+
+<div class="mb-3">
+<label>Pastor Full Name</label>
+<input type="text"
+name="full_name"
+class="form-control"
+required>
+</div>
+
+
+<div class="mb-3">
+<label>Pastor Photo</label>
+<input type="file"
+name="photo"
+class="form-control">
+</div>
+
+
+<div class="mb-3">
+<label>Biography</label>
+<textarea name="biography"
+class="form-control"></textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Education</label>
+<textarea name="education"
+class="form-control"></textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Ordination Details</label>
+<textarea name="ordination_details"
+class="form-control"></textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Ministry Experience</label>
+<textarea name="ministry_experience"
+class="form-control"></textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Date Called to Ministry of the Church</label>
+<input type="date"
+name="called_to_church_date"
+class="form-control">
+</div>
+
+
+<div class="mb-3">
+<label>Leadership Message</label>
+<textarea name="leadership_message"
+class="form-control"></textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Pastoral Vision</label>
+<textarea name="pastoral_vision"
+class="form-control"></textarea>
+</div>
+
+
+<button class="btn btn-primary">
+Save Pastor Profile
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

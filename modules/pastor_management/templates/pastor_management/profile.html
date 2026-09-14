@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Pastor Profile</h2>
+
+
+{% if pastor.photo_filename %}
+<img src="/pastor-management/static/uploads/{{ pastor.photo_filename }}"
+class="img-thumbnail mb-3"
+width="200">
+{% endif %}
+
+
+<h3>{{ pastor.full_name }}</h3>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Biography</h4>
+<p>
+{{ pastor.biography }}
+</p>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Education</h4>
+<p>
+{{ pastor.education }}
+</p>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Ordination Details</h4>
+<p>
+{{ pastor.ordination_details }}
+</p>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Date Called to Ministry of the Church</h4>
+
+<p>
+{{ pastor.called_to_church_date }}
+</p>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Ministry Experience</h4>
+
+<p>
+{{ pastor.ministry_experience }}
+</p>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Leadership Message</h4>
+
+<p>
+{{ pastor.leadership_message }}
+</p>
+
+</div>
+
+
+<div class="card mt-3 p-3">
+
+<h4>Pastoral Vision</h4>
+
+<p>
+{{ pastor.pastoral_vision }}
+</p>
+
+</div>
+
+
+</div>
+
+{% endblock %}
