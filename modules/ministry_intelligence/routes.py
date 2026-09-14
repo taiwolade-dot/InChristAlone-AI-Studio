@@ -1,6 +1,7 @@
 import json
+import os
 
-from flask import render_template
+from flask import render_template, send_file
 
 from . import ministry_intelligence_bp
 from .services import get_ministry_summary
@@ -16,6 +17,8 @@ from .alerts import generate_alert_report
 from .strategy import generate_strategy_report
 from .report import generate_ministry_report
 from .export import generate_export_report
+from .documents import generate_ministry_document
+from .pdf_generator import generate_pdf_report
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -95,4 +98,63 @@ def dashboard():
         strategy_report=strategy_report,
         ministry_report=ministry_report,
         export_report=export_report
+    )
+
+
+@ministry_intelligence_bp.route("/download-ministry-report")
+def download_ministry_report():
+
+    ministry_summary = get_ministry_summary()
+
+    health_score = calculate_ministry_health(
+        ministry_summary
+    )
+
+    analytics = generate_ministry_analytics()
+
+    network_report = generate_network_report()
+
+    prediction_report = generate_prediction_report(
+        ministry_summary,
+        analytics,
+        health_score
+    )
+
+    alert_report = generate_alert_report(
+        ministry_summary
+    )
+
+    strategy_report = generate_strategy_report(
+        prediction_report,
+        alert_report
+    )
+
+    ministry_report = generate_ministry_report(
+        ministry_summary,
+        health_score,
+        network_report,
+        prediction_report,
+        alert_report,
+        strategy_report
+    )
+
+    export_report = generate_export_report(
+        ministry_report
+    )
+
+    document = generate_ministry_document(
+        export_report
+    )
+
+    filename = "AI_Ministry_Intelligence_Leadership_Report.pdf"
+
+    generate_pdf_report(
+        document,
+        filename
+    )
+
+    return send_file(
+        filename,
+        as_attachment=True,
+        download_name=filename
     )
