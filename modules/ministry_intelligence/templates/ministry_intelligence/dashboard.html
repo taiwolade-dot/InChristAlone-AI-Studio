@@ -342,5 +342,36 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>AI Ministry Strategy Advisor</h2>
+
+<h3>Immediate Actions</h3>
+
+<ul>
+{% for action in strategy_report.immediate_actions %}
+<li>
+<strong>{{ action.priority }}:</strong>
+{{ action.action }}
+</li>
+{% else %}
+<li>No immediate actions required.</li>
+{% endfor %}
+</ul>
+
+
+<h3>Growth Strategies</h3>
+
+<ul>
+{% for action in strategy_report.growth_actions %}
+<li>{{ action }}</li>
+{% else %}
+<li>No growth strategies available.</li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 
