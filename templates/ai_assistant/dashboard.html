@@ -199,4 +199,55 @@
 
 </div>
 
+
+<div class="card">
+<h3>🧠 Graph Reasoning Insight</h3>
+
+<p>
+{{ data.copilot.graph_insight }}
+</p>
+
+</div>
+
+
+<div class="card">
+<h3>🕸️ Knowledge Graph Visualization</h3>
+
+{% if data.graph_visualization %}
+
+<p>
+<strong>Total Nodes:</strong>
+{{ data.graph_visualization.node_count }}
+</p>
+
+<p>
+<strong>Total Connections:</strong>
+{{ data.graph_visualization.edge_count }}
+</p>
+
+<h4>🔗 Relationships</h4>
+
+{% for edge in data.graph_visualization.edges %}
+
+<p>
+🧠 {{ edge.from }}
+<br>
+⬇️ {{ edge.label }}
+<br>
+🧠 {{ edge.to }}
+</p>
+
+<hr>
+
+{% endfor %}
+
+{% else %}
+
+<p>No graph visualization data available.</p>
+
+{% endif %}
+
+</div>
+
+
 {% endblock %}
