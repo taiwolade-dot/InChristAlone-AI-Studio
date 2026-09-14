@@ -1011,3 +1011,48 @@ class MinistryReport(db.Model):
 
     def __repr__(self):
         return f'<MinistryReport {self.title}>'
+
+
+class MinistryReportAnalysis(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    report_id = db.Column(
+        db.Integer,
+        db.ForeignKey("ministry_report.id"),
+        nullable=False
+    )
+
+    health_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    growth_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    risk_level = db.Column(
+        db.String(50),
+        default="Unknown"
+    )
+
+    recommendations = db.Column(
+        db.Text
+    )
+
+    summary = db.Column(
+        db.Text
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryReportAnalysis {self.report_id}>"
