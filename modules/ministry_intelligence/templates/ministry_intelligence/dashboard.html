@@ -5,22 +5,32 @@
 <h1>Ministry Intelligence Dashboard</h1>
 
 <div>
-    <h3>Ministry Overview</h3>
-
-    <p>Pastors: {{ summary.pastors }}</p>
-    <p>Churches: {{ summary.churches }}</p>
-    <p>Events: {{ summary.events }}</p>
-    <p>Bible Quiz Participants: {{ summary.quiz_participants }}</p>
+    <h2>Ministry Health Score</h2>
+    <h1>{{ health_score }} / 100</h1>
 </div>
+
+<hr>
+
+<h2>Ministry Overview</h2>
 
 <div>
-    <h3>AI Insights</h3>
-
-    <ul>
-    {% for insight in insights %}
-        <li>{{ insight }}</li>
-    {% endfor %}
-    </ul>
+    <p>Pastors: {{ summary.pastors }}</p>
+    <p>Churches: {{ summary.churches }}</p>
+    <p>Members: {{ summary.members }}</p>
+    <p>Events: {{ summary.events }}</p>
+    <p>Bible Quiz Participants: {{ summary.quiz_participants }}</p>
+    <p>Bible Quiz Accuracy: {{ summary.quiz_accuracy }}%</p>
 </div>
 
+<hr>
+
+<h2>AI Ministry Insights</h2>
+
+<ul>
+{% for insight in insights %}
+    <li>{{ insight }}</li>
+{% endfor %}
+</ul>
+
 {% endblock %}
+
