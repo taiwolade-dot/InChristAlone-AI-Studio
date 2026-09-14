@@ -11,6 +11,7 @@ from .recommendations import generate_ministry_recommendations
 from .health_insights import generate_health_insights
 from .comparative import generate_comparative_report
 from .association import generate_network_report
+from .prediction import generate_prediction_report
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -46,6 +47,12 @@ def dashboard():
 
     network_report = generate_network_report()
 
+    prediction_report = generate_prediction_report(
+        ministry_summary,
+        analytics,
+        health_score
+    )
+
     return render_template(
         "ministry_intelligence/dashboard.html",
         summary=ministry_summary,
@@ -56,5 +63,6 @@ def dashboard():
         chart_data=json.dumps(chart_data),
         recommendations=recommendations,
         comparative_report=comparative_report,
-        network_report=network_report
+        network_report=network_report,
+        prediction_report=prediction_report
     )

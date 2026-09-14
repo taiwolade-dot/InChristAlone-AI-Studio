@@ -267,5 +267,44 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Predictive Ministry Intelligence</h2>
+
+<h3>Growth Forecast</h3>
+
+<ul>
+<li>
+<strong>Direction:</strong>
+{{ prediction_report.growth_forecast.direction }}
+</li>
+
+<li>
+<strong>Confidence:</strong>
+{{ prediction_report.growth_forecast.confidence }}
+</li>
+
+<li>
+{{ prediction_report.growth_forecast.message }}
+</li>
+</ul>
+
+
+<h3>Health Forecast</h3>
+
+<ul>
+<li>
+<strong>Status:</strong>
+{{ prediction_report.health_forecast.status }}
+</li>
+
+<li>
+{{ prediction_report.health_forecast.message }}
+</li>
+</ul>
+
+</div>
+
 {% endblock %}
 
