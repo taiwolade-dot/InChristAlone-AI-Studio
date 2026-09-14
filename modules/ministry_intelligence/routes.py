@@ -24,6 +24,7 @@ from .report_manager import create_report_record, get_report_history, get_report
 from .comparison_manager import compare_reports
 from .decision_support import generate_decision_support
 from .strategic_planner import generate_strategic_plan
+from .forecasting import generate_ministry_forecast
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -236,6 +237,13 @@ def ministry_executive_dashboard():
         decision_support
     )
 
+    forecast = generate_ministry_forecast(
+        health_score,
+        comparison,
+        generate_ministry_analytics(),
+        strategic_plan
+    )
+
     chart_data = {
         "health_change": comparison["health_change"] if comparison else 0,
         "growth_change": comparison["growth_change"] if comparison else 0,
@@ -254,6 +262,7 @@ def ministry_executive_dashboard():
         recommendations=recommendations,
         decision_support=decision_support,
         strategic_plan=strategic_plan,
+        forecast=forecast,
         chart_data=json.dumps(chart_data)
     )
 

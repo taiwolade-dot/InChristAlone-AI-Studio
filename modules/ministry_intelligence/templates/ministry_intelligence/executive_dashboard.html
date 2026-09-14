@@ -201,6 +201,55 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Future Ministry Outlook</h2>
+
+
+<h3>Growth Forecast</h3>
+<ul>
+{% for item in forecast.growth_forecast %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Membership Outlook</h3>
+<ul>
+{% for item in forecast.membership_outlook %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Leadership Forecast</h3>
+<ul>
+{% for item in forecast.leadership_forecast %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Risk Projection</h3>
+<ul>
+{% for item in forecast.risk_projection %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Ministry Scenarios</h3>
+<ul>
+{% for item in forecast.scenarios %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
