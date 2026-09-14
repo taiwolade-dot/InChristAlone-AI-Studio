@@ -163,5 +163,18 @@ new Chart(
 
 </script>
 
+
+<div class="insight-card">
+
+<h2>AI Ministry Recommendations</h2>
+
+<ul>
+{% for recommendation in recommendations %}
+    <li>{{ recommendation }}</li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 

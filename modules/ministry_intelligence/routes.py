@@ -7,6 +7,7 @@ from .services import get_ministry_summary
 from .intelligence import generate_ministry_insights
 from .health import calculate_ministry_health
 from .analytics import generate_ministry_analytics
+from .recommendations import generate_ministry_recommendations
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -29,11 +30,17 @@ def dashboard():
         "event_activity": analytics["event_activity"]
     }
 
+    recommendations = generate_ministry_recommendations(
+        ministry_summary,
+        analytics
+    )
+
     return render_template(
         "ministry_intelligence/dashboard.html",
         summary=ministry_summary,
         insights=insights,
         health_score=health_score,
         analytics=analytics,
-        chart_data=json.dumps(chart_data)
+        chart_data=json.dumps(chart_data),
+        recommendations=recommendations
     )
