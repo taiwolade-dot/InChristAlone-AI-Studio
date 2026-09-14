@@ -108,3 +108,109 @@ def get_memory_statistics(user_id=None):
         "categories": categories,
         "recent_count": min(total, 5)
     }
+
+
+def intelligent_memory_search(
+    keyword,
+    memory_type=None,
+    importance=None,
+    user_id=None
+):
+
+    query = MinistryMemory.query.filter(
+        MinistryMemory.content.contains(keyword)
+        |
+        MinistryMemory.title.contains(keyword)
+    )
+
+    if user_id:
+        query = query.filter_by(
+            user_id=user_id
+        )
+
+    if memory_type:
+        query = query.filter_by(
+            memory_type=memory_type
+        )
+
+    if importance:
+        query = query.filter_by(
+            importance=importance
+        )
+
+    memories = query.order_by(
+        MinistryMemory.created_at.desc()
+    ).all()
+
+    return [
+        {
+            "title": item.title,
+            "type": item.memory_type,
+            "importance": item.importance,
+            "content": item.content,
+            "source": item.source
+        }
+        for item in memories
+    ]
+
+
+def get_memory_timeline(user_id=None, limit=10):
+
+    query = MinistryMemory.query
+
+    if user_id:
+        query = query.filter_by(
+            user_id=user_id
+        )
+
+    memories = (
+        query
+        .order_by(
+            MinistryMemory.created_at.desc()
+        )
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "date": item.created_at.strftime("%Y-%m-%d")
+                if item.created_at else "Unknown",
+            "title": item.title,
+            "type": item.memory_type,
+            "importance": item.importance,
+            "source": item.source
+        }
+        for item in memories
+    ]
+
+
+def get_memory_timeline(user_id=None, limit=10):
+
+    query = MinistryMemory.query
+
+    if user_id:
+        query = query.filter_by(
+            user_id=user_id
+        )
+
+    memories = (
+        query
+        .order_by(
+            MinistryMemory.created_at.desc()
+        )
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "date": item.created_at.strftime("%Y-%m-%d")
+                if item.created_at else "Unknown",
+            "title": item.title,
+            "type": item.memory_type,
+            "importance": item.importance,
+            "source": item.source
+        }
+        for item in memories
+    ]

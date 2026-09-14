@@ -119,4 +119,42 @@
 
 </div>
 
+
+<div class="card">
+<h3>📅 Ministry Memory Timeline</h3>
+
+{% if data.memory_timeline %}
+
+{% for item in data.memory_timeline %}
+
+<h4>🧠 {{ item.title }}</h4>
+
+<p>
+<strong>Date:</strong> {{ item.date }}
+</p>
+
+<p>
+<strong>Type:</strong> {{ item.type }}
+</p>
+
+<p>
+<strong>Importance:</strong> {{ item.importance }}
+</p>
+
+<p>
+<strong>Source:</strong> {{ item.source }}
+</p>
+
+<hr>
+
+{% endfor %}
+
+{% else %}
+
+<p>No timeline records available yet.</p>
+
+{% endif %}
+
+</div>
+
 {% endblock %}
