@@ -62,4 +62,37 @@
 
 </div>
 
+<div class="card">
+<h3>🧠 Ministry Knowledge Memory</h3>
+
+{% if data.copilot.memory_context %}
+
+{% for memory in data.copilot.memory_context %}
+
+<h4>{{ memory.title }}</h4>
+
+<p>
+<strong>Type:</strong> {{ memory.type }}
+</p>
+
+<p>
+<strong>Importance:</strong> {{ memory.importance }}
+</p>
+
+<p>
+{{ memory.content }}
+</p>
+
+<hr>
+
+{% endfor %}
+
+{% else %}
+
+<p>No ministry memories available yet.</p>
+
+{% endif %}
+
+</div>
+
 {% endblock %}
