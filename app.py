@@ -12,6 +12,7 @@ from modules.research_assistant.routes import research_assistant_bp
 from modules.content_generator.routes import content_generator_bp
 
 from modules.church_management.routes import church_management_bp
+from modules.pastor_management.routes import pastor_management_bp
 from modules.church_calendar.routes import church_calendar_bp
 
 from modules.seminary_assistant.routes import seminary_assistant_bp
@@ -38,6 +39,7 @@ app.register_blueprint(website_generator_bp)
 app.register_blueprint(research_assistant_bp)
 app.register_blueprint(content_generator_bp)
 app.register_blueprint(church_management_bp)
+app.register_blueprint(pastor_management_bp)
 app.register_blueprint(church_calendar_bp)
 app.register_blueprint(seminary_assistant_bp)
 app.register_blueprint(prompt_marketplace_bp)

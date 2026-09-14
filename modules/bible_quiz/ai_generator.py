@@ -28,6 +28,49 @@ for q in FALLBACK_BANK:
     q.setdefault("question_type", "Multiple Choice")
 
 
+
+def get_quiz_analytics_context(question_ids=None):
+    """
+    Collect previous learner performance data
+    to guide AI quiz generation.
+    """
+
+    try:
+        from models import QuizQuestionAnalytics
+
+        query = QuizQuestionAnalytics.query
+
+        if question_ids:
+            query = query.filter(
+                QuizQuestionAnalytics.question_id.in_(question_ids)
+            )
+
+        analytics = query.all()
+
+        if not analytics:
+            return "No previous learner analytics available."
+
+        context = []
+
+        for item in analytics:
+
+            context.append(
+                f"""
+Question ID: {item.question_id}
+Attempts: {item.times_answered}
+Accuracy: {item.accuracy_rate}%
+Difficulty Score: {item.difficulty_score}
+AI Recommendation: {item.ai_recommendation}
+"""
+            )
+
+        return "\n".join(context)
+
+    except Exception as e:
+        print("Analytics context error:", e)
+        return "Analytics unavailable."
+
+
 def generate_questions(
     source_material,
     age_group="Youth",
@@ -36,15 +79,65 @@ def generate_questions(
     bible_version="KJV",
     question_type="Mixed",
     difficulty="Medium",
-    question_style="Knowledge"
+    question_style="Knowledge",
+    analytics_context=None
 ):
     import os, json
+
+    if analytics_context is None:
+        analytics_context = get_quiz_analytics_context()
+
+    # Adaptive Difficulty Intelligence Engine
+    if analytics_context:
+
+        if "Accuracy: " in analytics_context:
+
+            try:
+                import re
+
+                accuracy_values = re.findall(
+                    r"Accuracy:\s*([0-9.]+)%",
+                    analytics_context
+                )
+
+                if accuracy_values:
+
+                    avg_accuracy = sum(
+                        float(x) for x in accuracy_values
+                    ) / len(accuracy_values)
+
+                    print(
+                        "Adaptive Average Accuracy:",
+                        avg_accuracy
+                    )
+
+                    if avg_accuracy < 40:
+                        difficulty = "Beginner"
+                        question_style = "Application"
+
+                    elif avg_accuracy < 70:
+                        difficulty = "Medium"
+
+                    elif avg_accuracy >= 85:
+                        difficulty = "Theological / Seminary"
+                        question_style = "Spiritual Reflection"
+
+            except Exception as e:
+                print(
+                    "Adaptive engine error:",
+                    e
+                )
+
     api_key = os.environ.get("GEMINI_API_KEY")
     if api_key:
         try:
             import google.generativeai as genai
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel("gemini-1.5-flash")
+            print("===== ADAPTIVE AI CONTEXT =====")
+            print(analytics_context[:1000])
+            print("===== END ADAPTIVE AI CONTEXT =====")
+
             prompt = f"""
 You are an expert Christian Bible teacher and quiz creator.
 
@@ -70,6 +163,15 @@ Question Style:
 
 Source Material:
 {source_material}
+
+Adaptive Learning Context:
+{analytics_context if analytics_context else "No previous learner analytics available. Generate balanced questions."}
+
+Use this information to improve question quality:
+- Avoid repeating questions that learners already mastered.
+- Increase explanation depth when learners show difficulty.
+- Adjust complexity according to learning performance.
+- Create questions that promote biblical understanding and spiritual growth.
 
 Requirements:
 - Questions must be biblically accurate.

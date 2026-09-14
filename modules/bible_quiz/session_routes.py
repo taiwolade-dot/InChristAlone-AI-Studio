@@ -9,6 +9,7 @@ from flask_login import login_required, current_user
 
 from models import db, BibleQuiz, QuizLiveSession, QuizParticipant, QuizQuestion, QuizAnswer
 from modules.bible_quiz.learner_engine import update_learner_profile
+from modules.bible_quiz.ai_analytics import update_question_analytics
 from modules.activity_log.service import log_activity
 from modules.bible_quiz.timer import seconds_remaining
 from modules.permissions import roles_required
@@ -566,6 +567,12 @@ def api_submit_answer(session_id):
         participant.score += base_points + speed_bonus
 
     db.session.commit()
+
+    # Update Question AI Analytics
+    try:
+        update_question_analytics(question.id)
+    except Exception as e:
+        print("Question analytics update failed:", e)
 
     # Update AI Learner Profile
     try:

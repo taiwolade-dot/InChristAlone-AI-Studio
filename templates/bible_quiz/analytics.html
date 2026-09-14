@@ -130,6 +130,18 @@ Difficulty Score:
 
 <canvas id="accuracyChart"></canvas>
 
+<br>
+
+<h3>🎯 Difficulty Distribution</h3>
+
+<canvas id="difficultyChart"></canvas>
+
+<br>
+
+<h3>🧠 AI Learning Performance</h3>
+
+<canvas id="learningChart"></canvas>
+
 </div>
 
 
@@ -236,6 +248,73 @@ max:100
 
 }
 );
+
+
+// Difficulty Distribution Chart
+
+new Chart(
+document.getElementById('difficultyChart'),
+{
+type:'pie',
+
+data:{
+labels:[
+{% for key,value in difficulty_distribution.items() %}
+"{{ key }}",
+{% endfor %}
+],
+
+datasets:[
+{
+label:'Difficulty',
+data:[
+{% for key,value in difficulty_distribution.items() %}
+{{ value }},
+{% endfor %}
+]
+}
+]
+
+}
+
+}
+
+);
+
+
+// AI Learning Metrics Chart
+
+new Chart(
+document.getElementById('learningChart'),
+{
+type:'radar',
+
+data:{
+labels:[
+{% for key,value in learning_metrics.items() %}
+"{{ key }}",
+{% endfor %}
+],
+
+datasets:[
+{
+label:'AI Learning Performance',
+
+data:[
+{% for key,value in learning_metrics.items() %}
+{{ value }},
+{% endfor %}
+]
+
+}
+]
+
+}
+
+}
+
+);
+
 
 </script>
 

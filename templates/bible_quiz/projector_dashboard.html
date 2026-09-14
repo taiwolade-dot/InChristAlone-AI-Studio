@@ -13,27 +13,36 @@ body {
 }
 
 .container {
-    padding:40px;
+    padding:50px;
 }
 
 h1 {
-    font-size:50px;
+    font-size:60px;
 }
 
 .question {
-    font-size:40px;
-    margin:30px;
+    font-size:55px;
+    margin:40px;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade-out {
+    opacity:0;
+}
+
+.fade-in {
+    opacity:1;
 }
 
 .options {
-    font-size:32px;
+    font-size:38px;
     text-align:left;
     max-width:800px;
     margin:auto;
 }
 
 .option {
-    padding:15px;
+    padding:20px;
     margin:10px;
     background:#222;
     border-radius:10px;
@@ -71,21 +80,47 @@ h1 {
     padding:10px;
 }
 
-.host-btn {
-    position:absolute;
-    right:30px;
-    bottom:30px;
-    background:#333;
-    color:white;
-    padding:12px 18px;
-    border-radius:8px;
-    text-decoration:none;
-    font-size:18px;
-    opacity:0.7;
+
+
+
+.countdown-overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.9);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:2000;
+    flex-direction:column;
 }
 
-.host-btn:hover {
-    opacity:1;
+.countdown-number {
+    font-size:180px;
+    font-weight:bold;
+    color:#ffd700;
+    animation:pulse 1s ease-in-out;
+}
+
+.countdown-text {
+    font-size:60px;
+    margin-bottom:20px;
+}
+
+@keyframes pulse {
+    0% {
+        transform:scale(0.5);
+        opacity:0;
+    }
+
+    50% {
+        transform:scale(1.2);
+        opacity:1;
+    }
+
+    100% {
+        transform:scale(1);
+        opacity:1;
+    }
 }
 
 </style>
@@ -94,14 +129,43 @@ h1 {
 
 <body>
 
+
+<div class="countdown-overlay" id="countdownOverlay">
+
+    <div class="countdown-text">
+        GET READY
+    </div>
+
+    <div class="countdown-number" id="countdownNumber">
+        3
+    </div>
+
+</div>
+
 <div class="container">
 
 
 
 
 <h1>📖 BIBLE QUIZ CHALLENGE</h1>
+
+<button id="fullscreenBtn"
+onclick="openFullscreen()"
+style="
+position:fixed;
+top:20px;
+right:20px;
+z-index:999;
+font-size:18px;
+padding:12px 18px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+">
+🖥 Full Screen
+</button>
 {% if quiz_session.status == "waiting" %}
-<div class="qr-box">
+<div class="qr-box" id="qrBox">
     <h2>📱 Scan to Join</h2>
 
     <img src="data:image/png;base64,{{ qr_code }}"
@@ -117,8 +181,6 @@ h1 {
 {% endif %}
 
 
-
-<div class="progress" id="progress"></div>
 
 <div class="progress" id="progress"></div>
 
@@ -166,6 +228,49 @@ Waiting...
 const sessionId = {{ quiz_session.id }};
 
 
+
+function runCountdown(callback){
+
+    const overlay = document.getElementById("countdownOverlay");
+    const number = document.getElementById("countdownNumber");
+
+    if(!overlay || !number){
+        callback();
+        return;
+    }
+
+    overlay.style.display = "flex";
+
+    let count = 3;
+
+    number.innerText = count;
+
+    const timer = setInterval(function(){
+
+        count--;
+
+        if(count > 0){
+
+            number.innerText = count;
+
+        }else{
+
+            clearInterval(timer);
+
+            overlay.style.display = "none";
+
+            callback();
+
+        }
+
+    },1000);
+
+}
+
+
+let lastDisplayedQuestion = null;
+
+
 function updateProjector(){
 
 fetch(`/api/bible-quiz/session/${sessionId}/state`)
@@ -179,13 +284,23 @@ if(data.status==="waiting"){
 
     document.getElementById("progress").innerHTML = "";
 
+const projectorTimer = document.getElementById("timer");
+
+if(projectorTimer && data.question){
+    projectorTimer.style.display = "block";
+    projectorTimer.innerHTML =
+        Number(data.question.seconds) > 0
+            ? data.question.seconds + "s"
+            : "⏰ Time Up!";
+}
+
+
     document.getElementById("question").innerHTML =
     "⏳ Waiting for host to start the quiz...";
 
     document.getElementById("options").innerHTML = "";
 
 document.getElementById("timer").style.display = "none";
-document.getElementById("timer").style.display = "block";
     document.getElementById("timer").innerHTML = "";
 
     return;
@@ -227,14 +342,40 @@ return;
 }
 
 
+const qr = document.getElementById("qrBox");
+
+if(qr && data.status === "waiting"){
+    qr.style.display = "block";
+}
+
+if(qr && data.status !== "waiting"){
+    qr.style.display = "none";
+}
+
 document.getElementById("progress").innerHTML =
 `Question ${data.current_question_index + 1} of ${data.total_questions}`;
 
 
-if(data.question){
+if(data.question && data.question.question_id !== lastDisplayedQuestion){
 
-document.getElementById("question").innerHTML =
-data.question.text;
+lastDisplayedQuestion = data.question.question_id;
+
+const questionBox = document.getElementById("question");
+
+runCountdown(function(){
+
+questionBox.classList.add("fade-out");
+
+setTimeout(function(){
+
+    questionBox.innerHTML = data.question.text;
+
+    questionBox.classList.remove("fade-out");
+    questionBox.classList.add("fade-in");
+
+},300);
+
+});
 
 
 let html="";
@@ -253,9 +394,7 @@ ${String.fromCharCode(65+i)}. ${o}
 document.getElementById("options").innerHTML=html;
 
 
-document.getElementById("timer").style.display = "block";
-document.getElementById("timer").innerHTML =
-data.question.seconds;
+
 
 
 }
@@ -295,8 +434,55 @@ setInterval(updateProjector,1000);
 updateProjector();
 
 
+
+
+window.addEventListener("load", function(){
+
+    const btn = document.getElementById("fullscreenBtn");
+
+    if(btn){
+        btn.style.display = "block";
+    }
+
+});
+
+
+document.addEventListener("fullscreenchange", function(){
+    const btn = document.getElementById("fullscreenBtn");
+    if(!btn) return;
+
+    if(document.fullscreenElement){
+        btn.style.display = "none";
+    }else{
+        btn.style.display = "block";
+    }
+});
+
+
+
+function openFullscreen(){
+    const elem = document.documentElement;
+
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(function(error){
+            console.log("Fullscreen request was blocked:", error);
+        });
+    } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+    }
+}
+
+
+
+
 </script>
 
 
+
+
+
 </body>
+
 </html>

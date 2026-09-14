@@ -116,7 +116,7 @@ function copyJoinLink() {
     </div>
 
     <div class="prompt-output">
-</button>        <h3>Leaderboard</h3>
+        <h3>Leaderboard</h3>
         <div id="leaderboard">
             Waiting for participants...
         </div>
@@ -251,56 +251,7 @@ async function autoAdvance(){
 
 {% endblock %}
 
-<script>
-let timerInterval = null;
 
-function updateDisplayTimer(seconds) {
-    const timerElem = document.getElementById('timer-display');
-    
-    let currentSeconds = seconds;
-    timerElem.innerText = currentSeconds + 's';
-    
-    clearInterval(timerInterval);
-    if (currentSeconds > 0) {
-        timerInterval = setInterval(() => {
-            currentSeconds--;
-            if (currentSeconds <= 0) {
-                clearInterval(timerInterval);
-                timerElem.innerText = 'Time Up!';
-            } else {
-                timerElem.innerText = currentSeconds + 's';
-            }
-        }, 1000);
-    }
-}
-</script>
-
-<script>
-let lastQuestionId = null;
-let countdownTimer = null;
-
-function handleTimerUpdate(seconds, questionId) {
-    const display = document.getElementById('timer-display') || document.querySelector('.timer-box');
-
-    if (questionId !== lastQuestionId) {
-        lastQuestionId = questionId;
-        clearInterval(countdownTimer);
-        let currentSeconds = seconds;
-        
-        display.innerText = currentSeconds + 's';
-        
-        countdownTimer = setInterval(() => {
-            currentSeconds--;
-            if (currentSeconds <= 0) {
-                clearInterval(countdownTimer);
-                display.innerText = '0s';
-            } else {
-                display.innerText = currentSeconds + 's';
-            }
-        }, 1000);
-    }
-}
-</script>
 
 
 <div id="timer-display" class="timer-box">20s</div>

@@ -383,6 +383,42 @@ class ChurchEvent(db.Model):
         nullable=False
     )
 
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey("church_profile.id")
+    )
+
+    pastor_id = db.Column(
+        db.Integer,
+        db.ForeignKey("pastor_profile.id")
+    )
+
+    location = db.Column(
+        db.String(255)
+    )
+
+    association = db.Column(
+        db.String(150)
+    )
+
+    conference = db.Column(
+        db.String(150)
+    )
+
+    convention = db.Column(
+        db.String(150)
+    )
+
+    church = db.relationship(
+        'ChurchProfile',
+        foreign_keys=[church_id]
+    )
+
+    pastor = db.relationship(
+        'PastorProfile',
+        foreign_keys=[pastor_id]
+    )
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -759,4 +795,181 @@ class QuizLearnerProfile(db.Model):
         onupdate=datetime.utcnow
     )
 
+
+
+
+# ==============================
+# CHURCH MANAGEMENT SYSTEM
+# ==============================
+
+
+class ChurchProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id'),
+        nullable=False
+    )
+
+    church_name = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    motto = db.Column(db.String(255))
+
+    vision = db.Column(db.Text)
+
+    mission = db.Column(db.Text)
+
+    statement_of_faith = db.Column(db.Text)
+
+    denomination = db.Column(db.String(100))
+
+    association = db.Column(db.String(100))
+
+    conference = db.Column(db.String(100))
+
+    address = db.Column(db.String(255))
+
+    phone = db.Column(db.String(50))
+
+    email = db.Column(db.String(120))
+
+    website = db.Column(db.String(255))
+
+    logo_filename = db.Column(db.String(255))
+
+    founded_date = db.Column(db.Date)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    pastors = db.relationship(
+        'PastorProfile',
+        backref='church',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+    histories = db.relationship(
+        'ChurchHistory',
+        backref='church',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+    documents = db.relationship(
+        'ChurchDocument',
+        backref='church',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+
+    def __repr__(self):
+        return f'<ChurchProfile {self.church_name}>'
+
+
+
+class PastorProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    full_name = db.Column(
+        db.String(150),
+        nullable=False
+    )
+
+    biography = db.Column(db.Text)
+
+    education = db.Column(db.Text)
+
+    ordination_details = db.Column(db.Text)
+
+    ministry_experience = db.Column(db.Text)
+
+    called_to_church_date = db.Column(db.Date)
+
+    leadership_message = db.Column(db.Text)
+
+    pastoral_vision = db.Column(db.Text)
+
+    photo_filename = db.Column(db.String(255))
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+    def __repr__(self):
+        return f'<PastorProfile {self.full_name}>'
+
+
+
+class ChurchHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    founder = db.Column(db.String(150))
+
+    founding_story = db.Column(db.Text)
+
+    milestones = db.Column(db.Text)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+    def __repr__(self):
+        return f'<ChurchHistory {self.id}>'
+
+
+
+class ChurchDocument(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    document_type = db.Column(
+        db.String(100)
+    )
+
+    filename = db.Column(
+        db.String(255)
+    )
+
+    uploaded_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+    def __repr__(self):
+        return f'<ChurchDocument {self.title}>'
 

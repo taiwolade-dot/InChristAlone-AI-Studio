@@ -39,6 +39,87 @@ and AI recommendations for better teaching.
 
 <section class="dashboard-card">
 
+<h2>🧠 AI Ministry Learning Summary</h2>
+
+<p>
+{{ ai_summary }}
+</p>
+
+</section>
+
+
+<section class="dashboard-card">
+
+<h2>🏆 Top Mastery Questions</h2>
+
+<table width="100%">
+
+<tr>
+<th>Question ID</th>
+<th>Accuracy</th>
+<th>Attempts</th>
+</tr>
+
+{% for item in mastery_questions %}
+
+<tr>
+<td>{{ item.question_id }}</td>
+<td>{{ item.accuracy_rate }}%</td>
+<td>{{ item.times_answered }}</td>
+</tr>
+
+{% else %}
+
+<tr>
+<td colspan="3">
+No mastery data available yet.
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</section>
+
+
+<section class="dashboard-card">
+
+<h2>⚠️ Teaching Attention Needed</h2>
+
+<table width="100%">
+
+<tr>
+<th>Question ID</th>
+<th>Accuracy</th>
+<th>AI Recommendation</th>
+</tr>
+
+{% for item in teaching_attention %}
+
+<tr>
+<td>{{ item.question_id }}</td>
+<td>{{ item.accuracy_rate }}%</td>
+<td>{{ item.ai_recommendation or "Review required" }}</td>
+</tr>
+
+{% else %}
+
+<tr>
+<td colspan="3">
+No teaching concerns detected.
+</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</section>
+
+
+<section class="dashboard-card">
+
 <h2>🔥 Most Difficult Questions</h2>
 
 <table width="100%">
@@ -124,6 +205,277 @@ AI recommendations will appear after quiz participation.
 
 
 </section>
+
+
+
+<section class="dashboard-card">
+
+<h2>🧑‍🎓 Learner Development Intelligence</h2>
+
+<p>
+AI-generated learner profiles showing knowledge growth,
+strengths, improvement areas and recommended learning paths.
+</p>
+
+
+{% if learner_profiles %}
+
+<table width="100%">
+
+<tr>
+<th>Participant</th>
+<th>Learning Level</th>
+<th>Strong Topics</th>
+<th>Weak Topics</th>
+<th>AI Recommendation</th>
+</tr>
+
+
+{% for profile in learner_profiles %}
+
+<tr>
+
+<td>
+{{ profile.participant_id }}
+</td>
+
+<td>
+{{ profile.learning_level }}
+</td>
+
+<td>
+{{ profile.strong_topics or "Developing" }}
+</td>
+
+<td>
+{{ profile.weak_topics or "No data yet" }}
+</td>
+
+<td>
+{{ profile.ai_recommendation or 'Continue learning' }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+
+</table>
+
+
+{% else %}
+
+<p>
+Learner profiles will appear after quiz participation.
+</p>
+
+{% endif %}
+
+
+</section>
+
+
+
+
+<section class="dashboard-card">
+
+<h2>🧑‍🎓 AI Learner Development Summary</h2>
+
+<div class="dashboard-grid">
+
+<div class="dashboard-card">
+<h3>👥 Total Learners</h3>
+<h1>{{ total_learners }}</h1>
+</div>
+
+
+<div class="dashboard-card">
+<h3>🧠 AI Learning Insight</h3>
+<p>
+{{ learner_summary }}
+</p>
+</div>
+
+</div>
+
+
+<h3>📚 Learning Level Distribution</h3>
+
+<table width="100%">
+
+<tr>
+<th>Level</th>
+<th>Number of Learners</th>
+</tr>
+
+{% for level, count in knowledge_distribution.items() %}
+
+<tr>
+<td>{{ level }}</td>
+<td>{{ count }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+<br>
+
+
+<h3>🎯 Recommended Learning Difficulty</h3>
+
+<table width="100%">
+
+<tr>
+<th>Difficulty</th>
+<th>Learners</th>
+</tr>
+
+{% for level, count in difficulty_distribution.items() %}
+
+<tr>
+<td>{{ level }}</td>
+<td>{{ count }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+</section>
+
+
+<section class="dashboard-card">
+
+<h2>📊 AI Learning Analytics Visualization</h2>
+
+<canvas id="accuracyChart"></canvas>
+
+<br>
+
+<canvas id="difficultyChart"></canvas>
+
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const labels = {{ question_labels | tojson }};
+const accuracyData = {{ accuracy_chart | tojson }};
+const difficultyData = {{ difficulty_chart | tojson }};
+
+
+new Chart(
+    document.getElementById('accuracyChart'),
+    {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Accuracy Rate (%)',
+                data: accuracyData
+            }]
+        }
+    }
+);
+
+
+new Chart(
+    document.getElementById('difficultyChart'),
+    {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Difficulty Score (%)',
+                data: difficultyData
+            }]
+        }
+    }
+);
+
+</script>
+
+
+
+
+<section class="dashboard-card">
+
+<h2>📊 AI Learner Analytics Visualization</h2>
+
+
+<div class="dashboard-card">
+
+<h3>🧠 Learning Level Distribution</h3>
+
+<canvas id="learnerLevelChart"></canvas>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>📈 Learner Accuracy Performance</h3>
+
+<canvas id="learnerAccuracyChart"></canvas>
+
+</div>
+
+
+</section>
+
+
+
+<script>
+
+const learnerLevelData = {{ learner_level_chart | tojson }};
+
+const learnerLabels = {{ learner_labels | tojson }};
+
+const learnerAccuracyData = {{ learner_accuracy_chart | tojson }};
+
+
+
+new Chart(
+    document.getElementById('learnerLevelChart'),
+    {
+        type: 'doughnut',
+
+        data: {
+            labels: Object.keys(learnerLevelData),
+
+            datasets: [{
+                data: Object.values(learnerLevelData)
+            }]
+        }
+    }
+);
+
+
+
+new Chart(
+    document.getElementById('learnerAccuracyChart'),
+    {
+        type: 'bar',
+
+        data: {
+            labels: learnerLabels,
+
+            datasets: [{
+                label: 'Accuracy %',
+
+                data: learnerAccuracyData
+            }]
+        }
+    }
+);
+
+
+</script>
 
 
 {% endblock %}
