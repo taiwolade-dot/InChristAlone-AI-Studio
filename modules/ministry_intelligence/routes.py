@@ -14,6 +14,7 @@ from .association import generate_network_report
 from .prediction import generate_prediction_report
 from .alerts import generate_alert_report
 from .strategy import generate_strategy_report
+from .report import generate_ministry_report
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -64,6 +65,15 @@ def dashboard():
         alert_report
     )
 
+    ministry_report = generate_ministry_report(
+        ministry_summary,
+        health_score,
+        network_report,
+        prediction_report,
+        alert_report,
+        strategy_report
+    )
+
     return render_template(
         "ministry_intelligence/dashboard.html",
         summary=ministry_summary,
@@ -77,5 +87,6 @@ def dashboard():
         network_report=network_report,
         prediction_report=prediction_report,
         alert_report=alert_report,
-        strategy_report=strategy_report
+        strategy_report=strategy_report,
+        ministry_report=ministry_report
     )

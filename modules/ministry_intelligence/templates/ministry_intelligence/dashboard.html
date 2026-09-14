@@ -373,5 +373,54 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Executive Ministry Intelligence Report</h2>
+
+<p>
+{{ ministry_report.executive_summary.message }}
+</p>
+
+<h3>Ministry Overview</h3>
+
+<ul>
+<li>Churches: {{ ministry_report.executive_summary.churches }}</li>
+<li>Members: {{ ministry_report.executive_summary.members }}</li>
+<li>Pastors: {{ ministry_report.executive_summary.pastors }}</li>
+<li>Events: {{ ministry_report.executive_summary.events }}</li>
+</ul>
+
+
+<h3>Leadership Assessment</h3>
+
+<ul>
+<li>
+Health Score:
+{{ ministry_report.intelligence_summary.health_score }}
+</li>
+
+<li>
+Growth Direction:
+{{ ministry_report.intelligence_summary.forecast.growth_forecast.direction }}
+</li>
+
+<li>
+Health Status:
+{{ ministry_report.intelligence_summary.forecast.health_forecast.status }}
+</li>
+</ul>
+
+
+<h3>Strategic Priorities</h3>
+
+<ul>
+{% for action in ministry_report.action_summary.strategies.immediate_actions %}
+<li>{{ action.action }}</li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 
