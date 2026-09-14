@@ -232,5 +232,40 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Baptist Network Intelligence</h2>
+
+<h3>Conference Overview</h3>
+
+<ul>
+{% for conference, data in network_report.conferences.items() %}
+    <li>
+        <strong>{{ conference }}</strong><br>
+        Churches: {{ data.churches }}<br>
+        Associations:
+        {% for association in data.associations %}
+            {{ association }}
+        {% endfor %}
+    </li>
+{% endfor %}
+</ul>
+
+
+<h3>Association Overview</h3>
+
+<ul>
+{% for association, data in network_report.associations.items() %}
+    <li>
+        <strong>{{ association }}</strong><br>
+        Churches: {{ data.churches }}<br>
+        Pastors: {{ data.pastors }}
+    </li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 
