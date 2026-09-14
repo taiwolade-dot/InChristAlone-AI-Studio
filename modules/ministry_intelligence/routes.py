@@ -27,6 +27,7 @@ from .strategic_planner import generate_strategic_plan
 from .forecasting import generate_ministry_forecast
 from .scenario_simulator import generate_ministry_scenarios
 from .recommendation_optimizer import generate_optimized_recommendations
+from .impact_analyzer import generate_ministry_impact_analysis
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -260,6 +261,14 @@ def ministry_executive_dashboard():
         scenarios
     )
 
+    impact_analysis = generate_ministry_impact_analysis(
+        health_score,
+        comparison,
+        forecast,
+        scenarios,
+        optimized_recommendations
+    )
+
     chart_data = {
         "health_change": comparison["health_change"] if comparison else 0,
         "growth_change": comparison["growth_change"] if comparison else 0,
@@ -281,6 +290,7 @@ def ministry_executive_dashboard():
         forecast=forecast,
         scenarios=scenarios,
         optimized_recommendations=optimized_recommendations,
+        impact_analysis=impact_analysis,
         chart_data=json.dumps(chart_data)
     )
 

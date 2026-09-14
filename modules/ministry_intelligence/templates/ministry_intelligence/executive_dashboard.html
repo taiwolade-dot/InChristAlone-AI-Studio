@@ -347,6 +347,54 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Ministry Impact Intelligence</h2>
+
+<h3>Impact Score</h3>
+<ul>
+{% for item in impact_analysis.impact_score %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Improvement Areas</h3>
+<ul>
+{% for item in impact_analysis.improvement_areas %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Success Indicators</h3>
+<ul>
+{% for item in impact_analysis.success_indicators %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Effectiveness Analysis</h3>
+<ul>
+{% for item in impact_analysis.effectiveness_analysis %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Continuous Improvement</h3>
+<ul>
+{% for item in impact_analysis.continuous_improvement %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
