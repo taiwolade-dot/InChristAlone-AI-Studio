@@ -76,3 +76,35 @@ def summarize_ministry_memory(user_id=None):
         }
         for item in memories
     ]
+
+
+def get_memory_statistics(user_id=None):
+
+    query = MinistryMemory.query
+
+    if user_id:
+        query = query.filter_by(
+            user_id=user_id
+        )
+
+    total = query.count()
+
+    high_priority = query.filter_by(
+        importance="High"
+    ).count()
+
+    categories = {}
+
+    memories = query.all()
+
+    for memory in memories:
+        categories[memory.memory_type] = (
+            categories.get(memory.memory_type, 0) + 1
+        )
+
+    return {
+        "total_memories": total,
+        "high_priority": high_priority,
+        "categories": categories,
+        "recent_count": min(total, 5)
+    }

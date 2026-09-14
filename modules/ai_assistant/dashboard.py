@@ -2,6 +2,7 @@ from models import AIConversation
 from sqlalchemy import func
 
 from .ministry_copilot import generate_ministry_copilot_context
+from .memory_engine import get_memory_statistics
 
 
 def get_ai_dashboard(user_id):
@@ -44,10 +45,13 @@ def get_ai_dashboard(user_id):
 
     copilot = generate_ministry_copilot_context()
 
+    memory_stats = get_memory_statistics(user_id)
+
 
     return {
         "total": total,
         "recent": recent,
         "usage": usage,
-        "copilot": copilot
+        "copilot": copilot,
+        "memory_stats": memory_stats
     }

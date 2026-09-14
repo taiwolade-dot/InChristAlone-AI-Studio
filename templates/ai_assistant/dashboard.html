@@ -95,4 +95,28 @@
 
 </div>
 
+<div class="card">
+<h3>📊 Memory Intelligence Analytics</h3>
+
+<h4>Total Memories</h4>
+<p>{{ data.memory_stats.total_memories }}</p>
+
+<h4>🔥 High Priority Memories</h4>
+<p>{{ data.memory_stats.high_priority }}</p>
+
+<h4>📚 Memory Categories</h4>
+
+<ul>
+{% for category,count in data.memory_stats.categories.items() %}
+<li>
+{{ category }} : {{ count }}
+</li>
+{% endfor %}
+</ul>
+
+<h4>🕒 Recent Memory Activity</h4>
+<p>{{ data.memory_stats.recent_count }} recent memories analyzed</p>
+
+</div>
+
 {% endblock %}
