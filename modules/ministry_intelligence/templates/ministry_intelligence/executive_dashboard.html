@@ -299,6 +299,54 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Action Priority Matrix</h2>
+
+<h3>Priority Actions</h3>
+<ul>
+{% for item in optimized_recommendations.priority_actions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Impact Analysis</h3>
+<ul>
+{% for item in optimized_recommendations.impact_analysis %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Urgency Levels</h3>
+<ul>
+{% for item in optimized_recommendations.urgency_levels %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Expected Outcomes</h3>
+<ul>
+{% for item in optimized_recommendations.expected_outcomes %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Leadership Action Sequence</h3>
+<ul>
+{% for item in optimized_recommendations.action_sequence %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
