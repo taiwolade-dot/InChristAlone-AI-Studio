@@ -1,0 +1,357 @@
+
+{% extends "base.html" %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<style>
+
+.timeline-item {
+    padding: 15px;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    border-radius: 10px;
+}
+
+.timeline-item h4 {
+    margin-bottom: 10px;
+}
+
+.dashboard-card {
+    overflow: visible;
+}
+
+</style>
+
+
+
+<div class="container">
+
+<div class="dashboard-hero">
+<h1>Church Calendar Intelligence Dashboard</h1>
+<p>Monitor programmes, ministries, and organisational activities.</p>
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>Quick Actions</h3>
+
+<div class="dashboard-grid">
+
+<a href="{{ url_for('church_calendar.new_event') }}" class="dashboard-card">
+➕ Add Programme
+</a>
+
+
+<a href="{{ url_for('church_calendar.index') }}" class="dashboard-card">
+📅 View Calendar
+</a>
+
+
+<a href="{{ url_for('church_calendar.ai_calendar') }}" class="dashboard-card">
+🤖 AI Search
+</a>
+
+
+<a href="{{ url_for('church_calendar.print_calendar') }}" class="dashboard-card">
+🖨 Print Calendar
+</a>
+
+</div>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>Advanced Analytics</h3>
+
+<div class="dashboard-grid">
+
+<div class="stat-card">
+<h3>Next 7 Days</h3>
+<p>{{ events_next_7_days }}</p>
+</div>
+
+
+<div class="stat-card">
+<h3>Next 30 Days</h3>
+<p>{{ events_next_30_days }}</p>
+</div>
+
+
+<div class="stat-card">
+<h3>Completed Programmes</h3>
+<p>{{ completed_events }}</p>
+</div>
+
+
+<div class="stat-card">
+<h3>Average Monthly Activity</h3>
+<p>{{ average_monthly_events }}</p>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="dashboard-grid">
+
+<div class="stat-card">
+<h3>Total Programmes</h3>
+<p>{{ total_events }}</p>
+</div>
+
+
+<div class="stat-card">
+<h3>Upcoming Programmes</h3>
+<p>{{ total_upcoming }}</p>
+</div>
+
+
+<div class="stat-card">
+<h3>Busiest Month</h3>
+<p>{{ busiest_month }}</p>
+</div>
+
+
+<div class="stat-card">
+<h3>Leading Ministry</h3>
+<p>{{ active_ministry }}</p>
+</div>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>Calendar Intelligence Summary</h3>
+
+<p>
+The most active ministry is <strong>{{ active_ministry }}</strong>.
+</p>
+
+<p>
+The leading organisational level is <strong>{{ active_level }}</strong>.
+</p>
+
+<p>
+The busiest month has recorded the highest programme activity.
+</p>
+
+</div>
+
+
+<div class="dashboard-grid">
+
+
+<div class="dashboard-card">
+
+
+
+<h3>Upcoming Programmes Timeline</h3>
+
+{% if upcoming_events %}
+
+{% for event in upcoming_events %}
+
+<div class="timeline-item">
+
+<h4>📅 {{ event.title }}</h4>
+
+<p>
+<strong>Date:</strong> {{ event.start_datetime.strftime("%d %B %Y") }}
+</p>
+
+<p>
+<strong>Ministry:</strong> {{ event.ministry }}
+</p>
+
+<p>
+<strong>Level:</strong> {{ event.level }}
+</p>
+
+<p>
+⏳ {{ event.days_remaining }} days remaining
+</p>
+
+</div>
+
+<hr>
+
+{% endfor %}
+
+{% else %}
+
+<p>
+No upcoming programmes scheduled.
+</p>
+
+<p>
+Add a new programme to activate the timeline.
+</p>
+
+{% endif %}
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>Completed Programmes</h3>
+
+{% if completed_recent_events %}
+
+{% for event in completed_recent_events %}
+
+<div class="timeline-item">
+
+<h4>✅ {{ event.title }}</h4>
+
+<p>
+<strong>Completed:</strong> {{ event.start_datetime.strftime("%d %B %Y") }}
+</p>
+
+<p>
+<strong>Ministry:</strong> {{ event.ministry }}
+</p>
+
+<p>
+<strong>Level:</strong> {{ event.level }}
+</p>
+
+</div>
+
+<hr>
+
+{% endfor %}
+
+{% else %}
+
+<p>No completed programmes found.</p>
+
+{% endif %}
+
+</div>
+
+<div class="dashboard-card">
+
+<h3>Monthly Programme Trend</h3>
+
+<canvas id="monthlyChart"></canvas>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>Ministry Distribution</h3>
+
+<canvas id="ministryChart"></canvas>
+
+</div>
+
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>Baptist Structure Distribution</h3>
+
+<canvas id="levelChart"></canvas>
+
+</div>
+
+
+</div>
+
+
+<script>
+
+const monthlyLabels = [
+{% for month in monthly_stats.keys() %}
+"{{ month }}",
+{% endfor %}
+];
+
+
+const monthlyData = [
+{% for count in monthly_stats.values() %}
+{{ count }},
+{% endfor %}
+];
+
+
+new Chart(
+document.getElementById('monthlyChart'),
+{
+type:'bar',
+data:{
+labels:monthlyLabels,
+datasets:[
+{
+label:'Programmes',
+data:monthlyData
+}
+]
+}
+}
+);
+
+
+new Chart(
+document.getElementById('ministryChart'),
+{
+type:'pie',
+data:{
+labels:[
+{% for ministry in ministry_stats.keys() %}
+"{{ ministry }}",
+{% endfor %}
+],
+datasets:[
+{
+data:[
+{% for count in ministry_stats.values() %}
+{{ count }},
+{% endfor %}
+]
+}
+]
+}
+}
+);
+
+
+new Chart(
+document.getElementById('levelChart'),
+{
+type:'doughnut',
+data:{
+labels:[
+{% for level in level_stats.keys() %}
+"{{ level }}",
+{% endfor %}
+],
+datasets:[
+{
+data:[
+{% for count in level_stats.values() %}
+{{ count }},
+{% endfor %}
+]
+}
+]
+}
+}
+);
+
+</script>
+
+
+{% endblock %}
