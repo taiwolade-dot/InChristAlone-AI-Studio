@@ -51,3 +51,9 @@ modules/content_generator/flyer_engine/layout.py
 
 # Church Calendar dashboard snapshots
 modules/church_calendar/templates/church_calendar/dashboard_after_*.html
+
+# Historical development snapshots
+*_before_*.py
+*_before_*.html
+*_backup_*.py
+*_backup_*.html
