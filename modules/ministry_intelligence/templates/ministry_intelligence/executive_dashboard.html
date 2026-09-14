@@ -152,6 +152,55 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Strategic Ministry Roadmap</h2>
+
+
+<h3>Immediate Actions</h3>
+<ul>
+{% for item in strategic_plan.immediate_actions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Growth Strategy</h3>
+<ul>
+{% for item in strategic_plan.growth_strategy %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Leadership Development Plan</h3>
+<ul>
+{% for item in strategic_plan.leadership_plan %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Outreach Plan</h3>
+<ul>
+{% for item in strategic_plan.outreach_plan %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Discipleship Plan</h3>
+<ul>
+{% for item in strategic_plan.discipleship_plan %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
