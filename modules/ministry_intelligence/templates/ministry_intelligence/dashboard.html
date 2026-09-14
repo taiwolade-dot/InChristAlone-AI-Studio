@@ -306,5 +306,41 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Ministry Risk & Alert Intelligence</h2>
+
+<h3>Data Alerts</h3>
+
+<ul>
+{% for alert in alert_report.data_alerts %}
+<li>
+<strong>{{ alert.level }}:</strong>
+{{ alert.title }} -
+{{ alert.message }}
+</li>
+{% else %}
+<li>No data alerts detected.</li>
+{% endfor %}
+</ul>
+
+
+<h3>Activity Alerts</h3>
+
+<ul>
+{% for alert in alert_report.activity_alerts %}
+<li>
+<strong>{{ alert.level }}:</strong>
+{{ alert.title }} -
+{{ alert.message }}
+</li>
+{% else %}
+<li>No activity alerts detected.</li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 
