@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Ministry Intelligence Dashboard</h1>
+
+<div>
+    <h3>Ministry Overview</h3>
+
+    <p>Pastors: {{ summary.pastors }}</p>
+    <p>Churches: {{ summary.churches }}</p>
+    <p>Events: {{ summary.events }}</p>
+    <p>Bible Quiz Participants: {{ summary.quiz_participants }}</p>
+</div>
+
+<div>
+    <h3>AI Insights</h3>
+
+    <ul>
+    {% for insight in insights %}
+        <li>{{ insight }}</li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

@@ -26,6 +26,7 @@ from modules.bible_quiz.routes import bible_quiz_bp
 from modules.bible_quiz.session_routes import bible_quiz_session_bp
 from modules.ai_assistant.routes import ai_assistant_bp
 from modules.ministry.routes import ministry_bp
+from modules.ministry_intelligence.routes import ministry_intelligence_bp
 
 app = Flask(__name__)
 
@@ -50,6 +51,7 @@ app.register_blueprint(bible_quiz_bp)
 app.register_blueprint(bible_quiz_session_bp)
 app.register_blueprint(ai_assistant_bp)
 app.register_blueprint(ministry_bp)
+app.register_blueprint(ministry_intelligence_bp)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
