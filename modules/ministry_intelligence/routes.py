@@ -21,6 +21,7 @@ from .export import generate_export_report
 from .documents import generate_ministry_document
 from .pdf_generator import generate_pdf_report
 from .report_manager import create_report_record, get_report_history, get_report_by_id, get_report_statistics
+from .comparison_manager import compare_reports
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -172,6 +173,27 @@ def download_ministry_report():
         download_name=filename
     )
 
+
+
+
+@ministry_intelligence_bp.route("/ministry-report-comparison")
+def ministry_report_comparison():
+
+    reports = get_report_history()
+
+    comparison = None
+
+    if len(reports) >= 2:
+        comparison = compare_reports(
+            reports[1].id,
+            reports[0].id
+        )
+
+    return render_template(
+        "ministry_intelligence/comparison.html",
+        reports=reports,
+        comparison=comparison
+    )
 
 @ministry_intelligence_bp.route("/ministry-reports")
 def ministry_reports():
