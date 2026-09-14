@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Church Calendar AI Intelligence</h2>
+
+<p>
+Ask questions about church programmes, ministries, associations, conferences, and conventions.
+</p>
+
+<form method="POST">
+
+<div class="mb-3">
+
+<label>
+Ask AI Calendar
+</label>
+
+<input 
+type="text"
+name="question"
+class="form-control"
+placeholder="Example: Show youth programmes in 2026"
+required>
+
+</div>
+
+<button class="btn btn-primary">
+Search Calendar
+</button>
+
+</form>
+
+
+<hr>
+
+
+<h4 class="mt-4">
+Search Results
+</h4>
+
+
+{% if events %}
+
+{% for event in events %}
+
+<div class="card mt-3 p-3">
+
+<h5>
+{{ event.title }}
+</h5>
+
+<p>
+<b>Date:</b>
+{{ event.start_datetime }}
+</p>
+
+<p>
+<b>Ministry:</b>
+{{ event.ministry }}
+</p>
+
+<p>
+<b>Level:</b>
+{{ event.level }}
+</p>
+
+<p>
+<b>Organization:</b>
+{{ event.organization_name }}
+</p>
+
+<p>
+<b>Venue:</b>
+{{ event.venue }}
+</p>
+
+<p>
+<b>Location:</b>
+{{ event.location }}
+</p>
+
+{% if event.association %}
+<p>
+<b>Association:</b>
+{{ event.association }}
+</p>
+{% endif %}
+
+{% if event.conference %}
+<p>
+<b>Conference:</b>
+{{ event.conference }}
+</p>
+{% endif %}
+
+{% if event.convention %}
+<p>
+<b>Convention:</b>
+{{ event.convention }}
+</p>
+{% endif %}
+
+
+{% if event.church %}
+<p>
+<b>Church:</b>
+{{ event.church.church_name }}
+</p>
+{% endif %}
+
+
+{% if event.pastor %}
+<p>
+<b>Pastor:</b>
+{{ event.pastor.full_name }}
+</p>
+{% endif %}
+
+
+<p>
+{{ event.description }}
+</p>
+
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p class="text-muted mt-3">
+No programme found. Try another search.
+</p>
+
+{% endif %}
+
+
+</div>
+
+{% endblock %}
