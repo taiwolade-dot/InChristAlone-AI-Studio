@@ -499,6 +499,62 @@ Risk:
 
 </div>
 
+
+
+<div class="insight-card">
+
+<h2>AI Predictive Intelligence</h2>
+
+<h3>Growth Predictions</h3>
+<ul>
+{% for item in predictive_insights.growth_predictions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Risk Predictions</h3>
+<ul>
+{% for item in predictive_insights.risk_predictions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Trend Analysis</h3>
+<ul>
+{% for item in predictive_insights.trend_analysis %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Future Outcomes</h3>
+<ul>
+{% for item in predictive_insights.future_outcomes %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Early Warning Signals</h3>
+<ul>
+{% for item in predictive_insights.early_warning_signals %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Predictive Recommendations</h3>
+<ul>
+{% for item in predictive_insights.predictive_recommendations %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}
