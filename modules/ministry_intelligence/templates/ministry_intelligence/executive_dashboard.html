@@ -111,6 +111,47 @@ Risk:
 
 <div class="insight-card">
 
+
+
+<div class="insight-card">
+
+<h2>AI Leadership Decision Support</h2>
+
+
+<h3>Ministry Strengths</h3>
+<ul>
+{% for item in decision_support.strengths %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Growth Opportunities</h3>
+<ul>
+{% for item in decision_support.opportunities %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Emerging Risks</h3>
+<ul>
+{% for item in decision_support.risks %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+<h3>Recommended Actions</h3>
+<ul>
+{% for item in decision_support.actions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+
+</div>
+
 <h2>Strategic Recommendations</h2>
 
 {% for item in recommendations %}

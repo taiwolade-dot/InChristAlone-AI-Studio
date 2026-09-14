@@ -22,6 +22,7 @@ from .documents import generate_ministry_document
 from .pdf_generator import generate_pdf_report
 from .report_manager import create_report_record, get_report_history, get_report_by_id, get_report_statistics
 from .comparison_manager import compare_reports
+from .decision_support import generate_decision_support
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -223,6 +224,12 @@ def ministry_executive_dashboard():
         generate_ministry_analytics()
     )
 
+    decision_support = generate_decision_support(
+        health_score,
+        comparison,
+        recommendations
+    )
+
     chart_data = {
         "health_change": comparison["health_change"] if comparison else 0,
         "growth_change": comparison["growth_change"] if comparison else 0,
@@ -239,6 +246,7 @@ def ministry_executive_dashboard():
         statistics=statistics,
         comparison=comparison,
         recommendations=recommendations,
+        decision_support=decision_support,
         chart_data=json.dumps(chart_data)
     )
 
