@@ -223,12 +223,23 @@ def ministry_executive_dashboard():
         generate_ministry_analytics()
     )
 
+    chart_data = {
+        "health_change": comparison["health_change"] if comparison else 0,
+        "growth_change": comparison["growth_change"] if comparison else 0,
+        "previous_health": (
+            health_score - comparison["health_change"]
+            if comparison else health_score
+        ),
+        "current_health": health_score
+    }
+
     return render_template(
         "ministry_intelligence/executive_dashboard.html",
         health_score=health_score,
         statistics=statistics,
         comparison=comparison,
-        recommendations=recommendations
+        recommendations=recommendations,
+        chart_data=json.dumps(chart_data)
     )
 
 @ministry_intelligence_bp.route("/ministry-reports")

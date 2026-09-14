@@ -37,6 +37,48 @@
 
 <div class="insight-card">
 
+
+<div class="insight-card">
+
+<h2>Ministry Growth Analytics</h2>
+
+<canvas id="ministryTrendChart"></canvas>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const chartData = {{ chart_data | safe }};
+
+new Chart(
+    document.getElementById("ministryTrendChart"),
+    {
+        type: "bar",
+        data: {
+            labels: [
+                "Previous Health",
+                "Current Health",
+                "Growth Change"
+            ],
+            datasets: [
+                {
+                    label: "Ministry Performance",
+                    data: [
+                        chartData.previous_health,
+                        chartData.current_health,
+                        chartData.growth_change
+                    ]
+                }
+            ]
+        }
+    }
+);
+
+</script>
+
 <h2>Comparison Insight</h2>
 
 {% if comparison %}
