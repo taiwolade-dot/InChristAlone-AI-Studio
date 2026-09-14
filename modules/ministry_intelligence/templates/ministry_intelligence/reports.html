@@ -6,6 +6,38 @@
 
 <h1>AI Ministry Intelligence Report History</h1>
 
+
+
+<div class="metric-grid">
+
+<div class="metric-card">
+<h3>Total Reports</h3>
+<div class="metric-value">
+{{ statistics.total_reports }}
+</div>
+</div>
+
+<div class="metric-card">
+<h3>Report Types</h3>
+<div class="metric-value">
+{{ statistics.report_types }}
+</div>
+</div>
+
+<div class="metric-card">
+<h3>Latest Report</h3>
+<div class="metric-value">
+{% if statistics.latest_report %}
+{{ statistics.latest_report.created_at }}
+{% else %}
+None
+{% endif %}
+</div>
+</div>
+
+</div>
+
+
 <div class="insight-card">
 
 <h2>Archived Leadership Reports</h2>

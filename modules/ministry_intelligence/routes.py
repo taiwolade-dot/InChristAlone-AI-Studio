@@ -20,7 +20,7 @@ from .report import generate_ministry_report
 from .export import generate_export_report
 from .documents import generate_ministry_document
 from .pdf_generator import generate_pdf_report
-from .report_manager import create_report_record, get_report_history, get_report_by_id
+from .report_manager import create_report_record, get_report_history, get_report_by_id, get_report_statistics
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -177,10 +177,12 @@ def download_ministry_report():
 def ministry_reports():
 
     reports = get_report_history()
+    statistics = get_report_statistics()
 
     return render_template(
         "ministry_intelligence/reports.html",
-        reports=reports
+        reports=reports,
+        statistics=statistics
     )
 
 
