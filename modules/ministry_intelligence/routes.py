@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 from flask import render_template, send_file
 
@@ -19,7 +20,7 @@ from .report import generate_ministry_report
 from .export import generate_export_report
 from .documents import generate_ministry_document
 from .pdf_generator import generate_pdf_report
-from .report_manager import create_report_record, get_report_history
+from .report_manager import create_report_record, get_report_history, get_report_by_id
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -147,7 +148,10 @@ def download_ministry_report():
         export_report
     )
 
-    filename = "AI_Ministry_Intelligence_Leadership_Report.pdf"
+    filename = (
+        "reports/ministry_intelligence/"
+        f"AI_Ministry_Intelligence_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    )
 
     generate_pdf_report(
         document,
@@ -177,4 +181,19 @@ def ministry_reports():
     return render_template(
         "ministry_intelligence/reports.html",
         reports=reports
+    )
+
+
+@ministry_intelligence_bp.route("/download-report/<int:report_id>")
+def download_report(report_id):
+
+    report = get_report_by_id(report_id)
+
+    if not report:
+        return "Report not found", 404
+
+    return send_file(
+        report.file_path,
+        as_attachment=True,
+        download_name=report.file_path.split("/")[-1]
     )
