@@ -12,6 +12,7 @@ from .dashboard import get_ai_dashboard
 from .pdf_export import create_pdf
 from .reports import generate_ai_report
 from .insights import generate_ministry_insights
+from .ministry_decision_engine import format_ministry_decision_response
 from modules.ai_service import ask_ai
 
 
@@ -856,6 +857,10 @@ def chat():
         elif module == "ai_help":
             title = "🤖 AI Studio Help"
             response = ask_ai_with_memory(question, module)
+
+        elif module == "ministry_intelligence":
+            title = "🧠 Ministry Decision Intelligence"
+            response = format_ministry_decision_response(question)
 
         else:
             title = "🤖 AI Assistant"

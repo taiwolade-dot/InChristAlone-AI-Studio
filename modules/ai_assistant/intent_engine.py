@@ -125,4 +125,21 @@ def detect_module(question):
         return "ai_help"
 
 
+    if any(word in q for word in [
+        "strategy",
+        "strategic plan",
+        "forecast",
+        "prediction",
+        "risk",
+        "ministry health",
+        "church health",
+        "decision support",
+        "recommendation",
+        "growth analysis",
+        "leadership analysis",
+        "future outcome"
+    ]):
+        return "ministry_intelligence"
+
+
     return "general"
