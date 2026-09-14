@@ -19,7 +19,7 @@ from .report import generate_ministry_report
 from .export import generate_export_report
 from .documents import generate_ministry_document
 from .pdf_generator import generate_pdf_report
-from .report_manager import create_report_record
+from .report_manager import create_report_record, get_report_history
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -166,4 +166,15 @@ def download_ministry_report():
         filename,
         as_attachment=True,
         download_name=filename
+    )
+
+
+@ministry_intelligence_bp.route("/ministry-reports")
+def ministry_reports():
+
+    reports = get_report_history()
+
+    return render_template(
+        "ministry_intelligence/reports.html",
+        reports=reports
     )
