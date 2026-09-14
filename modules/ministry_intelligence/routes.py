@@ -8,6 +8,7 @@ from .intelligence import generate_ministry_insights
 from .health import calculate_ministry_health
 from .analytics import generate_ministry_analytics
 from .recommendations import generate_ministry_recommendations
+from .health_insights import generate_health_insights
 
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
@@ -20,6 +21,10 @@ def dashboard():
     )
 
     health_score = calculate_ministry_health(
+        ministry_summary
+    )
+
+    health_insights = generate_health_insights(
         ministry_summary
     )
 
@@ -40,6 +45,7 @@ def dashboard():
         summary=ministry_summary,
         insights=insights,
         health_score=health_score,
+        health_insights=health_insights,
         analytics=analytics,
         chart_data=json.dumps(chart_data),
         recommendations=recommendations

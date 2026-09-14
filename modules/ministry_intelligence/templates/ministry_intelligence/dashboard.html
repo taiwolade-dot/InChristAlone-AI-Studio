@@ -176,5 +176,33 @@ new Chart(
 
 </div>
 
+
+<div class="insight-card">
+
+<h2>Health Intelligence</h2>
+
+<h3>Strengths</h3>
+<ul>
+{% for item in health_insights.strengths %}
+    <li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+<h3>Attention Areas</h3>
+<ul>
+{% for item in health_insights.attention %}
+    <li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+<h3>Priority Actions</h3>
+<ul>
+{% for item in health_insights.priorities %}
+    <li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+</div>
+
 {% endblock %}
 
