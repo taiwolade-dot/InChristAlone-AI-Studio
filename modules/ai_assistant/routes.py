@@ -3,7 +3,7 @@ from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from flask_login import login_required, current_user
-from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile
+from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile, PastorProfile
 from datetime import datetime
 import requests
 import os
@@ -1056,6 +1056,10 @@ def birthday_flyer(member_id):
         owner_id=member.owner_id
     ).first()
 
+    pastor = PastorProfile.query.filter_by(
+        church_id=church.id
+    ).first() if church else None
+
     background_url = generate_birthday_background(
         member.full_name
     )
@@ -1073,13 +1077,26 @@ def birthday_flyer(member_id):
             if church
             else "Celebrating God's faithfulness"
         ),
-        speakers=[
-            {
-                "photo": member.profile_photo,
-                "name": member.full_name,
-                "role": "Birthday Celebration"
-            }
-        ] if member.profile_photo else None,
+        speakers=(
+            [
+                {
+                    "photo": member.profile_photo,
+                    "name": member.full_name,
+                    "role": "Birthday Celebration"
+                }
+            ]
+            +
+            [
+                {
+                    "photo": pastor.photo_filename,
+                    "name": pastor.full_name,
+                    "role": "Senior Pastor"
+                }
+            ]
+            if pastor and pastor.photo_filename
+            else []
+        )
+        if member.profile_photo else None,
         logo_path=church.logo_filename if church else None,
           background_path=background_path,
         theme="default"
