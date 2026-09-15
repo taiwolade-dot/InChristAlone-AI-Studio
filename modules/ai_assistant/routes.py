@@ -1065,8 +1065,14 @@ def birthday_flyer(member_id):
         bible_verse="Numbers 6:24-26",
         event_date=str(member.birthday),
         venue="Celebrating God's faithfulness",
-        speakers=None,
-        logo_path=member.profile_photo if member.profile_photo else None,
+        speakers=[
+            {
+                "photo": member.profile_photo,
+                "name": member.full_name,
+                "role": "Birthday Celebration"
+            }
+        ] if member.profile_photo else None,
+        logo_path=None,
           background_path=background_path,
         theme="default"
     )
