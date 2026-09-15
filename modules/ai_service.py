@@ -2,6 +2,8 @@ import requests
 from config import Config
 
 
+AI_LAST_STATUS = "unknown"
+
 MINISTRY_CONTEXT = """
 You are InChristAlone AI Assistant, a Christian ministry artificial intelligence assistant.
 
@@ -21,6 +23,9 @@ Always answer clearly and practically.
 
 
 def ask_ai(prompt):
+    global AI_LAST_STATUS
+    AI_LAST_STATUS = "requesting"
+
 
     prompt = MINISTRY_CONTEXT + "User Request:" + prompt
 
@@ -67,13 +72,28 @@ def ask_ai(prompt):
 
 
             if response.status_code != 200:
-                continue
+                try:
+                    error = response.json()
+                    message = error.get("error", {}).get("message", "")
+                except Exception:
+                    message = response.text
 
+                if response.status_code == 429:
+                    AI_LAST_STATUS = "quota_error"
+                    return (
+                        "⚠️ AI generation limit reached.\n\n"
+                        "The Gemini AI service quota has been exceeded. "
+                        "Please try again later or configure a paid Gemini API plan."
+                    )
+
+                AI_LAST_STATUS = "error"
+                return f"⚠️ AI service error: {message}"
 
             result = response.json()
 
 
             if "candidates" in result:
+                AI_LAST_STATUS = "success"
                 return (
                     result["candidates"][0]
                     ["content"]
@@ -81,15 +101,14 @@ def ask_ai(prompt):
                     ["text"]
                 )
 
-
         except requests.exceptions.RequestException:
 
             if attempt == 2:
+                AI_LAST_STATUS = "unavailable"
                 return (
                     "⚠️ The AI service is temporarily unavailable. "
                     "Please try again shortly."
                 )
-
 
         except Exception:
 

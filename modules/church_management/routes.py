@@ -377,6 +377,29 @@ def edit_member(member_id):
     return render_template('church_management/edit_member.html', member=member)
 
 
+
+@church_management_bp.route('/members/<int:member_id>')
+@login_required
+@admin_required
+def member_profile(member_id):
+
+    member = Member.query.get_or_404(member_id)
+
+    if member.owner_id != current_user.id:
+        flash(
+            'You do not have permission to view this member.',
+            'error'
+        )
+        return redirect(
+            url_for('church_management.index')
+        )
+
+    return render_template(
+        'church_management/member_profile.html',
+        member=member
+    )
+
+
 @church_management_bp.route('/delete/<int:member_id>', methods=['POST'])
 @login_required
 @admin_required

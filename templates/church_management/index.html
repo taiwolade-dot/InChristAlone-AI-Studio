@@ -86,6 +86,7 @@
             {% if member.age_range %}<p><strong>Age Range:</strong> {{ member.age_range }}</p>{% endif %}
 
             <div style="margin-top:0.8rem; display:flex; gap:0.8rem;">
+                <a href="{{ url_for('church_management.member_profile', member_id=member.id) }}" class="btn-primary">👤 Profile</a>
                 <a href="{{ url_for('church_management.edit_member', member_id=member.id) }}" class="btn-secondary">Edit</a>
                 <form method="POST" action="{{ url_for('church_management.delete_member', member_id=member.id) }}"
                       onsubmit="return confirm('Remove {{ member.full_name }} from the member list?');">

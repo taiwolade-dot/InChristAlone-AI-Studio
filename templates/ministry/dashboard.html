@@ -65,4 +65,61 @@ Bible Quiz Studio
 </div>
 
 
+
+<div class="dashboard-grid" style="margin-top:2rem">
+
+    <div class="dashboard-card">
+        <h3>🗓 Upcoming Events</h3>
+
+        {% if upcoming_events %}
+            {% for event in upcoming_events %}
+                <p>
+                    <strong>{{ event.title }}</strong><br>
+                      {{ event.start_datetime.strftime('%d %b %Y') }}<br>
+                      ⏳ {{ event.days_remaining }} days remaining
+                </p>
+            {% endfor %}
+        {% else %}
+            <p>No upcoming events</p>
+        {% endif %}
+    </div>
+
+
+    <div class="dashboard-card">
+        <h3>🔔 Event Alerts</h3>
+
+        {% if event_alerts %}
+            {% for alert in event_alerts %}
+                <p>
+                    {{ alert.title }} -
+                    {{ alert.days_remaining }} days remaining
+                </p>
+            {% endfor %}
+        {% else %}
+            <p>No urgent event alerts</p>
+        {% endif %}
+    </div>
+
+
+    <div class="dashboard-card">
+        <h3>🎂 Birthday Alerts</h3>
+
+        {% if birthday_alerts %}
+            {% for birthday in birthday_alerts %}
+                <p>
+                    {{ birthday.name }} -
+                    {{ birthday.days_remaining }} days
+<br>
+                      <a class="btn-primary" href="/ai/birthday-greeting/{{ birthday.member_id }}">🤖 Generate Greeting</a>
+                      <a class="btn-secondary" href="/ai/birthday-prayer/{{ birthday.member_id }}">🙏 Generate Prayer</a>
+                      <a class="btn-secondary" href="/ai/birthday-flyer/{{ birthday.member_id }}">🎨 Create Flyer</a>
+                </p>
+            {% endfor %}
+        {% else %}
+            <p>No upcoming birthdays</p>
+        {% endif %}
+    </div>
+
+</div>
+
 {% endblock %}

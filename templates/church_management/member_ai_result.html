@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Member AI Result{% endblock %}
+
+{% block content %}
+
+<section class="prompt-engine">
+
+<div class="dashboard-card">
+
+<h2>{{ title }}</h2>
+
+<hr>
+
+<div style="white-space:pre-line;">
+{{ content }}
+</div>
+
+{% if flyer %}
+<hr>
+<h3>🎨 Generated Flyer</h3>
+
+<img src="/{{ flyer }}"
+     style="max-width:100%; border-radius:10px;">
+
+{% endif %}
+
+</div>
+
+
+<a href="{{ url_for('church_management.member_profile', member_id=member.id) }}"
+   class="btn-secondary">
+← Back to Member Profile
+</a>
+
+</section>
+
+{% endblock %}

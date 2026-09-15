@@ -5,6 +5,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from flask_login import login_required, current_user
 from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile
 from datetime import datetime
+import requests
+import os
 from modules.content_generator.data import CONTENT_TYPES
 from .intent_engine import detect_module
 from .analytics import get_ai_statistics
@@ -14,7 +16,9 @@ from .reports import generate_ai_report
 from .insights import generate_ministry_insights
 from .ministry_decision_engine import format_ministry_decision_response
 from .ministry_copilot import format_ministry_copilot_response
-from modules.ai_service import ask_ai
+from modules.ai_service import ask_ai, AI_LAST_STATUS, AI_LAST_STATUS
+from modules.content_generator.flyer_composer_v5 import ai_compose_flyer
+from modules.content_generator.fal_service import generate_birthday_background
 
 
 ai_assistant_bp = Blueprint(
@@ -545,6 +549,47 @@ def save_ai_conversation(user_id, question, module, response):
 
 
 
+
+def birthday_greeting_fallback(member):
+    return f"""
+🎉 Happy Birthday, {member.full_name}!
+
+We thank God for His faithfulness, love, and mercy upon your life.
+May this new year bring you deeper fellowship with God, renewed strength,
+divine wisdom, and abundant blessings.
+
+"The LORD bless thee, and keep thee:
+The LORD make his face shine upon thee, and be gracious unto thee:
+The LORD lift up his countenance upon thee, and give thee peace."
+— Numbers 6:24-26
+
+May God's purpose for your life continue to be fulfilled in Jesus' name.
+
+Happy Birthday and many more fruitful years!
+"""
+
+
+def birthday_prayer_fallback(member):
+    return f"""
+🙏 Birthday Prayer for {member.full_name}
+
+Heavenly Father, we thank You for the life of Your servant,
+{member.full_name}.
+
+Thank You for Your protection, guidance, and faithfulness.
+As {member.full_name} begins another year, grant wisdom, good health,
+spiritual growth, and success according to Your will.
+
+May Your presence go before, Your grace sustain, and Your blessings
+overflow in every area of life.
+
+"For He shall give His angels charge over thee, to keep thee in all thy ways."
+— Psalm 91:11
+
+In Jesus' name, Amen.
+"""
+
+
 def ask_ai_with_memory(question, module=None):
 
     prompt = build_personalized_prompt(
@@ -890,4 +935,148 @@ Your request:
     return render_template(
         "ai_assistant/chat.html",
         answer=answer
+    )
+
+
+@ai_assistant_bp.route("/birthday-greeting/<int:member_id>")
+@login_required
+def birthday_greeting(member_id):
+
+    member = Member.query.get_or_404(member_id)
+
+    if not member:
+        return "Member not found", 404
+
+    prompt = f"""
+Create a warm Christian birthday greeting.
+
+Member name: {member.full_name}
+
+Include:
+- appreciation for God's faithfulness
+- a Bible verse
+- prayerful blessings
+- encouraging words for the new year of life
+
+Write it as a message that can be sent by a pastor or church family.
+"""
+
+    response = ask_ai_with_memory(
+        prompt,
+        "birthday"
+    )
+
+    if response.startswith("⚠️"):
+        response = (
+            "ℹ️ AI assistant temporarily unavailable. "
+            "A prepared ministry greeting has been provided.\n\n"
+            + birthday_greeting_fallback(member)
+        )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        member=member,
+        title="🎂 Birthday Greeting",
+        content=response,
+        flyer=None
+    )
+
+
+@ai_assistant_bp.route("/birthday-prayer/<int:member_id>")
+@login_required
+def birthday_prayer(member_id):
+
+    member = Member.query.get_or_404(member_id)
+
+    if not member:
+        return "Member not found", 404
+
+    prompt = f"""
+Write a Christian birthday prayer for {member.full_name}.
+
+Include:
+- thanksgiving to God
+- prayers for spiritual growth
+- divine guidance
+- God's protection and purpose
+- relevant Scripture references
+"""
+
+    response = ask_ai_with_memory(
+        prompt,
+        "birthday"
+    )
+
+    if response.startswith("⚠️"):
+        response = birthday_prayer_fallback(member)
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        member=member,
+        title="🙏 Birthday Prayer",
+        content=response,
+        flyer=None
+    )
+
+
+
+def download_fal_background(image_url):
+    try:
+        response = requests.get(
+            image_url,
+            timeout=30
+        )
+
+        if response.status_code == 200:
+            os.makedirs(
+                "static/generated",
+                exist_ok=True
+            )
+
+            path = "static/generated/birthday_ai_background.jpg"
+
+            with open(path, "wb") as f:
+                f.write(response.content)
+
+            return path
+
+    except Exception:
+        pass
+
+    return None
+
+
+@ai_assistant_bp.route("/birthday-flyer/<int:member_id>")
+@login_required
+def birthday_flyer(member_id):
+
+    member = Member.query.get_or_404(member_id)
+
+    background_url = generate_birthday_background(
+        member.full_name
+    )
+
+    background_path = download_fal_background(
+        background_url
+    )
+
+    flyer_result = ai_compose_flyer(
+        title=f"Happy Birthday {member.full_name}",
+        bible_verse="Numbers 6:24-26",
+        event_date=str(member.birthday),
+        venue="Celebrating God's faithfulness",
+        speakers=None,
+        logo_path=member.profile_photo if member.profile_photo else None,
+          background_path=background_path,
+        theme="default"
+    )
+
+    generated_image = flyer_result.get("file")
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        member=member,
+        title="🎨 Birthday Flyer Created",
+        content=f"Birthday flyer generated for {member.full_name}",
+        flyer=generated_image
     )

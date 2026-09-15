@@ -54,6 +54,7 @@ class Member(db.Model):
     marital_status = db.Column(db.String(30))
     age_range = db.Column(db.String(20))
     birthday = db.Column(db.Date)
+    profile_photo = db.Column(db.String(255))
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

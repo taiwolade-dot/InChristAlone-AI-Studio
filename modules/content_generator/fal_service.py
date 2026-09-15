@@ -384,3 +384,24 @@ def transcribe_audio(audio_data_uri):
         return None
     except requests.RequestException:
         return None
+
+
+def generate_birthday_background(member_name=""):
+    """
+    Generate a premium Christian birthday background using Fal.ai.
+    Text is intentionally excluded because Flyer Composer v5
+    handles accurate names, scriptures, and branding.
+    """
+
+    prompt = """
+    Premium Christian birthday celebration background.
+    Elegant church celebration atmosphere.
+    Luxury navy blue and gold theme.
+    Soft heavenly light rays.
+    Beautiful subtle floral decorations.
+    Modern ministry invitation design.
+    High-end social media flyer background.
+    No text, no letters, no words, no watermark.
+    """
+
+    return generate_image(prompt)

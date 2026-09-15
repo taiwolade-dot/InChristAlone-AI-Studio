@@ -333,6 +333,7 @@ def generate_flyer_v5(
         venue="",
         speakers=None,
         logo_path=None,
+        background_path=None,
         design_settings=None,
         layout=None,
         output_dir="static/generated"
@@ -514,11 +515,25 @@ def generate_flyer_v5(
         theme=theme_personality
     )
 
+    ai_background_loaded = False
 
-    add_background_gradient(
-        flyer,
-        theme_personality
-    )
+    if background_path and os.path.exists(background_path):
+        try:
+            ai_background = Image.open(background_path).convert("RGBA")
+            ai_background = ai_background.resize(flyer.size)
+            flyer = ai_background
+            draw = ImageDraw.Draw(flyer)
+            ai_background_loaded = True
+        except Exception:
+            pass
+
+
+
+    if not ai_background_loaded:
+        add_background_gradient(
+            flyer,
+            theme_personality
+        )
 
     add_decorative_effects(
         flyer,
@@ -960,6 +975,7 @@ def ai_compose_flyer(
         speakers=None,
         logo_path=None,
         theme="default",
+        background_path=None,
         output_dir="static/generated"
 ):
 
@@ -1055,6 +1071,7 @@ def ai_compose_flyer(
         venue=venue,
         speakers=speakers,
         logo_path=logo_path,
+          background_path=background_path,
           layout=layout,
         output_dir=output_dir
     )
