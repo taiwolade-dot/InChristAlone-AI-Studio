@@ -59,6 +59,7 @@ def dashboard():
 
         if days_remaining in [30, 7, 1]:
             event_alerts.append({
+                "id": event.id,
                 "title": event.title,
                 "days_remaining": days_remaining
             })

@@ -3,7 +3,7 @@ from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from flask_login import login_required, current_user
-from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile, PastorProfile
+from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile
 from datetime import datetime
 import requests
 import os
@@ -1044,6 +1044,44 @@ def download_fal_background(image_url):
         pass
 
     return None
+
+
+
+@ai_assistant_bp.route("/event-flyer/<int:event_id>")
+@login_required
+def event_flyer(event_id):
+
+    event = ChurchEvent.query.get_or_404(event_id)
+
+    church = ChurchProfile.query.get(event.church_id) if event.church_id else None
+
+    pastor = PastorProfile.query.get(event.pastor_id) if event.pastor_id else None
+
+    speakers = []
+
+    if pastor:
+        speakers.append({
+            "photo": pastor.photo_filename,
+            "name": pastor.full_name,
+            "role": "Host Pastor"
+        })
+
+    flyer_result = ai_compose_flyer(
+        title=event.title,
+        bible_verse="",
+        event_date=str(event.start_datetime),
+        venue=event.venue or event.location or "",
+        speakers=speakers or None,
+        logo_path=church.logo_filename if church else None,
+        theme="default"
+    )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        title="🎨 Programme Flyer",
+        content=event.description or event.title,
+        flyer=flyer_result.get("file")
+    )
 
 
 @ai_assistant_bp.route("/birthday-flyer/<int:member_id>")

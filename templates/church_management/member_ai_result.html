@@ -28,10 +28,17 @@
 </div>
 
 
+{% if member %}
 <a href="{{ url_for('church_management.member_profile', member_id=member.id) }}"
    class="btn-secondary">
 ← Back to Member Profile
 </a>
+{% else %}
+<a href="{{ url_for('ai_assistant.dashboard') }}"
+   class="btn-secondary">
+← Back to AI Dashboard
+</a>
+{% endif %}
 
 </section>
 
