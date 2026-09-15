@@ -325,6 +325,80 @@ def add_premium_decoration(
     )
 
 
+def add_footer_branding(
+        flyer,
+        theme="default",
+        ministry="InChristAlone AI Studio",
+        event_type="general",
+        church_name=""
+):
+
+    config = THEMES.get(
+        theme,
+        THEMES["default"]
+    )
+
+    draw = ImageDraw.Draw(
+        flyer
+    )
+
+    footer_font = load_font(
+        22
+    )
+
+    small_font = load_font(
+        16
+    )
+
+    y = flyer.height - 70
+
+    draw.line(
+        (
+            80,
+            y-15,
+            flyer.width-80,
+            y-15
+        ),
+        fill=config["secondary"],
+        width=3
+    )
+
+    if event_type == "birthday":
+        text = "🎉 Celebrating God's Faithfulness"
+    else:
+        text = ministry
+
+    width = draw.textlength(
+        text,
+        font=footer_font
+    )
+
+    draw.text(
+        (
+            (flyer.width-width)//2,
+            y
+        ),
+        text,
+        font=footer_font,
+        fill=config["secondary"]
+    )
+
+    if church_name:
+        church_width = draw.textlength(
+            church_name,
+            font=small_font
+        )
+
+        draw.text(
+            (
+                (flyer.width-church_width)//2,
+                y+28
+            ),
+            church_name,
+            font=small_font,
+            fill=config["accent"]
+        )
+
 def generate_flyer_v5(
         title,
         bible_verse="",
@@ -916,9 +990,21 @@ def generate_flyer_v5(
 
 
 
+    footer_event_type = "general"
+
+    title_check = title.lower()
+
+    if (
+        "birthday" in title_check
+        or "happy birthday" in title_check
+        or "celebration" in title_check
+    ):
+        footer_event_type = "birthday"
+
     add_footer_branding(
         flyer,
-        theme
+        theme,
+        event_type=footer_event_type
     )
 
 
