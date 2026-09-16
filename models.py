@@ -1108,3 +1108,69 @@ class MinistryMemory(db.Model):
 
     def __repr__(self):
         return f"<MinistryMemory {self.title}>"
+
+
+class MinistryOccasion(db.Model):
+    __tablename__ = "ministry_occasions"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    occasion_type = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    source_type = db.Column(
+        db.String(50),
+        default="Manual"
+    )
+
+    date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    description = db.Column(
+        db.Text
+    )
+
+    scripture_theme = db.Column(
+        db.String(255)
+    )
+
+    member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("member.id")
+    )
+
+    event_id = db.Column(
+        db.Integer,
+        db.ForeignKey("church_events.id")
+    )
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey("church_profile.id")
+    )
+
+    created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryOccasion {self.title}>"
