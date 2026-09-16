@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, make_response
+from flask import Blueprint, render_template, request, make_response, abort
 from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -1386,6 +1386,9 @@ def content_similar(content_id):
 
     saved = MinistryContent.query.get_or_404(content_id)
 
+    if saved.owner_id != current_user.id:
+        abort(403)
+
     prompt = f"""
 Rewrite the following Christian ministry content.
 
@@ -1406,6 +1409,28 @@ Content:
         prompt,
         "content_library"
     )
+
+    latest_version = db.session.query(
+        db.func.max(MinistryContent.version_number)
+    ).filter(
+        MinistryContent.parent_id == saved.id
+    ).scalar()
+
+    next_version = (latest_version or saved.version_number or 1) + 1
+
+    version = MinistryContent(
+        owner_id=saved.owner_id,
+        occasion_id=saved.occasion_id,
+        content_type=saved.content_type,
+        title=saved.title,
+        content=response,
+        version_number=next_version,
+        parent_id=saved.id,
+        ai_action="Generate Similar"
+    )
+
+    db.session.add(version)
+    db.session.commit()
 
     return render_template(
         "church_management/member_ai_result.html",

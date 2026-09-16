@@ -425,19 +425,6 @@ class ChurchEvent(db.Model):
         default=datetime.utcnow
     )
 
-    version_number = db.Column(
-        db.Integer,
-        default=1
-    )
-
-    parent_id = db.Column(
-        db.Integer
-    )
-
-    ai_action = db.Column(
-        db.String(100)
-    )
-
 
 
 class AITransaction(db.Model):
@@ -1226,6 +1213,19 @@ class MinistryContent(db.Model):
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
+    )
+
+    version_number = db.Column(
+        db.Integer,
+        default=1
+    )
+
+    parent_id = db.Column(
+        db.Integer
+    )
+
+    ai_action = db.Column(
+        db.String(100)
     )
 
     def __repr__(self):

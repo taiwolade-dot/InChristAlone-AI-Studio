@@ -23,6 +23,11 @@
             </p>
 
             <a class="btn-secondary"
+               href="{{ url_for('ministry.content_history', content_id=content.id) }}">
+                🕘 Version History
+            </a>
+
+            <a class="btn-secondary"
                href="{{ url_for('ministry.content_library') }}">
                 ← Back to Library
             </a>

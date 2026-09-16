@@ -141,6 +141,26 @@ def content_library():
     )
 
 
+@ministry_bp.route("/content/<int:content_id>/history")
+@login_required
+def content_history(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    versions = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.parent_id == content.id
+    ).order_by(
+        MinistryContent.version_number.desc()
+    ).all()
+
+    return render_template(
+        "ministry/content_history.html",
+        content=content,
+        versions=versions
+    )
+
+
 @ministry_bp.route("/content/<int:content_id>")
 @login_required
 def view_content(content_id):
