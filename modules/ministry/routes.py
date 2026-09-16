@@ -139,3 +139,15 @@ def content_library():
         "ministry/content_library.html",
         contents=contents
     )
+
+
+@ministry_bp.route("/content/<int:content_id>")
+@login_required
+def view_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    return render_template(
+        "ministry/content_view.html",
+        content=content
+    )

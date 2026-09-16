@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>📖 Ministry Content View</h2>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <h4>{{ content.title }}</h4>
+
+            <p>
+                <strong>Type:</strong>
+                {{ content.content_type }}
+            </p>
+
+            <hr>
+
+            <p style="white-space: pre-line;">
+                {{ content.content }}
+            </p>
+
+            <a class="btn-secondary"
+               href="{{ url_for('ministry.content_library') }}">
+                ← Back to Library
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
