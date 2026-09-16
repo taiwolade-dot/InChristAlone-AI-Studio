@@ -3,7 +3,7 @@ from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from flask_login import login_required, current_user
-from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile, MinistryOccasion, MinistryOccasion
+from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile, MinistryOccasion, MinistryContent
 from datetime import datetime
 import requests
 import os
@@ -27,6 +27,27 @@ ai_assistant_bp = Blueprint(
     __name__,
     url_prefix="/ai"
 )
+
+
+def save_ministry_content(
+    occasion,
+    content_type,
+    title,
+    content
+):
+    saved_content = MinistryContent(
+        owner_id=occasion.created_by,
+        occasion_id=occasion.id,
+        content_type=content_type,
+        title=title,
+        content=content
+    )
+
+    db.session.add(saved_content)
+    db.session.commit()
+
+    return saved_content
+
 
 
 
@@ -1058,6 +1079,13 @@ Include:
         "occasion"
     )
 
+    save_ministry_content(
+        occasion,
+        "Prayer",
+        f"Prayer - {occasion.title}",
+        response
+    )
+
     return render_template(
         "church_management/member_ai_result.html",
         title="🙏 Occasion Prayer",
@@ -1096,6 +1124,13 @@ Include invitation and encouragement.
     response = ask_ai_with_memory(
         prompt,
         "occasion"
+    )
+
+    save_ministry_content(
+        occasion,
+        "Announcement",
+        f"Announcement - {occasion.title}",
+        response
     )
 
     return render_template(
@@ -1137,6 +1172,13 @@ Provide:
     response = ask_ai_with_memory(
         prompt,
         "occasion"
+    )
+
+    save_ministry_content(
+        occasion,
+        "Bible Study Outline",
+        f"Study Outline - {occasion.title}",
+        response
     )
 
     return render_template(
@@ -1245,6 +1287,13 @@ def occasion_flyer(occasion_id):
             else None
         ),
         theme="default"
+    )
+
+    save_ministry_content(
+        occasion,
+        "Flyer",
+        f"Flyer - {occasion.title}",
+        str(flyer_result)
     )
 
     return render_template(
