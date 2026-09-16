@@ -25,6 +25,19 @@
                 </p>
 
                 <p>
+                    <strong>Version:</strong>
+                    {{ item.version_number or 1 }}
+                    <br>
+
+                    <strong>AI Action:</strong>
+                    {{ item.ai_action or "Original Content" }}
+                    <br>
+
+                    <strong>Created:</strong>
+                    {{ item.created_at }}
+                </p>
+
+                <p>
                     {{ item.content[:300] }}
                     {% if item.content|length > 300 %}
                     ...

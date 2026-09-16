@@ -33,14 +33,19 @@ def save_ministry_content(
     occasion,
     content_type,
     title,
-    content
+    content,
+    ai_action=None,
+    parent_id=None
 ):
     saved_content = MinistryContent(
         owner_id=occasion.created_by,
         occasion_id=occasion.id,
         content_type=content_type,
         title=title,
-        content=content
+        content=content,
+        version_number=1,
+        parent_id=parent_id,
+        ai_action=ai_action
     )
 
     db.session.add(saved_content)
@@ -1083,7 +1088,8 @@ Include:
         occasion,
         "Prayer",
         f"Prayer - {occasion.title}",
-        response
+        response,
+        ai_action="Occasion Prayer"
     )
 
     return render_template(
@@ -1130,7 +1136,8 @@ Include invitation and encouragement.
         occasion,
         "Announcement",
         f"Announcement - {occasion.title}",
-        response
+        response,
+        ai_action="Occasion Announcement"
     )
 
     return render_template(
@@ -1178,7 +1185,8 @@ Provide:
         occasion,
         "Bible Study Outline",
         f"Study Outline - {occasion.title}",
-        response
+        response,
+        ai_action="Occasion Bible Study Outline"
     )
 
     return render_template(
@@ -1293,7 +1301,8 @@ def occasion_flyer(occasion_id):
         occasion,
         "Flyer",
         f"Flyer - {occasion.title}",
-        str(flyer_result)
+        str(flyer_result),
+        ai_action="Occasion Flyer"
     )
 
     return render_template(

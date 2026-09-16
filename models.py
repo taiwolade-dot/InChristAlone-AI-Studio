@@ -425,6 +425,19 @@ class ChurchEvent(db.Model):
         default=datetime.utcnow
     )
 
+    version_number = db.Column(
+        db.Integer,
+        default=1
+    )
+
+    parent_id = db.Column(
+        db.Integer
+    )
+
+    ai_action = db.Column(
+        db.String(100)
+    )
+
 
 
 class AITransaction(db.Model):
