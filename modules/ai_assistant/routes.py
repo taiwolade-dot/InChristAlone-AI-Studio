@@ -1085,6 +1085,50 @@ def event_flyer(event_id):
     )
 
 
+
+
+@ai_assistant_bp.route("/occasion-flyer/<int:occasion_id>")
+@login_required
+def occasion_flyer(occasion_id):
+
+    occasion = MinistryOccasion.query.get_or_404(
+        occasion_id
+    )
+
+    context = build_occasion_context(
+        occasion
+    )
+
+    church = (
+        ChurchProfile.query.get(occasion.church_id)
+        if occasion.church_id
+        else None
+    )
+
+    speakers = []
+
+    flyer_result = ai_compose_flyer(
+        title=context["title"],
+        bible_verse=context.get("scripture_theme") or "",
+        event_date=str(context["date"]),
+        venue=context.get("description") or "",
+        speakers=speakers or None,
+        logo_path=(
+            church.logo_filename
+            if church
+            else None
+        ),
+        theme="default"
+    )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        title="🎨 Occasion Flyer",
+        content=context["description"] or context["title"],
+        flyer=flyer_result.get("file")
+    )
+
+
 @ai_assistant_bp.route("/birthday-flyer/<int:member_id>")
 @login_required
 def birthday_flyer(member_id):

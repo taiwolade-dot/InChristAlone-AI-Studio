@@ -75,8 +75,10 @@ def build_occasion_context(occasion):
     Prepare MinistryOccasion data for AI generation.
     """
 
-    occasion_type = detect_occasion_type(
-        occasion.title
+    occasion_type = (
+        occasion.occasion_type
+        if occasion.occasion_type
+        else detect_occasion_type(occasion.title)
     )
 
     return {
