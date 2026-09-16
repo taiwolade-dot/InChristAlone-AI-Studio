@@ -7,7 +7,8 @@ from models import (
     Member,
     ChurchEvent,
     BibleQuiz,
-    AIConversation
+    AIConversation,
+    MinistryOccasion
 )
 
 
@@ -88,6 +89,27 @@ def dashboard():
                     "days_remaining": days_until
             })
 
+    occasion_alerts = []
+
+    upcoming_occasions = MinistryOccasion.query.filter(
+        MinistryOccasion.created_by == current_user.id,
+        MinistryOccasion.date >= today
+    ).order_by(
+        MinistryOccasion.date.asc()
+    ).limit(5).all()
+
+    for occasion in upcoming_occasions:
+        days_remaining = (
+            occasion.date - today
+        ).days
+
+        occasion_alerts.append({
+            "id": occasion.id,
+            "title": occasion.title,
+            "occasion_type": occasion.occasion_type,
+            "days_remaining": days_remaining
+        })
+
     return render_template(
         "ministry/dashboard.html",
         profile=profile,
@@ -97,5 +119,6 @@ def dashboard():
         ai_usage=ai_usage,
           upcoming_events=upcoming_events,
           event_alerts=event_alerts,
-          birthday_alerts=birthday_alerts
+          birthday_alerts=birthday_alerts,
+        occasion_alerts=occasion_alerts
     )

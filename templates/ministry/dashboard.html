@@ -125,6 +125,28 @@ Bible Quiz Studio
         {% endif %}
     </div>
 
+    <div class="dashboard-card">
+        <h3>🎉 Occasion Intelligence</h3>
+
+        {% if occasion_alerts %}
+            {% for occasion in occasion_alerts %}
+                <p>
+                    <strong>{{ occasion.title }}</strong><br>
+                    {{ occasion.occasion_type }}<br>
+                    ⏳ {{ occasion.days_remaining }} days remaining
+                </p>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ai_assistant.occasion_flyer', occasion_id=occasion.id) }}">
+                    🎨 Create Flyer
+                </a>
+            {% endfor %}
+        {% else %}
+            <p>No upcoming occasions</p>
+        {% endif %}
+    </div>
+
+
 </div>
 
 {% endblock %}
