@@ -43,7 +43,9 @@ def get_ai_actions(occasion_type):
 
         "Conference": [
             "Generate Flyer",
+            "Generate Prayer",
             "Generate Announcement",
+            "Generate Bible Study Outline",
             "Generate Programme Outline"
         ],
 

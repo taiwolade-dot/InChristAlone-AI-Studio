@@ -1021,6 +1021,132 @@ Include:
 
 
 
+
+
+@ai_assistant_bp.route("/occasion-prayer/<int:occasion_id>")
+@login_required
+def occasion_prayer(occasion_id):
+
+    occasion = MinistryOccasion.query.get_or_404(
+        occasion_id
+    )
+
+    prompt = f"""
+Write a Christian prayer for this ministry occasion.
+
+Occasion:
+{occasion.title}
+
+Type:
+{occasion.occasion_type}
+
+Theme:
+{occasion.description}
+
+Scripture theme:
+{occasion.scripture_theme}
+
+Include:
+- thanksgiving to God
+- spiritual impact
+- prayers for participants
+- relevant Bible references
+"""
+
+    response = ask_ai_with_memory(
+        prompt,
+        "occasion"
+    )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        title="🙏 Occasion Prayer",
+        content=response,
+        flyer=None
+    )
+
+
+@ai_assistant_bp.route("/occasion-announcement/<int:occasion_id>")
+@login_required
+def occasion_announcement(occasion_id):
+
+    occasion = MinistryOccasion.query.get_or_404(
+        occasion_id
+    )
+
+    prompt = f"""
+Create a Christian ministry announcement.
+
+Occasion:
+{occasion.title}
+
+Type:
+{occasion.occasion_type}
+
+Description:
+{occasion.description}
+
+Date:
+{occasion.date}
+
+Make it suitable for church members.
+Include invitation and encouragement.
+"""
+
+    response = ask_ai_with_memory(
+        prompt,
+        "occasion"
+    )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        title="📢 Occasion Announcement",
+        content=response,
+        flyer=None
+    )
+
+
+@ai_assistant_bp.route("/occasion-outline/<int:occasion_id>")
+@login_required
+def occasion_outline(occasion_id):
+
+    occasion = MinistryOccasion.query.get_or_404(
+        occasion_id
+    )
+
+    prompt = f"""
+Create a Bible study outline for this ministry occasion.
+
+Title:
+{occasion.title}
+
+Theme:
+{occasion.description}
+
+Scripture:
+{occasion.scripture_theme}
+
+Provide:
+- Introduction
+- Bible passages
+- Teaching points
+- Discussion questions
+- Application
+"""
+
+    response = ask_ai_with_memory(
+        prompt,
+        "occasion"
+    )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        title="📖 Occasion Bible Study Outline",
+        content=response,
+        flyer=None
+    )
+
+
 def download_fal_background(image_url):
     try:
         response = requests.get(

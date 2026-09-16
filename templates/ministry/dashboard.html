@@ -140,6 +140,21 @@ Bible Quiz Studio
                    href="{{ url_for('ai_assistant.occasion_flyer', occasion_id=occasion.id) }}">
                     🎨 Create Flyer
                 </a>
+
+                <a class="btn-primary"
+                   href="{{ url_for('ai_assistant.occasion_prayer', occasion_id=occasion.id) }}">
+                    🙏 Generate Prayer
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ai_assistant.occasion_announcement', occasion_id=occasion.id) }}">
+                    📢 Announcement
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ai_assistant.occasion_outline', occasion_id=occasion.id) }}">
+                    📖 Study Outline
+                </a>
             {% endfor %}
         {% else %}
             <p>No upcoming occasions</p>
