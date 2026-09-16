@@ -1174,3 +1174,46 @@ class MinistryOccasion(db.Model):
 
     def __repr__(self):
         return f"<MinistryOccasion {self.title}>"
+
+
+class MinistryContent(db.Model):
+    __tablename__ = "ministry_contents"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    occasion_id = db.Column(
+        db.Integer,
+        db.ForeignKey("ministry_occasions.id")
+    )
+
+    content_type = db.Column(
+        db.String(50),
+        nullable=False
+    )
+
+    title = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    content = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryContent {self.title}>"
