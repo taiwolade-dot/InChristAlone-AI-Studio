@@ -8,7 +8,8 @@ from models import (
     ChurchEvent,
     BibleQuiz,
     AIConversation,
-    MinistryOccasion
+    MinistryOccasion,
+    MinistryContent
 )
 
 
@@ -121,4 +122,20 @@ def dashboard():
           event_alerts=event_alerts,
           birthday_alerts=birthday_alerts,
         occasion_alerts=occasion_alerts
+    )
+
+
+@ministry_bp.route("/content-library")
+@login_required
+def content_library():
+
+    contents = MinistryContent.query.filter_by(
+        owner_id=current_user.id
+    ).order_by(
+        MinistryContent.created_at.desc()
+    ).all()
+
+    return render_template(
+        "ministry/content_library.html",
+        contents=contents
     )

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>📚 Ministry Content Library</h2>
+
+    <p>
+        Saved AI-generated ministry resources.
+    </p>
+
+    {% if contents %}
+
+        {% for item in contents %}
+
+        <div class="card mb-3">
+            <div class="card-body">
+
+                <h5>{{ item.title }}</h5>
+
+                <p>
+                    <strong>Type:</strong>
+                    {{ item.content_type }}
+                </p>
+
+                <p>
+                    {{ item.content[:300] }}
+                    {% if item.content|length > 300 %}
+                    ...
+                    {% endif %}
+                </p>
+
+            </div>
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="alert alert-info">
+            No saved ministry content yet.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
