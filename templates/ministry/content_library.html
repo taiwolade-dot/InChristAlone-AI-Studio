@@ -38,26 +38,33 @@
                         👁 View Full Content
                     </a>
 
+                    <a class="btn-secondary"
+                       href="{{ url_for('ai_assistant.content_similar', content_id=item.id) }}">
+                        🔄 Generate Similar
+                    </a>
+
                     {% if item.occasion_id %}
+
                     <a class="btn-secondary"
                        href="{{ url_for('ai_assistant.occasion_prayer', occasion_id=item.occasion_id) }}">
-                        🙏 Generate Prayer
+                        🙏 Convert to Prayer
                     </a>
 
                     <a class="btn-secondary"
                        href="{{ url_for('ai_assistant.occasion_announcement', occasion_id=item.occasion_id) }}">
-                        📢 Announcement
+                        📢 Convert to Announcement
                     </a>
 
                     <a class="btn-secondary"
                        href="{{ url_for('ai_assistant.occasion_outline', occasion_id=item.occasion_id) }}">
-                        📖 Study Outline
+                        📖 Convert to Study Outline
                     </a>
 
                     <a class="btn-secondary"
                        href="{{ url_for('ai_assistant.occasion_flyer', occasion_id=item.occasion_id) }}">
-                        🎨 Flyer
+                        🎨 Create Flyer
                     </a>
+
                     {% endif %}
 
                 </div>

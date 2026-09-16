@@ -1369,3 +1369,38 @@ def birthday_flyer(member_id):
         content=f"Birthday flyer generated for {member.full_name}",
         flyer=generated_image
     )
+
+
+@ai_assistant_bp.route("/content-similar/<int:content_id>")
+@login_required
+def content_similar(content_id):
+
+    saved = MinistryContent.query.get_or_404(content_id)
+
+    prompt = f"""
+Rewrite the following Christian ministry content.
+
+Keep the same biblical message and purpose,
+but create a fresh original version.
+
+Title:
+{saved.title}
+
+Content Type:
+{saved.content_type}
+
+Content:
+{saved.content}
+"""
+
+    response = ask_ai_with_memory(
+        prompt,
+        "content_library"
+    )
+
+    return render_template(
+        "church_management/member_ai_result.html",
+        title="🔄 Similar Ministry Content",
+        content=response,
+        flyer=None
+    )
