@@ -57,3 +57,6 @@ modules/church_calendar/templates/church_calendar/dashboard_after_*.html
 *_before_*.html
 *_backup_*.py
 *_backup_*.html
+
+# Versioned development snapshots
+*.v[0-9]*
