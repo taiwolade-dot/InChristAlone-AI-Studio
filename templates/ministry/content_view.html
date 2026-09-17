@@ -16,6 +16,30 @@
                 {{ content.content_type }}
             </p>
 
+            <p>
+                <strong>Status:</strong>
+                {{ content.status or "Draft" }}
+            </p>
+
+            <div class="mb-3">
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.submit_content_review', content_id=content.id) }}">
+                    📝 Submit for Review
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.approve_content', content_id=content.id) }}">
+                    ✅ Approve
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.reject_content', content_id=content.id) }}">
+                    ↩ Return for Revision
+                </a>
+
+            </div>
+
             <hr>
 
             <p style="white-space: pre-line;">

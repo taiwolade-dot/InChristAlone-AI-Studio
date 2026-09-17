@@ -204,6 +204,75 @@ def restore_content_version(version_id):
     )
 
 
+@ministry_bp.route("/content/<int:content_id>/submit-review")
+@login_required
+def submit_content_review(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Under Review"
+    content.ai_action = "Submitted for Review"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/approve")
+@login_required
+def approve_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Approved"
+    content.approved_by = current_user.id
+    content.approved_at = datetime.utcnow()
+    content.ai_action = "Approved"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/reject")
+@login_required
+def reject_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Draft"
+    content.approval_note = "Returned for revision"
+    content.ai_action = "Returned for Revision"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
 @ministry_bp.route("/content/<int:content_id>")
 @login_required
 def view_content(content_id):

@@ -1233,5 +1233,22 @@ class MinistryContent(db.Model):
         default=False
     )
 
+    status = db.Column(
+        db.String(30),
+        default="Draft"
+    )
+
+    approved_by = db.Column(
+        db.Integer
+    )
+
+    approved_at = db.Column(
+        db.DateTime
+    )
+
+    approval_note = db.Column(
+        db.Text
+    )
+
     def __repr__(self):
         return f"<MinistryContent {self.title}>"
