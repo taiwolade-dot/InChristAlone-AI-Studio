@@ -1,5 +1,5 @@
-from sqlalchemy import or_
-from flask import Blueprint, render_template, request
+from sqlalchemy import or_, func
+from flask import Blueprint, render_template, request, make_response
 from flask_login import login_required, current_user
 from datetime import datetime, date
 
@@ -10,7 +10,8 @@ from models import (
     BibleQuiz,
     AIConversation,
     MinistryOccasion,
-    MinistryContent
+    MinistryContent,
+    db
 )
 
 
@@ -187,6 +188,39 @@ def resource_library():
     )
 
 
+@ministry_bp.route("/resource-analytics")
+@login_required
+def resource_analytics():
+
+    published = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    )
+
+    total_resources = published.count()
+
+    categories = db.session.query(
+        MinistryContent.category,
+        func.count(MinistryContent.id)
+    ).filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).group_by(
+        MinistryContent.category
+    ).all()
+
+    top_resources = published.order_by(
+        MinistryContent.view_count.desc()
+    ).limit(5).all()
+
+    return render_template(
+        "ministry/resource_analytics.html",
+        total_resources=total_resources,
+        categories=categories,
+        top_resources=top_resources
+    )
+
+
 @ministry_bp.route("/content/<int:content_id>/history")
 @login_required
 def content_history(content_id):
@@ -343,11 +377,45 @@ def publish_content(content_id):
     )
 
 
+@ministry_bp.route("/content/<int:content_id>/download")
+@login_required
+def download_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        return "Unauthorized", 403
+
+    if content.status != "Published":
+        return "Resource not available", 404
+
+    content.download_count = (content.download_count or 0) + 1
+    db.session.commit()
+
+    response = make_response(content.content)
+
+    filename = f"{content.title.replace(' ', '_')}.txt"
+
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename={filename}"
+    )
+
+    response.headers["Content-Type"] = "text/plain"
+
+    return response
+
+
 @ministry_bp.route("/content/<int:content_id>")
 @login_required
 def view_content(content_id):
 
     content = MinistryContent.query.get_or_404(content_id)
+
+    if content.status == "Published":
+        content.view_count = (content.view_count or 0) + 1
+        content.last_viewed_at = datetime.utcnow()
+        from models import db
+        db.session.commit()
 
     related_resources = MinistryContent.query.filter(
         MinistryContent.owner_id == current_user.id,

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>📊 Ministry Resource Analytics</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Published Resources</h4>
+        <p>{{ total_resources }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Resource Categories</h4>
+
+        {% for category, count in categories %}
+            <p>{{ category or "General" }}: {{ count }}</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Most Viewed Resources</h4>
+
+        {% for resource in top_resources %}
+            <p>
+                {{ resource.title }}
+                ({{ resource.view_count }} views)
+            </p>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

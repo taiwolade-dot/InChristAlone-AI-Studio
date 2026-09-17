@@ -1275,5 +1275,19 @@ class MinistryContent(db.Model):
         db.Text
     )
 
+    view_count = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    download_count = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    last_viewed_at = db.Column(
+        db.DateTime
+    )
+
     def __repr__(self):
         return f"<MinistryContent {self.title}>"
