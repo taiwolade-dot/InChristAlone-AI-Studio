@@ -213,9 +213,37 @@ def resource_analytics():
         MinistryContent.view_count.desc()
     ).limit(5).all()
 
+    total_views = db.session.query(
+        func.sum(MinistryContent.view_count)
+    ).filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).scalar() or 0
+
+    total_downloads = db.session.query(
+        func.sum(MinistryContent.download_count)
+    ).filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).scalar() or 0
+
+    most_downloaded = published.order_by(
+        MinistryContent.download_count.desc()
+    ).first()
+
+    top_category = max(
+        categories,
+        key=lambda item: item[1],
+        default=None
+    )
+
     return render_template(
         "ministry/resource_analytics.html",
         total_resources=total_resources,
+        total_views=total_views,
+        total_downloads=total_downloads,
+        most_downloaded=most_downloaded,
+        top_category=top_category,
         categories=categories,
         top_resources=top_resources
     )

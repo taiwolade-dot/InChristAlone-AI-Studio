@@ -6,6 +6,48 @@
 
 <div class="card mt-3">
     <div class="card-body">
+        <h4>👁 Total Views</h4>
+        <p>{{ total_views }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>⬇️ Total Downloads</h4>
+        <p>{{ total_downloads }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🏆 Most Downloaded Resource</h4>
+        {% if most_downloaded %}
+            <p>
+                {{ most_downloaded.title }}
+                ({{ most_downloaded.download_count }} downloads)
+            </p>
+        {% else %}
+            <p>No downloads yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🔥 Top Category</h4>
+        {% if top_category %}
+            <p>
+                {{ top_category[0] or "General" }}
+                ({{ top_category[1] }} resources)
+            </p>
+        {% else %}
+            <p>No category data.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
         <h4>Published Resources</h4>
         <p>{{ total_resources }}</p>
     </div>
