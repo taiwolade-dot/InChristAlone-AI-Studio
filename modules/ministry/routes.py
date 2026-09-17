@@ -349,7 +349,19 @@ def view_content(content_id):
 
     content = MinistryContent.query.get_or_404(content_id)
 
+    related_resources = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published",
+        MinistryContent.id != content.id,
+        or_(
+            MinistryContent.category == content.category,
+            MinistryContent.scripture_reference == content.scripture_reference,
+            MinistryContent.tags.ilike(f"%{content.tags}%")
+        )
+    ).limit(5).all()
+
     return render_template(
         "ministry/content_view.html",
-        content=content
+        content=content,
+        related_resources=related_resources
     )
