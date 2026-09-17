@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Ministry Content Planner
+{% endblock %}
+
+{% block content %}
+
+<h1>🤖 AI Ministry Content Planner</h1>
+
+<div class="dashboard-card">
+
+<form method="POST">
+
+<label>Topic</label>
+<br>
+<input type="text" name="topic" style="width:100%;" placeholder="Example: Discipleship Growth">
+
+<br><br>
+
+<label>Target Audience</label>
+<br>
+<input type="text" name="audience" style="width:100%;" placeholder="Example: Youth, Families, Church Members">
+
+<br><br>
+
+<label>Content Type</label>
+<br>
+<select name="content_type" style="width:100%;">
+    <option value="Bible Study">Bible Study</option>
+    <option value="Sermon Outline">Sermon Outline</option>
+    <option value="Devotional">Devotional</option>
+    <option value="Prayer Guide">Prayer Guide</option>
+</select>
+
+<br><br>
+
+<button class="btn-primary">
+🚀 Generate Plan
+</button>
+
+</form>
+
+</div>
+
+{% if saved_message %}<div class="dashboard-card">{{ saved_message }}</div>{% endif %}\n\n{% if plan %}
+
+<div class="dashboard-card">
+
+<h2>📖 Content Plan</h2>
+
+<p><strong>Title:</strong> {{ plan.title }}</p>
+
+<p><strong>Theme:</strong> {{ plan.theme }}</p>
+
+<p><strong>Audience:</strong> {{ plan.audience }}</p>
+
+<p><strong>Content Type:</strong> {{ plan.content_type }}</p>
+
+<h3>Scriptures</h3>
+
+<ul>
+{% for scripture in plan.scriptures %}
+<li>{{ scripture }}</li>
+{% endfor %}
+</ul>
+
+<h3>Outline</h3>
+
+<ul>
+{% for item in plan.outline %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+<form method="POST">
+
+<input type="hidden" name="action" value="save">
+
+<input type="hidden" name="title" value="{{ plan.title }}">
+
+<input type="hidden" name="content" value="{{ plan.theme }} | {{ plan.scriptures }} | {{ plan.outline }}">
+
+<input type="hidden" name="content_type" value="{{ plan.content_type }}">
+
+<button class="btn-primary">
+💾 Save Content Plan
+</button>
+
+</form>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

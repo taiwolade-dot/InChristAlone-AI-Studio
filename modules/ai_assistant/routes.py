@@ -205,6 +205,30 @@ def search_calendar(question):
 
 
 
+def generate_content_plan(topic, audience, content_type):
+    topic = topic or "Christian Growth"
+    audience = audience or "Church Members"
+    content_type = content_type or "Bible Study"
+
+    return {
+        "title": f"{topic}: A {content_type} Guide",
+        "theme": f"Growing in Christ through {topic}",
+        "scriptures": [
+            "John 15:5",
+            "2 Timothy 3:16",
+            "Romans 12:2"
+        ],
+        "outline": [
+            f"Introduction to {topic}",
+            f"Biblical understanding of {topic}",
+            f"Practical application for {audience}",
+            "Prayer and reflection"
+        ],
+        "audience": audience,
+        "content_type": content_type
+    }
+
+
 def generate_content(question):
 
     q = question.lower()
@@ -869,6 +893,54 @@ def profile():
         profile=profile
     )
 
+
+
+@ai_assistant_bp.route("/content-planner", methods=["GET", "POST"])
+@login_required
+def content_planner():
+
+    plan = None
+    saved_message = None
+
+    if request.method == "POST":
+
+        action = request.form.get("action")
+
+        if action == "save":
+            title = request.form.get("title")
+            content = request.form.get("content")
+            content_type = request.form.get("content_type")
+
+            saved = MinistryContent(
+                owner_id=current_user.id,
+                content_type=content_type,
+                title=title,
+                content=content,
+                version_number=1,
+                ai_action="content_planner"
+            )
+
+            db.session.add(saved)
+            db.session.commit()
+
+            saved_message = "✅ Content plan saved to Ministry Library."
+
+        else:
+            topic = request.form.get("topic")
+            audience = request.form.get("audience")
+            content_type = request.form.get("content_type")
+
+            plan = generate_content_plan(
+                topic,
+                audience,
+                content_type
+            )
+
+    return render_template(
+        "ai_assistant/content_planner.html",
+        plan=plan,
+        saved_message=saved_message
+    )
 
 
 @ai_assistant_bp.route("/", methods=["GET", "POST"])
