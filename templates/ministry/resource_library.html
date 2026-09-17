@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>📚 Ministry Resource Library</h2>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            {% if resources %}
+
+                {% for resource in resources %}
+
+                <div class="mb-4">
+
+                    <h4>{{ resource.title }}</h4>
+
+                    <p>
+                        <strong>Category:</strong>
+                        {{ resource.category or "General" }}
+                    </p>
+
+                    <p>
+                        <strong>Scripture:</strong>
+                        {{ resource.scripture_reference or "Not specified" }}
+                    </p>
+
+                    <p>
+                        <strong>Visibility:</strong>
+                        {{ resource.visibility }}
+                    </p>
+
+                    <p>
+                        <strong>Published:</strong>
+                        {{ resource.published_at }}
+                    </p>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ministry.view_content', content_id=resource.id) }}">
+                        📖 View Resource
+                    </a>
+
+                </div>
+
+                <hr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No published resources available.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

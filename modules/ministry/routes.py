@@ -141,6 +141,23 @@ def content_library():
     )
 
 
+@ministry_bp.route("/resources")
+@login_required
+def resource_library():
+
+    resources = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).order_by(
+        MinistryContent.published_at.desc()
+    ).all()
+
+    return render_template(
+        "ministry/resource_library.html",
+        resources=resources
+    )
+
+
 @ministry_bp.route("/content/<int:content_id>/history")
 @login_required
 def content_history(content_id):
