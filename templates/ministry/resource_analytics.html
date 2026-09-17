@@ -46,6 +46,18 @@
     </div>
 </div>
 
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🤖 AI Ministry Recommendations</h4>
+
+        {% for insight in resource_insights %}
+            <p>• {{ insight }}</p>
+        {% endfor %}
+
+    </div>
+</div>
+
 <div class="card mt-3">
     <div class="card-body">
         <h4>Published Resources</h4>
