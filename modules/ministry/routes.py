@@ -161,6 +161,49 @@ def content_history(content_id):
     )
 
 
+@ministry_bp.route("/content/<int:version_id>/restore")
+@login_required
+def restore_content_version(version_id):
+
+    version = MinistryContent.query.get_or_404(version_id)
+
+    if version.owner_id != current_user.id:
+        abort(403)
+
+    if not version.parent_id:
+        return redirect(
+            url_for(
+                "ministry.view_content",
+                content_id=version.id
+            )
+        )
+
+    original = MinistryContent.query.get_or_404(version.parent_id)
+
+    MinistryContent.query.filter(
+        MinistryContent.parent_id == original.id
+    ).update(
+        {"is_preferred": False},
+        synchronize_session=False
+    )
+
+    original.is_preferred = False
+
+    version.is_preferred = True
+
+    original.content = version.content
+    original.ai_action = "Restore Version"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=original.id
+        )
+    )
+
+
 @ministry_bp.route("/content/<int:content_id>")
 @login_required
 def view_content(content_id):

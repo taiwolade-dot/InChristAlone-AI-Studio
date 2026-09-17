@@ -1228,5 +1228,10 @@ class MinistryContent(db.Model):
         db.String(100)
     )
 
+    is_preferred = db.Column(
+        db.Boolean,
+        default=False
+    )
+
     def __repr__(self):
         return f"<MinistryContent {self.title}>"

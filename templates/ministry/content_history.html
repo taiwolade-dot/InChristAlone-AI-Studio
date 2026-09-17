@@ -44,6 +44,11 @@
 
                         <h6>
                             Version {{ version.version_number or 1 }}
+                            {% if version.is_preferred %}
+                                <span class="badge bg-success">
+                                    ⭐ Preferred Version
+                                </span>
+                            {% endif %}
                         </h6>
 
                         <p>
@@ -57,6 +62,11 @@
                         <p style="white-space: pre-line;">
                             {{ version.content }}
                         </p>
+
+                        <a class="btn-secondary"
+                           href="{{ url_for('ministry.restore_content_version', version_id=version.id) }}">
+                            🔄 Restore This Version
+                        </a>
 
                     </div>
 
