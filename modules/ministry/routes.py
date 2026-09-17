@@ -1,4 +1,5 @@
-from flask import Blueprint, render_template
+from sqlalchemy import or_
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from datetime import datetime, date
 
@@ -145,16 +146,44 @@ def content_library():
 @login_required
 def resource_library():
 
-    resources = MinistryContent.query.filter(
+    search = request.args.get("search", "")
+    category = request.args.get("category", "")
+    scripture = request.args.get("scripture", "")
+
+    query = MinistryContent.query.filter(
         MinistryContent.owner_id == current_user.id,
         MinistryContent.status == "Published"
-    ).order_by(
+    )
+
+    if search:
+        query = query.filter(
+            or_(
+                MinistryContent.title.ilike(f"%{search}%"),
+                MinistryContent.content.ilike(f"%{search}%"),
+                MinistryContent.tags.ilike(f"%{search}%")
+            )
+        )
+
+    if category:
+        query = query.filter(
+            MinistryContent.category.ilike(f"%{category}%")
+        )
+
+    if scripture:
+        query = query.filter(
+            MinistryContent.scripture_reference.ilike(f"%{scripture}%")
+        )
+
+    resources = query.order_by(
         MinistryContent.published_at.desc()
     ).all()
 
     return render_template(
         "ministry/resource_library.html",
-        resources=resources
+        resources=resources,
+        search=search,
+        category=category,
+        scripture=scripture
     )
 
 

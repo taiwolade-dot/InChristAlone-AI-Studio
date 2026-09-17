@@ -6,6 +6,33 @@
 
     <h2>📚 Ministry Resource Library</h2>
 
+    <form method="get" class="card mt-3 mb-3">
+        <div class="card-body">
+
+            <h5>🔍 Search Resources</h5>
+
+            <input class="form-control mb-2"
+                   name="search"
+                   placeholder="Search title, content, tags"
+                   value="{{ search or '' }}">
+
+            <input class="form-control mb-2"
+                   name="category"
+                   placeholder="Category"
+                   value="{{ category or '' }}">
+
+            <input class="form-control mb-2"
+                   name="scripture"
+                   placeholder="Scripture Reference"
+                   value="{{ scripture or '' }}">
+
+            <button class="btn-secondary" type="submit">
+                🔎 Search
+            </button>
+
+        </div>
+    </form>
+
     <div class="card mt-3">
         <div class="card-body">
 
