@@ -59,6 +59,39 @@ def generate_resource_insights(
     return insights
 
 
+def generate_content_strategy(
+    total_resources,
+    total_views,
+    total_downloads,
+    categories,
+    top_category
+):
+    strategies = []
+
+    if top_category:
+        category_name = top_category[0] or "General"
+        strategies.append(
+            f"Create more {category_name} resources because this category has the strongest engagement."
+        )
+
+    if total_resources > 0 and total_downloads == 0:
+        strategies.append(
+            "Promote existing resources to increase member downloads."
+        )
+
+    if total_views > total_downloads:
+        strategies.append(
+            "Convert popular viewed resources into downloadable study materials."
+        )
+
+    if not strategies:
+        strategies.append(
+            "Create and publish more ministry resources to generate content opportunities."
+        )
+
+    return strategies
+
+
 @ministry_bp.route("/")
 @login_required
 def dashboard():
@@ -282,6 +315,14 @@ def resource_analytics():
         top_category
     )
 
+    content_strategies = generate_content_strategy(
+        total_resources,
+        total_views,
+        total_downloads,
+        categories,
+        top_category
+    )
+
     return render_template(
         "ministry/resource_analytics.html",
         total_resources=total_resources,
@@ -290,6 +331,7 @@ def resource_analytics():
         most_downloaded=most_downloaded,
         top_category=top_category,
         resource_insights=resource_insights,
+        content_strategies=content_strategies,
         categories=categories,
         top_resources=top_resources
     )
