@@ -1250,5 +1250,18 @@ class MinistryContent(db.Model):
         db.Text
     )
 
+    published_at = db.Column(
+        db.DateTime
+    )
+
+    published_by = db.Column(
+        db.Integer
+    )
+
+    visibility = db.Column(
+        db.String(30),
+        default="Private"
+    )
+
     def __repr__(self):
         return f"<MinistryContent {self.title}>"

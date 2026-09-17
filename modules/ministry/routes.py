@@ -273,6 +273,30 @@ def reject_content(content_id):
     )
 
 
+@ministry_bp.route("/content/<int:content_id>/publish")
+@login_required
+def publish_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Published"
+    content.published_by = current_user.id
+    content.published_at = datetime.utcnow()
+    content.ai_action = "Published"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
 @ministry_bp.route("/content/<int:content_id>")
 @login_required
 def view_content(content_id):
