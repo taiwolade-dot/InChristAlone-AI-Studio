@@ -614,7 +614,8 @@ def generate_flyer_v5(
                 title=title,
                 theme=theme_personality,
                 event_type="ministry",
-                bible_verse=bible_verse
+                bible_verse=bible_verse,
+                church_id=church_id
             )
 
             if fal_background:
@@ -1112,7 +1113,8 @@ def ai_compose_flyer(
         theme="default",
         background_path=None,
         images=None,
-        output_dir="static/generated"
+        output_dir="static/generated",
+        church_id=None
 ):
 
     # AI understanding

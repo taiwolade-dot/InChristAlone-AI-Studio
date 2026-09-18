@@ -192,7 +192,8 @@ def generate():
                 speakers=speakers,
                 logo_path=logo_path,
                 images=images,
-                theme=values.get("theme", "default")
+                theme=values.get("theme", "default"),
+                church_id=current_user.id
             )
 
             generated_image_url = flyer_result.get("file")

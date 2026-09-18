@@ -1182,7 +1182,8 @@ def content_flyer():
         flyer_result = ai_compose_flyer(
             title=topic,
             bible_verse="",
-            theme="default"
+            theme="default",
+            church_id=current_user.id
         )
 
 
