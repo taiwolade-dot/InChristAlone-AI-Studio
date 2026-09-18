@@ -1,5 +1,6 @@
 from ..fal_service import generate_image
 from .event_intelligence import detect_event_type
+from .prompts import MINISTRY_VISUAL_PROMPTS
 
 
 def build_flyer_visual_prompt(
@@ -20,6 +21,9 @@ Event Type:
 
 Theme:
 {theme}
+
+Visual Direction:
+{MINISTRY_VISUAL_PROMPTS.get(event_type, "")}
 
 Style:
 Professional church media design,
