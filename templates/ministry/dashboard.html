@@ -78,6 +78,12 @@ Bible Quiz Studio
                       {{ event.start_datetime.strftime('%d %b %Y') }}<br>
                       ⏳ {{ event.days_remaining }} days remaining
                 </p>
+
+                  <a href="{{ url_for('ai_assistant.event_flyer', event_id=event.id) }}"
+                     class="btn-secondary">
+                      🤖 Generate AI Flyer
+                  </a>
+
             {% endfor %}
         {% else %}
             <p>No upcoming events</p>

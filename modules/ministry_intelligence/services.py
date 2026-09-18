@@ -4,7 +4,9 @@ from models import (
     Member,
     ChurchEvent,
     QuizParticipant,
-    QuizQuestionAnalytics
+    QuizQuestionAnalytics,
+    ActivityLog,
+    MinistryContent
 )
 
 
@@ -17,6 +19,14 @@ def get_ministry_summary():
         "events": ChurchEvent.query.count(),
         "quiz_participants": QuizParticipant.query.count()
     }
+
+    summary["member_ai_activities"] = ActivityLog.query.count()
+
+    summary["birthday_interactions"] = ActivityLog.query.filter(
+        ActivityLog.action.like("Birthday%")
+    ).count()
+
+    summary["ai_content_generated"] = MinistryContent.query.count()
 
     analytics = QuizQuestionAnalytics.query.all()
 

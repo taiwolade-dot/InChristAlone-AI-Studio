@@ -3,7 +3,7 @@ from io import BytesIO
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from flask_login import login_required, current_user
-from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile, MinistryOccasion, MinistryContent
+from models import ChurchEvent, db, BibleQuiz, Member, AcademicWork, AcademicDocument, AIConversation, MinistryProfile, ChurchProfile, PastorProfile, MinistryOccasion, MinistryContent, ActivityLog
 from datetime import datetime
 import requests
 import os
@@ -20,6 +20,7 @@ from modules.ai_service import ask_ai, AI_LAST_STATUS, AI_LAST_STATUS
 from modules.content_generator.flyer_composer_v5 import ai_compose_flyer
 from modules.ministry_intelligence.occasion import build_occasion_context
 from modules.content_generator.fal_service import generate_birthday_background
+from .memory_engine import save_ministry_memory
 
 
 ai_assistant_bp = Blueprint(
@@ -45,6 +46,47 @@ def save_ministry_content(
         content=content,
         version_number=1,
         parent_id=parent_id,
+        ai_action=ai_action
+    )
+
+    db.session.add(saved_content)
+    db.session.commit()
+
+    return saved_content
+
+
+def log_ministry_activity(
+    action,
+    module,
+    details=None
+):
+    activity = ActivityLog(
+        user_id=current_user.id if current_user.is_authenticated else None,
+        action=action,
+        module=module,
+        details=details
+    )
+
+    db.session.add(activity)
+    db.session.commit()
+
+    return activity
+
+
+def save_member_ai_content(
+    member,
+    content_type,
+    title,
+    content,
+    ai_action=None
+):
+    saved_content = MinistryContent(
+        owner_id=member.owner_id,
+        occasion_id=None,
+        content_type=content_type,
+        title=title,
+        content=content,
+        version_number=1,
         ai_action=ai_action
     )
 
@@ -265,6 +307,61 @@ Close with a prayer asking God to help participants apply these truths in daily 
 """
 
     return content
+
+
+def generate_content_publisher(draft, format_type):
+    """Transform ministry content into publishing formats."""
+
+    draft = draft or ""
+    format_type = format_type or "Website Article"
+
+    if format_type == "Social Media Post":
+        return f"""🙏 {draft}
+
+Share this message and encourage others to grow in Christ.
+#ChristianGrowth #Faith #Discipleship
+"""
+
+    elif format_type == "Flyer Content":
+        return f"""TITLE:
+{draft.splitlines()[0] if draft else "Christian Ministry Event"}
+
+MESSAGE:
+{draft}
+
+Join us and be blessed.
+"""
+
+    elif format_type == "PDF Resource":
+        return f"""MINISTRY RESOURCE
+
+{draft}
+
+Prepared for Christian teaching and discipleship.
+"""
+
+    else:
+        return f"""ARTICLE TITLE
+
+{draft}
+
+This article provides biblical encouragement and practical application for believers.
+"""
+
+
+def prepare_flyer_content(title, content):
+    """Prepare ministry content for Flyer Composer."""
+
+    title = title or "Christian Ministry Event"
+    content = content or ""
+
+    return {
+        "title": title,
+        "headline": title,
+        "message": content,
+        "call_to_action": "Join us and be blessed.",
+        "theme": "Growing in Christ"
+    }
 
 
 def generate_content(question):
@@ -1035,6 +1132,66 @@ def content_creator():
         saved_message=saved_message
     )
 
+
+@ai_assistant_bp.route("/content-publisher", methods=["GET", "POST"])
+@login_required
+def content_publisher():
+
+    published = None
+
+    if request.method == "POST":
+
+        draft = request.form.get("draft")
+        format_type = request.form.get("format_type")
+
+        published = generate_content_publisher(
+            draft,
+            format_type
+        )
+
+    return render_template(
+        "ai_assistant/content_publisher.html",
+        published=published
+    )
+
+
+@ai_assistant_bp.route("/content-flyer", methods=["GET", "POST"])
+@login_required
+def content_flyer():
+    flyer_result = None
+    draft = None
+
+    if request.method == "POST":
+        topic = request.form.get("topic")
+        audience = request.form.get("audience")
+        content_type = request.form.get("content_type")
+
+        plan = generate_content_plan(
+            topic,
+            audience,
+            content_type
+        )
+
+        draft = generate_content_creator(plan)
+
+        flyer_content = prepare_flyer_content(
+            topic,
+            draft
+        )
+
+        flyer_result = ai_compose_flyer(
+            title=topic,
+            bible_verse="",
+            theme="default"
+        )
+
+
+    return render_template(
+        "ai_assistant/content_flyer.html",
+        flyer_result=flyer_result,
+        draft=draft
+    )
+
 @ai_assistant_bp.route("/", methods=["GET", "POST"])
 @login_required
 def chat():
@@ -1164,6 +1321,29 @@ Write it as a message that can be sent by a pastor or church family.
             + birthday_greeting_fallback(member)
         )
 
+    save_member_ai_content(
+        member,
+        "Birthday Greeting",
+        f"Birthday Greeting - {member.full_name}",
+        response,
+        ai_action="Member Birthday Greeting"
+    )
+
+    log_ministry_activity(
+        "Birthday Greeting Generated",
+        "AI Assistant",
+        f"Generated birthday greeting for {member.full_name}"
+    )
+
+    save_ministry_memory(
+        title=f"Birthday Care Engagement - {member.full_name}",
+        content=f"AI generated a birthday greeting for {member.full_name}. This indicates an opportunity for personalized member care and relationship building.",
+        memory_type="Member Engagement",
+        source="AI Birthday Assistant",
+        importance="Medium",
+        user_id=current_user.id
+    )
+
     return render_template(
         "church_management/member_ai_result.html",
         member=member,
@@ -1200,6 +1380,29 @@ Include:
 
     if response.startswith("⚠️"):
         response = birthday_prayer_fallback(member)
+
+    save_member_ai_content(
+        member,
+        "Birthday Prayer",
+        f"Birthday Prayer - {member.full_name}",
+        response,
+        ai_action="Member Birthday Prayer"
+    )
+
+    log_ministry_activity(
+        "Birthday Prayer Generated",
+        "AI Assistant",
+        f"Generated birthday prayer for {member.full_name}"
+    )
+
+    save_ministry_memory(
+        title=f"Birthday Prayer Engagement - {member.full_name}",
+        content=f"AI generated a birthday prayer for {member.full_name}. This supports personalized spiritual care and member connection.",
+        memory_type="Member Engagement",
+        source="AI Birthday Assistant",
+        importance="Medium",
+        user_id=current_user.id
+    )
 
     return render_template(
         "church_management/member_ai_result.html",
@@ -1398,6 +1601,14 @@ def event_flyer(event_id):
 
     pastor = PastorProfile.query.get(event.pastor_id) if event.pastor_id else None
 
+    ai_event_content = generate_content_creator(
+        generate_content_plan(
+            event.title,
+            "Church Members",
+            "Event Flyer"
+        )
+    )
+
     speakers = []
 
     if pastor:
@@ -1420,7 +1631,7 @@ def event_flyer(event_id):
     return render_template(
         "church_management/member_ai_result.html",
         title="🎨 Programme Flyer",
-        content=event.description or event.title,
+        content=ai_event_content,
         flyer=flyer_result.get("file")
     )
 
@@ -1534,6 +1745,21 @@ def birthday_flyer(member_id):
     )
 
     generated_image = flyer_result.get("file")
+
+    log_ministry_activity(
+        "Birthday Flyer Created",
+        "AI Assistant",
+        f"Created birthday flyer for {member.full_name}"
+    )
+
+    save_ministry_memory(
+        title=f"Birthday Flyer Engagement - {member.full_name}",
+        content=f"AI generated a birthday flyer for {member.full_name}. This supports personalized celebration and member connection.",
+        memory_type="Member Engagement",
+        source="AI Birthday Assistant",
+        importance="Medium",
+        user_id=current_user.id
+    )
 
     return render_template(
         "church_management/member_ai_result.html",

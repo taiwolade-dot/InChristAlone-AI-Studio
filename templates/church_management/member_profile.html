@@ -99,6 +99,68 @@
 </div>
 
 
+
+<div class="dashboard-card" style="margin-top:1rem;">
+<h3>🧠 AI Pastoral Care Intelligence</h3>
+
+<p>
+<strong>🤖 AI Care Score:</strong>
+{{ member_ai_summary.total_interactions }}
+interactions
+</p>
+
+{% if member_ai_summary.last_interaction %}
+<p>
+<strong>🕒 Last AI Interaction:</strong>
+{{ member_ai_summary.last_interaction }}
+</p>
+{% endif %}
+
+<hr>
+
+<h4>📜 AI Care Timeline</h4>
+
+{% if member_ai_summary.history %}
+<ul>
+{% for item in member_ai_summary.history[:10] %}
+<li>
+<strong>{{ item.type }}</strong><br>
+{{ item.title }}<br>
+<small>{{ item.date }}</small>
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No AI ministry care history recorded yet.</p>
+{% endif %}
+
+</div>
+
+<div class="dashboard-card" style="margin-top:1rem;">
+<h3>💡 AI Care Recommendations</h3>
+
+<p>
+<strong>📊 Care Score:</strong>
+{{ member_care_score }}/100
+</p>
+
+{% if member_recommendations %}
+<hr>
+
+<ul>
+{% for recommendation in member_recommendations %}
+<li>
+{{ recommendation }}
+</li>
+{% endfor %}
+</ul>
+
+{% else %}
+<p>No AI care recommendations available.</p>
+{% endif %}
+
+</div>
+
 </section>
 
 {% endblock %}

@@ -32,11 +32,24 @@ from .continuous_improvement import generate_continuous_improvement_plan
 from .knowledge_engine import generate_ministry_knowledge_insights
 from .prediction import generate_predictive_ministry_insights
 
+from modules.ai_assistant.member_intelligence import (
+    get_ministry_care_statistics,
+    get_top_engaged_members,
+    get_members_needing_attention
+)
+
+
 
 @ministry_intelligence_bp.route("/ministry-intelligence")
 def dashboard():
 
     ministry_summary = get_ministry_summary()
+
+    care_statistics = get_ministry_care_statistics()
+
+    top_engaged_members = get_top_engaged_members()
+
+    members_needing_attention = get_members_needing_attention()
 
     insights = generate_ministry_insights(
         ministry_summary
@@ -109,7 +122,10 @@ def dashboard():
         alert_report=alert_report,
         strategy_report=strategy_report,
         ministry_report=ministry_report,
-        export_report=export_report
+        export_report=export_report,
+        care_statistics=care_statistics,
+        top_engaged_members=top_engaged_members,
+        members_needing_attention=members_needing_attention
     )
 
 

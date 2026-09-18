@@ -5,7 +5,12 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
-from models import db, Member, ChurchProfile
+from models import db, Member, ChurchProfile, ActivityLog, MinistryContent
+from modules.ai_assistant.member_intelligence import (
+    get_member_ai_summary,
+    calculate_member_care_score,
+    generate_member_care_recommendations
+)
 
 church_management_bp = Blueprint(
     'church_management',
@@ -394,9 +399,26 @@ def member_profile(member_id):
             url_for('church_management.index')
         )
 
+    member_ai_summary = get_member_ai_summary(
+        member.full_name
+    )
+
+    member_care_score = calculate_member_care_score(
+        member.full_name
+    )
+
+    member_recommendations = generate_member_care_recommendations(
+        member.full_name
+    )
+
     return render_template(
         'church_management/member_profile.html',
-        member=member
+        member=member,
+        member_ai_summary=member_ai_summary,
+        member_care_score=member_care_score,
+        member_recommendations=member_recommendations,
+        ai_activities=member_ai_summary["history"],
+        ai_content=member_ai_summary["history"]
     )
 
 

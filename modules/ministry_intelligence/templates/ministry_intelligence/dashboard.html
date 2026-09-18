@@ -95,6 +95,97 @@ Compare Reports
         </div>
     </div>
 
+    <div class="metric-card">
+        <h3>🤖 AI Ministry Activities</h3>
+        <div class="metric-value">
+            {{ summary.member_ai_activities }}
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <h3>🎂 Birthday Interactions</h3>
+        <div class="metric-value">
+            {{ summary.birthday_interactions }}
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <h3>✍️ AI Content Created</h3>
+        <div class="metric-value">
+            {{ summary.ai_content_generated }}
+        </div>
+    </div>
+
+</div>
+
+
+<h2>🧑‍🤝‍🧑 AI Pastoral Care Intelligence</h2>
+
+<div class="dashboard-grid">
+
+<div class="metric-card">
+<h3>📊 Total Members</h3>
+<div class="metric-value">
+{{ care_statistics.total_members }}
+</div>
+</div>
+
+<div class="metric-card">
+<h3>🤖 AI Care Interactions</h3>
+<div class="metric-value">
+{{ care_statistics.total_interactions }}
+</div>
+</div>
+
+<div class="metric-card">
+<h3>💚 Average Care Score</h3>
+<div class="metric-value">
+{{ care_statistics.average_care_score }}
+</div>
+</div>
+
+</div>
+
+
+<div class="insight-card">
+
+<h3>🏆 Top Engaged Members</h3>
+
+{% if top_engaged_members %}
+<ul>
+{% for member in top_engaged_members %}
+<li>
+<strong>{{ member.name }}</strong>
+-
+{{ member.interactions }} AI interactions
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No engagement data available.</p>
+{% endif %}
+
+</div>
+
+
+<div class="insight-card">
+
+<h3>⚠️ Members Needing Attention</h3>
+
+{% if members_needing_attention %}
+<ul>
+{% for member in members_needing_attention %}
+<li>
+<strong>{{ member.name }}</strong><br>
+{{ member.reason }}<br>
+<small>{{ member.recommendation }}</small>
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No members currently requiring attention.</p>
+{% endif %}
+
 </div>
 
 
