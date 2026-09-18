@@ -9,11 +9,11 @@ def build_flyer_visual_prompt(
     theme="default",
     event_type="general",
     bible_verse="",
-    church_name="default"
+    church_id=None
 ):
 
     brand = get_brand_profile(
-        church_name
+        church_id
     )
 
     prompt = f"""
@@ -72,14 +72,16 @@ def generate_flyer_background(
     title,
     theme="default",
     event_type="general",
-    bible_verse=""
+    bible_verse="",
+    church_id=None
 ):
 
     prompt = build_flyer_visual_prompt(
         title,
         theme,
         event_type,
-        bible_verse
+        bible_verse,
+        church_id
     )
 
     return generate_image(prompt)

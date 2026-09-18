@@ -1291,3 +1291,70 @@ class MinistryContent(db.Model):
 
     def __repr__(self):
         return f"<MinistryContent {self.title}>"
+
+
+class ChurchBrandProfile(db.Model):
+    """
+    AI branding identity profile for churches and ministries.
+    Used by AI Flyer Generator and future digital content tools.
+    """
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    primary_color = db.Column(
+        db.String(20),
+        default="#1a2a6c"
+    )
+
+    accent_color = db.Column(
+        db.String(20),
+        default="#d4af37"
+    )
+
+    visual_style = db.Column(
+        db.String(100),
+        default="premium Christian ministry"
+    )
+
+    ministry_tone = db.Column(
+        db.String(100),
+        default="inspiring"
+    )
+
+    preferred_layout = db.Column(
+        db.String(50),
+        default="modern"
+    )
+
+    logo_position = db.Column(
+        db.String(50),
+        default="top_right"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    church = db.relationship(
+        'ChurchProfile',
+        backref='brand_profile'
+    )
+
+    def __repr__(self):
+        return f"<ChurchBrandProfile {self.church_id}>"
