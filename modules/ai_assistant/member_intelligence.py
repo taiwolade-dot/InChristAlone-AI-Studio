@@ -168,3 +168,68 @@ def get_members_needing_attention(limit=5):
             })
 
     return attention
+
+def analyze_member_care(member):
+    from datetime import datetime
+
+    history = get_member_ai_history(
+        member.full_name,
+        limit=50
+    )
+
+    care_score = calculate_member_care_score(
+        member.full_name
+    )
+
+    signals = []
+    recommendations = []
+
+    if not history:
+        signals.append(
+            "No recent AI engagement"
+        )
+        recommendations.append(
+            "Schedule pastoral follow-up"
+        )
+
+    if member.birthday:
+        today = datetime.utcnow().date()
+        birthday = member.birthday
+
+        try:
+            days_until = (
+                birthday.replace(
+                    year=today.year
+                ) - today
+            ).days
+
+            if 0 <= days_until <= 30:
+                signals.append(
+                    "Birthday approaching"
+                )
+                recommendations.append(
+                    "Generate birthday greeting and prayer"
+                )
+
+        except Exception:
+            pass
+
+    if care_score >= 70:
+        care_level = "Healthy"
+    elif care_score >= 40:
+        care_level = "Attention"
+    else:
+        care_level = "Critical"
+
+    if not recommendations:
+        recommendations.append(
+            "Continue relationship building and ministry engagement"
+        )
+
+    return {
+        "name": member.full_name,
+        "care_score": care_score,
+        "care_level": care_level,
+        "signals": signals,
+        "recommendation": recommendations
+    }

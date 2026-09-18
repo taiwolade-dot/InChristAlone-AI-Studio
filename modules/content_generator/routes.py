@@ -136,6 +136,35 @@ def generate():
                         }
                     )
 
+
+            images = []
+
+            image_upload_dir = "static/uploads/flyer_images"
+
+            os.makedirs(
+                image_upload_dir,
+                exist_ok=True
+            )
+
+            for image in request.files.getlist("event_images"):
+
+                if image and image.filename:
+
+                    filename = secure_filename(
+                        image.filename
+                    )
+
+                    image_path = os.path.join(
+                        image_upload_dir,
+                        filename
+                    )
+
+                    image.save(image_path)
+
+                    images.append(
+                        {"path": image_path}
+                    )
+
             logo_path = None
 
             logo = request.files.get(
@@ -162,6 +191,7 @@ def generate():
                 venue=values.get("venue", ""),
                 speakers=speakers,
                 logo_path=logo_path,
+                images=images,
                 theme=values.get("theme", "default")
             )
 
@@ -453,6 +483,35 @@ def flyer_composer_page():
 
 
             photo_paths = []
+
+            images = []
+
+            image_upload_dir = "static/uploads/flyer_images"
+
+            os.makedirs(
+                image_upload_dir,
+                exist_ok=True
+            )
+
+            for image in request.files.getlist("event_images"):
+
+                if image and image.filename:
+
+                    filename = secure_filename(
+                        image.filename
+                    )
+
+                    image_path = os.path.join(
+                        image_upload_dir,
+                        filename
+                    )
+
+                    image.save(image_path)
+
+                    images.append(
+                        {"path": image_path}
+                    )
+
             logo_path = None
 
             for photo in photos:
@@ -526,6 +585,7 @@ def flyer_composer_page():
                   venue=flyer_data["location"],
                   speakers=speaker_data,
                   logo_path=logo_path,
+                images=images,
                     design_settings=design_settings
               )
 

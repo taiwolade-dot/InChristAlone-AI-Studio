@@ -16,6 +16,7 @@ from .flyer_engine.portraits import (
     create_portrait
 )
 from .flyer_engine.speakers import place_speakers
+from .flyer_engine.assets import place_assets
 from .flyer_engine.logo import (
     add_logo,
     add_footer_branding
@@ -410,6 +411,7 @@ def generate_flyer_v5(
         background_path=None,
         design_settings=None,
         layout=None,
+        images=None,
         output_dir="static/generated"
     ):
 
@@ -980,6 +982,15 @@ def generate_flyer_v5(
       )
 
 
+
+    # Event Images
+
+    place_assets(
+        flyer,
+        images or [],
+        theme
+    )
+
     # Logo
 
     add_logo(
@@ -1062,6 +1073,7 @@ def ai_compose_flyer(
         logo_path=None,
         theme="default",
         background_path=None,
+        images=None,
         output_dir="static/generated"
 ):
 
@@ -1159,6 +1171,7 @@ def ai_compose_flyer(
         logo_path=logo_path,
           background_path=background_path,
           layout=layout,
+        images=images,
         output_dir=output_dir
     )
 
