@@ -68,4 +68,27 @@ CONTENT_TYPES = {
             "sample opening lines, and instrumentation/style notes."
         ),
     },
+    "bible_study_outline": {
+        "label": "Bible Study Outline",
+        "fields": [
+            "topic",
+            "scripture",
+            "audience",
+            "theme",
+            "key_points",
+            "application"
+        ],
+        "template": (
+            "Act as a Christian Bible Study teacher and curriculum developer.\n\n"
+            "Create a Bible Study Outline on: {topic}.\n"
+            "Primary Scripture: {scripture}.\n"
+            "Audience: {audience}.\n"
+            "Theme: {theme}.\n"
+            "Key Points: {key_points}.\n"
+            "Practical Application: {application}.\n\n"
+            "Structure the outline with introduction, biblical background, "
+            "major teaching points, discussion questions, practical applications, "
+            "and prayer points."
+        ),
+    },
 }
