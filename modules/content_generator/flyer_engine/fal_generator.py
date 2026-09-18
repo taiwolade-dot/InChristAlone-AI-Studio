@@ -1,14 +1,20 @@
 from ..fal_service import generate_image
 from .event_intelligence import detect_event_type
 from .prompts import MINISTRY_VISUAL_PROMPTS
+from .brand_memory import get_brand_profile
 
 
 def build_flyer_visual_prompt(
     title,
     theme="default",
     event_type="general",
-    bible_verse=""
+    bible_verse="",
+    church_name="default"
 ):
+
+    brand = get_brand_profile(
+        church_name
+    )
 
     prompt = f"""
 Create a premium Christian ministry flyer background.
@@ -24,6 +30,23 @@ Theme:
 
 Visual Direction:
 {MINISTRY_VISUAL_PROMPTS.get(event_type, "")}
+
+Church Brand Identity:
+
+Brand Style:
+{brand.get("style")}
+
+Tone:
+{brand.get("tone")}
+
+Primary Color:
+{brand.get("primary_color")}
+
+Accent Color:
+{brand.get("accent_color")}
+
+Layout Preference:
+{brand.get("layout")}
 
 Style:
 Professional church media design,
