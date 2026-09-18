@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 import os
 import uuid
+import requests
 
 from modules.content_generator.flyer_engine.layout_engine import FlyerLayout
 
@@ -27,6 +28,7 @@ from .flyer_engine.text import (
     draw_wrapped_text
 )
 from .flyer_engine.premium import add_premium_decoration
+from .flyer_engine.fal_generator import generate_flyer_background
 
 
 # ==============================
@@ -606,6 +608,42 @@ def generate_flyer_v5(
 
 
     if not ai_background_loaded:
+
+        try:
+            fal_background = generate_flyer_background(
+                title=title,
+                theme=theme_personality,
+                event_type="ministry",
+                bible_verse=bible_verse
+            )
+
+            if fal_background:
+
+                ai_background = Image.open(
+                    requests.get(
+                        fal_background,
+                        stream=True,
+                        timeout=20
+                    ).raw
+                ).convert("RGBA")
+
+                ai_background = ai_background.resize(
+                    flyer.size
+                )
+
+                flyer = ai_background
+                draw = ImageDraw.Draw(
+                    flyer
+                )
+
+                ai_background_loaded = True
+
+        except Exception:
+            pass
+
+
+    if not ai_background_loaded:
+
         add_background_gradient(
             flyer,
             theme_personality
