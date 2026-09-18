@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2>🎨 Church AI Brand Identity</h2>
+
+    <p>
+        Configure the visual identity that InChristAlone AI will use
+        when creating ministry content and flyers.
+    </p>
+
+    <h3>{{ profile.church_name }}</h3>
+
+    <form method="POST">
+
+        <label>Primary Colour</label>
+        <input
+            type="text"
+            name="primary_color"
+            value="{{ brand.primary_color if brand else '#1a2a6c' }}"
+            class="form-control"
+        >
+
+        <br>
+
+        <label>Accent Colour</label>
+        <input
+            type="text"
+            name="accent_color"
+            value="{{ brand.accent_color if brand else '#d4af37' }}"
+            class="form-control"
+        >
+
+        <br>
+
+        <label>Visual Style</label>
+        <input
+            type="text"
+            name="visual_style"
+            value="{{ brand.visual_style if brand else 'premium Christian ministry' }}"
+            class="form-control"
+        >
+
+        <br>
+
+        <label>Ministry Tone</label>
+        <input
+            type="text"
+            name="ministry_tone"
+            value="{{ brand.ministry_tone if brand else 'inspiring' }}"
+            class="form-control"
+        >
+
+        <br>
+
+        <label>Preferred Layout</label>
+        <select name="preferred_layout" class="form-control">
+
+            <option value="modern"
+            {% if brand and brand.preferred_layout == 'modern' %}selected{% endif %}>
+                Modern
+            </option>
+
+            <option value="classic"
+            {% if brand and brand.preferred_layout == 'classic' %}selected{% endif %}>
+                Classic
+            </option>
+
+            <option value="minimal"
+            {% if brand and brand.preferred_layout == 'minimal' %}selected{% endif %}>
+                Minimal
+            </option>
+
+        </select>
+
+        <br>
+
+        <label>Logo Position</label>
+        <select name="logo_position" class="form-control">
+
+            <option value="top_right">
+                Top Right
+            </option>
+
+            <option value="top_left">
+                Top Left
+            </option>
+
+            <option value="center">
+                Center
+            </option>
+
+        </select>
+
+        <br>
+
+        <button type="submit">
+            Save Brand Identity
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

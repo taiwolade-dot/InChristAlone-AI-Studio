@@ -5,7 +5,14 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 
-from models import db, Member, ChurchProfile, ActivityLog, MinistryContent
+from models import (
+    db,
+    Member,
+    ChurchProfile,
+    ChurchBrandProfile,
+    ActivityLog,
+    MinistryContent
+)
 from modules.ai_assistant.member_intelligence import (
     get_member_ai_summary,
     calculate_member_care_score,
@@ -70,6 +77,58 @@ def church_profile():
     return render_template(
         'church_management/profile.html',
         profile=profile
+    )
+
+
+
+@church_management_bp.route('/brand', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def church_brand():
+
+    profile = ChurchProfile.query.filter_by(
+        owner_id=current_user.id
+    ).first()
+
+    if not profile:
+        return redirect(
+            url_for('church_management.create_church_profile')
+        )
+
+    brand = ChurchBrandProfile.query.filter_by(
+        church_id=profile.id
+    ).first()
+
+    if request.method == 'POST':
+
+        if not brand:
+            brand = ChurchBrandProfile(
+                church_id=profile.id
+            )
+
+        brand.primary_color = request.form.get('primary_color')
+        brand.accent_color = request.form.get('accent_color')
+        brand.visual_style = request.form.get('visual_style')
+        brand.ministry_tone = request.form.get('ministry_tone')
+        brand.preferred_layout = request.form.get('preferred_layout')
+        brand.logo_position = request.form.get('logo_position')
+
+        db.session.add(brand)
+        db.session.commit()
+
+        flash(
+            'Church AI Brand Identity updated successfully.',
+            'success'
+        )
+
+        return redirect(
+            url_for('church_management.church_brand')
+        )
+
+    return render_template(
+        'church_management/brand.html',
+        profile=profile,
+        brand=brand
     )
 
 
