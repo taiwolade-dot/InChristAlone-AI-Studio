@@ -229,6 +229,44 @@ def generate_content_plan(topic, audience, content_type):
     }
 
 
+def generate_content_creator(plan):
+    """Generate a complete ministry content draft from a content plan."""
+
+    title = plan.get("title", "")
+    theme = plan.get("theme", "")
+    audience = plan.get("audience", "")
+    scriptures = plan.get("scriptures", [])
+    outline = plan.get("outline", [])
+
+    content = f"""# {title}
+
+Theme:
+{theme}
+
+Target Audience:
+{audience}
+
+Key Scriptures:
+"""
+    for verse in scriptures:
+        content += f"- {verse}\n"
+
+    content += "\nOutline:\n"
+    for item in outline:
+        content += f"- {item}\n"
+
+    content += """
+
+Teaching Notes:
+Expand each outline point with biblical explanation, practical application, and relevant illustrations.
+
+Prayer:
+Close with a prayer asking God to help participants apply these truths in daily life.
+"""
+
+    return content
+
+
 def generate_content(question):
 
     q = question.lower()
@@ -942,6 +980,60 @@ def content_planner():
         saved_message=saved_message
     )
 
+
+
+@ai_assistant_bp.route("/content-creator", methods=["GET", "POST"])
+@login_required
+def content_creator():
+
+    plan = None
+    draft = None
+    saved_message = None
+
+    if request.method == "POST":
+
+        action = request.form.get("action")
+
+        if action == "save":
+
+            title = request.form.get("title")
+            content = request.form.get("content")
+            content_type = request.form.get("content_type")
+
+            saved = MinistryContent(
+                owner_id=current_user.id,
+                content_type=content_type,
+                title=title,
+                content=content,
+                version_number=1,
+                ai_action="content_creator"
+            )
+
+            db.session.add(saved)
+            db.session.commit()
+
+            saved_message = "✅ Created content saved to Ministry Library."
+
+        else:
+
+            topic = request.form.get("topic")
+            audience = request.form.get("audience")
+            content_type = request.form.get("content_type")
+
+            plan = generate_content_plan(
+                topic,
+                audience,
+                content_type
+            )
+
+            draft = generate_content_creator(plan)
+
+    return render_template(
+        "ai_assistant/content_creator.html",
+        plan=plan,
+        draft=draft,
+        saved_message=saved_message
+    )
 
 @ai_assistant_bp.route("/", methods=["GET", "POST"])
 @login_required

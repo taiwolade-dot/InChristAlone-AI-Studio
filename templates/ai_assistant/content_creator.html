@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}AI Ministry Content Creator{% endblock %}
+
+{% block content %}
+
+<h1>🚀 AI Ministry Content Creator</h1>
+
+<div class="dashboard-card">
+<form method="POST">
+
+<label>Topic</label><br>
+<input type="text" name="topic" style="width:100%;" placeholder="Example: Christian Growth">
+
+<br><br>
+
+<label>Target Audience</label><br>
+<input type="text" name="audience" style="width:100%;" placeholder="Example: Youth, Church Members">
+
+<br><br>
+
+<label>Content Type</label><br>
+<select name="content_type" style="width:100%;">
+    <option>Bible Study</option>
+    <option>Sermon Outline</option>
+    <option>Devotional</option>
+    <option>Prayer Guide</option>
+</select>
+
+<br><br>
+
+<button class="btn-primary">
+🚀 Generate Content
+</button>
+
+</form>
+</div>
+
+{% if draft %}
+
+<div class="dashboard-card">
+
+<h2>{{ plan.title }}</h2>
+
+<pre style="white-space:pre-wrap;">{{ draft }}</pre>
+
+<form method="POST">
+
+<input type="hidden" name="action" value="save">
+
+<input type="hidden" name="title" value="{{ plan.title }}">
+
+<input type="hidden" name="content" value="{{ draft }}">
+
+<input type="hidden" name="content_type" value="{{ plan.content_type }}">
+
+<button class="btn-primary">
+💾 Save Created Content
+</button>
+
+</form>
+
+</div>
+
+{% endif %}
+
+{% endblock %}
