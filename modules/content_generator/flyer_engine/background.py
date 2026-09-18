@@ -5,13 +5,36 @@ from .themes import THEMES
 def create_flyer_canvas(
         width=1080,
         height=1350,
-        theme="default"
+        theme="default",
+        brand_profile=None
 ):
 
     config = THEMES.get(
         theme,
         THEMES["default"]
-    )
+    ).copy()
+
+    if brand_profile:
+
+        primary = brand_profile.get(
+            "primary_color"
+        )
+
+        accent = brand_profile.get(
+            "accent_color"
+        )
+
+        if primary:
+            config["primary"] = tuple(
+                int(primary[i:i+2], 16)
+                for i in (1, 3, 5)
+            )
+
+        if accent:
+            config["secondary"] = tuple(
+                int(accent[i:i+2], 16)
+                for i in (1, 3, 5)
+            )
 
     canvas = Image.new(
         "RGBA",

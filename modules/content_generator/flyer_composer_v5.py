@@ -29,6 +29,7 @@ from .flyer_engine.text import (
 )
 from .flyer_engine.premium import add_premium_decoration
 from .flyer_engine.fal_generator import generate_flyer_background
+from .flyer_engine.brand_memory import get_brand_profile
 
 
 # ==============================
@@ -414,7 +415,8 @@ def generate_flyer_v5(
         design_settings=None,
         layout=None,
         images=None,
-        output_dir="static/generated"
+        output_dir="static/generated",
+        church_id=None
     ):
 
     # ==============================
@@ -589,8 +591,16 @@ def generate_flyer_v5(
     )
 
 
+    brand_profile = None
+
+    if church_id:
+        brand_profile = get_brand_profile(
+            church_id
+        )
+
     flyer, draw, config = create_flyer_canvas(
-        theme=theme_personality
+        theme=theme_personality,
+        brand_profile=brand_profile
     )
 
     ai_background_loaded = False
@@ -1212,7 +1222,8 @@ def ai_compose_flyer(
           background_path=background_path,
           layout=layout,
         images=images,
-        output_dir=output_dir
+        output_dir=output_dir,
+        church_id=church_id
     )
 
 
