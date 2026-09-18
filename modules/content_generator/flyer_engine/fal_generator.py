@@ -1,4 +1,5 @@
 from ..fal_service import generate_image
+from .event_intelligence import detect_event_type
 
 
 def build_flyer_visual_prompt(
