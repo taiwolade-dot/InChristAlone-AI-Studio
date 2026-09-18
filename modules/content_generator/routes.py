@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from modules.wallet_utils import spend_units, refund_units
 from .data import CONTENT_TYPES
 from .fal_service import generate_image, upscale_image, edit_image, generate_video, generate_music, generate_voice, transcribe_audio
 from .prompt_enhancer import enhance_prompt
 from .flyer_composer_v5 import ai_compose_flyer
+from .ministry_context import get_ministry_context
 
 content_generator_bp = Blueprint(
     'content_generator',
@@ -61,6 +62,47 @@ def generate():
             for field in type_data['fields']
         }
         generated_prompt = type_data['template'].format(**values)
+
+        if content_type == 'bible_study_outline':
+
+            ministry_context = get_ministry_context(
+                current_user.id
+            )
+
+            church = ministry_context.get(
+                'church',
+                {}
+            )
+
+            brand = ministry_context.get(
+                'brand',
+                {}
+            )
+
+            generated_prompt += f"""
+
+Ministry Context:
+
+Church Name:
+{church.get('name', '')}
+
+Motto:
+{church.get('motto', '')}
+
+Vision:
+{church.get('vision', '')}
+
+Mission:
+{church.get('mission', '')}
+
+Ministry Tone:
+{brand.get('tone', '')}
+
+Teaching Style:
+{brand.get('style', '')}
+
+Create this Bible Study Outline in alignment with this ministry identity.
+"""
 
         if content_type == 'cartoon':
 
