@@ -30,3 +30,16 @@ def get_ministry_context(church_id=None):
     context["brand"] = get_brand_profile(church_id)
 
     return context
+
+
+def resolve_church_id(user_id):
+    """Return the id of the ChurchProfile owned by this user (most recent), or None."""
+
+    if not user_id:
+        return None
+
+    church = ChurchProfile.query.filter_by(
+        owner_id=user_id
+    ).order_by(ChurchProfile.id.desc()).first()
+
+    return church.id if church else None

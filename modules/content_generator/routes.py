@@ -5,7 +5,7 @@ from .data import CONTENT_TYPES
 from .fal_service import generate_image, upscale_image, edit_image, generate_video, generate_music, generate_voice, transcribe_audio
 from .prompt_enhancer import enhance_prompt
 from .flyer_composer_v5 import ai_compose_flyer
-from .ministry_context import get_ministry_context
+from .ministry_context import get_ministry_context, resolve_church_id
 
 content_generator_bp = Blueprint(
     'content_generator',
@@ -65,9 +65,7 @@ def generate():
 
         if content_type == 'bible_study_outline':
 
-            ministry_context = get_ministry_context(
-                current_user.id
-            )
+            ministry_context = get_ministry_context(resolve_church_id(current_user.id))
 
             church = ministry_context.get(
                 'church',
