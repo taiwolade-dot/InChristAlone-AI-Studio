@@ -233,7 +233,7 @@ Create this Bible Study Outline in alignment with this ministry identity.
                 logo_path=logo_path,
                 images=images,
                 theme=values.get("theme", "default"),
-                church_id=current_user.id
+                church_id=resolve_church_id(current_user.id)
             )
 
             generated_image_url = flyer_result.get("file")
