@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}AI Flyer Composer — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+
+<section class="prompt-engine">
+
+<h2>🖼️ AI Flyer Composer</h2>
+
+<p class="prompt-engine-subtitle">
+Add a real photo to your designed flyer while keeping the original image unchanged.
+</p>
+
+
+<form method="POST"
+enctype="multipart/form-data">
+
+
+<div class="form-group">
+<h3>Flyer Editor</h3>
+<p style="color:#666;">
+Your flyer has already been generated.
+You can now personalize it by adding or replacing speaker photos and your church logo.
+</p>
+</div>
+
+<div class="form-group">
+<label>Current Flyer Design</label>
+
+{% if generated_flyer %}
+<input type="hidden"
+name="generated_flyer"
+value="{{ generated_flyer }}">
+
+{% else %}
+
+<input type="file"
+name="flyer"
+accept="image/*"
+required>
+
+{% endif %}
+
+</div>
+
+
+
+<div class="form-group">
+
+<h3>🎨 Design Settings</h3>
+
+<label>Title Colour</label>
+<input type="color"
+       name="title_color"
+       value="#ffffff">
+
+<br><br>
+
+<label>Verse Colour</label>
+<input type="color"
+       name="verse_color"
+       value="#ffffff">
+
+<br><br>
+
+<label>Speaker Name Colour</label>
+<input type="color"
+       name="speaker_name_color"
+       value="#FFD700">
+
+<br><br>
+
+<label>Speaker Layout</label>
+<select name="speaker_layout">
+    <option value="bottom">Bottom Row</option>
+    <option value="center">Center</option>
+    <option value="side">Side Column</option>
+</select>
+
+<br><br>
+
+<label>Logo Position</label>
+<select name="logo_position">
+    <option value="top_left">Top Left</option>
+    <option value="top_right">Top Right</option>
+    <option value="bottom_left">Bottom Left</option>
+    <option value="bottom_right">Bottom Right</option>
+</select>
+
+<br><br>
+
+
+<label>Title Font Family</label>
+<select name="title_font_family">
+    <option value="sans">Modern Sans</option>
+    <option value="bold">Bold Impact</option>
+    <option value="serif">Classic Serif</option>
+    <option value="mono">Monospace</option>
+</select>
+
+<br><br>
+
+<label>Verse Font Family</label>
+<select name="verse_font_family">
+    <option value="serif">Classic Serif</option>
+    <option value="sans">Modern Sans</option>
+    <option value="bold">Bold Impact</option>
+    <option value="mono">Monospace</option>
+</select>
+
+<br><br>
+
+<label>Speaker Font Family</label>
+<select name="speaker_font_family">
+    <option value="sans">Modern Sans</option>
+    <option value="bold">Bold Impact</option>
+    <option value="serif">Classic Serif</option>
+    <option value="mono">Monospace</option>
+</select>
+
+<br><br>
+
+<label>Title Font Size</label>
+
+<input type="range"
+       name="title_font_size"
+       min="40"
+       max="100"
+       value="70">
+
+<br><br>
+
+<label>Verse Font Size</label>
+<input type="range"
+       name="verse_font_size"
+       min="20"
+       max="60"
+       value="34">
+
+<br><br>
+
+<label>Speaker Font Size</label>
+<input type="range"
+       name="speaker_font_size"
+       min="20"
+       max="50"
+       value="28">
+
+</div>
+
+
+<div class="form-group">
+
+<label>Speaker Information</label>
+
+<p style="font-size:0.9rem;">
+Add or replace speaker photos, names, and titles.
+</p>
+
+{% for i in range(1,6) %}
+
+<div style="border:1px solid #ddd;padding:10px;margin-bottom:15px;border-radius:8px;">
+
+<h4>Speaker {{ i }}</h4>
+
+<label>Photo</label>
+<input type="file"
+name="speaker_photo_{{ i }}"
+accept="image/*">
+
+<br>
+
+<label>Name</label>
+<input type="text"
+name="speaker_name_{{ i }}"
+placeholder="Speaker name">
+
+<br>
+
+<label>Title / Role</label>
+<input type="text"
+name="speaker_title_{{ i }}"
+placeholder="Speaker title">
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<div class="form-group">
+
+<label>Upload Church Logo (Optional)</label>
+
+<p style="font-size:0.9rem;">
+Add your church logo for professional branding.
+</p>
+
+<input type="file"
+name="logo"
+accept="image/*">
+
+</div>
+
+<button class="btn-primary" type="submit">
+✨ Compose Flyer
+</button>
+
+
+</form>
+
+
+{% if composed_url %}
+
+<div class="prompt-output">
+
+<h3>Final Flyer</h3>
+
+<img src="{{ composed_url }}"
+style="max-width:100%;border-radius:10px;">
+
+<br><br>
+
+<a class="btn-primary"
+href="{{ composed_url }}"
+download>
+Download Flyer
+</a>
+
+</div>
+
+{% endif %}
+
+
+</section>
+
+{% endblock %}

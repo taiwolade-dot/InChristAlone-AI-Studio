@@ -1,0 +1,89 @@
+{
+  "Children": [
+    {
+      "text": "Who built a big boat because God told him to?",
+      "options": ["Noah", "Moses", "David", "Peter"],
+      "correct_index": 0,
+      "scripture_ref": "Genesis 6:14",
+      "explanation": "God told Noah to build an ark to save his family and the animals.",
+      "difficulty": "Easy"
+    },
+    {
+      "text": "Who was thrown into the lions' den but was not hurt?",
+      "options": ["Daniel", "Jonah", "Joseph", "Samuel"],
+      "correct_index": 0,
+      "scripture_ref": "Daniel 6:16-23",
+      "explanation": "God shut the mouths of the lions to protect Daniel.",
+      "difficulty": "Easy"
+    },
+    {
+      "text": "What did Jesus use to feed 5,000 people?",
+      "options": ["Bread and fish", "Rice and beans", "Meat and water", "Fruit and honey"],
+      "correct_index": 0,
+      "scripture_ref": "John 6:9-13",
+      "explanation": "A boy gave Jesus five loaves and two fish, and Jesus multiplied them.",
+      "difficulty": "Easy"
+    }
+  ],
+  "Teenagers": [
+    {
+      "text": "Who denied Jesus three times before the rooster crowed?",
+      "options": ["Peter", "John", "Judas", "Thomas"],
+      "correct_index": 0,
+      "scripture_ref": "Matthew 26:69-75",
+      "explanation": "Peter denied knowing Jesus three times, just as Jesus had predicted.",
+      "difficulty": "Easy"
+    },
+    {
+      "text": "What did David use to defeat Goliath?",
+      "options": ["A sling and stone", "A sword", "A spear", "His bare hands"],
+      "correct_index": 0,
+      "scripture_ref": "1 Samuel 17:49-50",
+      "explanation": "David defeated Goliath with a single stone from his sling.",
+      "difficulty": "Easy"
+    }
+  ],
+  "Youth": [
+    {
+      "text": "According to Romans 12:2, what should believers do instead of conforming to the world?",
+      "options": [
+        "Be transformed by the renewing of their mind",
+        "Follow every tradition",
+        "Avoid all fellowship",
+        "Focus only on outward appearance"
+      ],
+      "correct_index": 0,
+      "scripture_ref": "Romans 12:2",
+      "explanation": "Paul teaches believers to be transformed by renewing their minds, so they can discern God's will.",
+      "difficulty": "Medium"
+    }
+  ],
+  "Adults": [
+    {
+      "text": "According to Hebrews 11:1, faith is the substance of things hoped for and what?",
+      "options": [
+        "The evidence of things not seen",
+        "The proof of past events",
+        "A feeling of certainty",
+        "The absence of doubt"
+      ],
+      "correct_index": 0,
+      "scripture_ref": "Hebrews 11:1",
+      "explanation": "Hebrews 11:1 defines faith as substance of things hoped for and evidence of things not seen.",
+      "difficulty": "Medium"
+    },
+    {
+      "text": "In Nehemiah, what was the primary obstacle the builders faced while rebuilding the wall?",
+      "options": [
+        "Opposition and mockery from surrounding enemies",
+        "Lack of building materials",
+        "Disagreement among the priests",
+        "A famine in the land"
+      ],
+      "correct_index": 0,
+      "scripture_ref": "Nehemiah 4:1-9",
+      "explanation": "Sanballat and Tobiah mocked and threatened the builders, so Nehemiah organized armed guards alongside the workers.",
+      "difficulty": "Medium"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Member Profile — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+
+<section class="prompt-engine">
+
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+    <h2>👤 Member Profile</h2>
+
+    <a href="{{ url_for('church_management.index') }}"
+       class="btn-secondary">
+        ← Back to Members
+    </a>
+</div>
+
+
+<div class="dashboard-card" style="margin-top:1.5rem;">
+
+    <h2>{{ member.full_name }}</h2>
+
+    <hr>
+
+    <p><strong>📞 Phone:</strong>
+        {{ member.phone or 'Not provided' }}
+    </p>
+
+    <p><strong>📧 Email:</strong>
+        {{ member.email or 'Not provided' }}
+    </p>
+
+    <p><strong>🎂 Birthday:</strong>
+        {{ member.birthday or 'Not provided' }}
+    </p>
+
+    <p><strong>⛪ Church Role:</strong>
+        {{ member.church_role or 'Member' }}
+    </p>
+
+    <p><strong>💍 Marital Status:</strong>
+        {{ member.marital_status or 'Not provided' }}
+    </p>
+
+    <p><strong>📅 Joined:</strong>
+        {{ member.date_joined or 'Not provided' }}
+    </p>
+
+    <p><strong>🙏 Salvation Date:</strong>
+        {{ member.date_of_salvation or 'Not provided' }}
+    </p>
+
+    <p><strong>💧 Baptism Date:</strong>
+        {{ member.date_of_baptism or 'Not provided' }}
+    </p>
+
+    <p><strong>📝 Notes:</strong>
+        {{ member.notes or 'None' }}
+    </p>
+
+</div>
+
+
+<div class="dashboard-card" style="margin-top:1rem;">
+
+<h3>🤖 AI Ministry Tools</h3>
+
+<div style="display:flex; gap:1rem; flex-wrap:wrap;">
+
+<a href="{{ url_for('ai_assistant.birthday_greeting', member_id=member.id) }}"
+   class="btn-primary">
+🎂 Birthday Greeting
+</a>
+
+
+<a href="{{ url_for('ai_assistant.birthday_prayer', member_id=member.id) }}"
+   class="btn-primary">
+🙏 Birthday Prayer
+</a>
+
+
+<a href="{{ url_for('ai_assistant.birthday_flyer', member_id=member.id) }}"
+   class="btn-primary">
+🎨 Birthday Flyer
+</a>
+
+</div>
+
+</div>
+
+
+<div style="margin-top:1rem;">
+
+<a href="{{ url_for('church_management.edit_member', member_id=member.id) }}"
+   class="btn-secondary">
+✏️ Edit Member
+</a>
+
+</div>
+
+
+
+<div class="dashboard-card" style="margin-top:1rem;">
+<h3>🧠 AI Pastoral Care Intelligence</h3>
+
+<p>
+<strong>🤖 AI Care Score:</strong>
+{{ member_ai_summary.total_interactions }}
+interactions
+</p>
+
+{% if member_ai_summary.last_interaction %}
+<p>
+<strong>🕒 Last AI Interaction:</strong>
+{{ member_ai_summary.last_interaction }}
+</p>
+{% endif %}
+
+<hr>
+
+<h4>📜 AI Care Timeline</h4>
+
+{% if member_ai_summary.history %}
+<ul>
+{% for item in member_ai_summary.history[:10] %}
+<li>
+<strong>{{ item.type }}</strong><br>
+{{ item.title }}<br>
+<small>{{ item.date }}</small>
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No AI ministry care history recorded yet.</p>
+{% endif %}
+
+</div>
+
+<div class="dashboard-card" style="margin-top:1rem;">
+<h3>💡 AI Care Recommendations</h3>
+
+<p>
+<strong>📊 Care Score:</strong>
+{{ member_care_score }}/100
+</p>
+
+{% if member_recommendations %}
+<hr>
+
+<ul>
+{% for recommendation in member_recommendations %}
+<li>
+{{ recommendation }}
+</li>
+{% endfor %}
+</ul>
+
+{% else %}
+<p>No AI care recommendations available.</p>
+{% endif %}
+
+</div>
+
+</section>
+
+{% endblock %}

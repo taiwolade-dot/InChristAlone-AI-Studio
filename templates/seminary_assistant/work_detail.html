@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ work.title }} — Seminary Assistant{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>{{ work.title }}</h2>
+
+    <form method="POST" action="{{ url_for('seminary_assistant.update_status', work_id=work.id) }}" style="margin-bottom:1.5rem;">
+        <div class="form-group" style="max-width:250px;">
+            <label for="status">Status</label>
+            <select id="status" name="status" onchange="this.form.submit()">
+                {% for key, label in work_statuses.items() %}
+                    <option value="{{ key }}" {% if work.status == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    {% if work.deadline %}<p><strong>Deadline:</strong> {{ work.deadline }}</p>{% endif %}
+    {% if work.notes %}<p><strong>Notes:</strong> {{ work.notes }}</p>{% endif %}
+
+    <hr style="margin:1.5rem 0;">
+
+    <h3>Documents</h3>
+
+    {% if work.documents %}
+        {% for doc in work.documents %}
+        <div class="dashboard-card" style="margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem;">
+            <span>{{ doc.original_filename }}</span>
+            <div style="display:flex; gap:0.8rem;">
+                <a href="{{ url_for('seminary_assistant.download_document', doc_id=doc.id) }}" class="btn-secondary">Download</a>
+                <form method="POST" action="{{ url_for('seminary_assistant.delete_document', doc_id=doc.id) }}"
+                      onsubmit="return confirm('Delete {{ doc.original_filename }}?');">
+                    <button type="submit" class="btn-secondary" style="border-color:#b91c1c; color:#b91c1c;">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No documents uploaded yet.</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('seminary_assistant.upload_document', work_id=work.id) }}"
+          enctype="multipart/form-data" style="margin-top:1rem;">
+        <div class="form-group">
+            <label for="document">Upload Document (PDF, DOC, DOCX, TXT)</label>
+            <input type="file" id="document" name="document" required>
+        </div>
+        <button type="submit" class="btn-primary">Upload</button>
+    </form>
+
+    <hr style="margin:1.5rem 0;">
+
+    <form method="POST" action="{{ url_for('seminary_assistant.delete_work', work_id=work.id) }}"
+          onsubmit="return confirm('Delete this entire item and all its documents?');">
+        <button type="submit" class="btn-secondary" style="border-color:#b91c1c; color:#b91c1c;">Delete This Item</button>
+    </form>
+
+    <p class="auth-switch">
+        <a href="{{ url_for('seminary_assistant.index') }}">← Back to My Work</a>
+    </p>
+</section>
+{% endblock %}

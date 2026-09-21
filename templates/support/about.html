@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}About Us — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>About InChristAlone AI Studio</h2>
+
+    <p>InChristAlone AI Studio is a Christian AI platform built to equip pastors, churches, and theological institutions with practical, AI-powered tools for ministry, research, and content creation.</p>
+
+    <p>Our vision is to become a one-stop AI Prompt Engine platform for the global Christian community - helping ministers prepare sermons, build church websites, manage congregations, track academic work, and create media content, all in one place.</p>
+
+    <h3 style="margin-top:1.5rem;">What We Offer</h3>
+    <ul style="padding-left:1.2rem;">
+        <li>AI Prompt Engine for sermons, Bible studies, and ministry content</li>
+        <li>Real AI image, video, music, and voice generation</li>
+        <li>Website generation for churches and ministries</li>
+        <li>Church membership management</li>
+        <li>Seminary and thesis tracking tools</li>
+        <li>A marketplace for premium ministry prompt packs</li>
+    </ul>
+
+    <h3 style="margin-top:1.5rem;">Founder</h3>
+    <p>InChristAlone AI Studio was founded by Rev. Taiwo Jacob Lade, Senior Pastor and founder of InChristAlone Digital &amp; AI Solutions, built entirely to serve the Nigerian Baptist Convention community and beyond.</p>
+
+    <p class="auth-switch">
+        <a href="{{ url_for('support.contact') }}">Contact Us →</a>
+    </p>
+</section>
+{% endblock %}

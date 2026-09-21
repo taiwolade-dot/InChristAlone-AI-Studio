@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="dashboard-card">
+
+<h2>🤖 AI Quiz Improvement Dashboard</h2>
+
+<p>
+Quiz: <strong>{{ quiz.title }}</strong>
+</p>
+
+<hr>
+
+<h3>📊 Performance Analysis</h3>
+
+<div class="dashboard-card">
+
+<p>
+Status:
+<strong>
+{{ analysis.status }}
+</strong>
+</p>
+
+<p>
+Average Accuracy:
+<strong>
+{{ analysis.average_accuracy }}%
+</strong>
+</p>
+
+</div>
+
+
+<h3>⚠️ Weak Questions</h3>
+
+{% if analysis.weak_questions %}
+
+<table class="table">
+
+<tr>
+<th>Question ID</th>
+<th>Accuracy</th>
+<th>Action</th>
+</tr>
+
+{% for item in analysis.weak_questions %}
+
+<tr>
+
+<td>
+{{ item.question_id }}
+</td>
+
+<td>
+{{ item.accuracy }}%
+</td>
+
+<td>
+Review teaching material
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<p>
+✅ No weak questions detected.
+</p>
+
+{% endif %}
+
+
+<hr>
+
+
+<h3>🤖 AI Recommendations</h3>
+
+
+{% if recommendations %}
+
+{% for item in recommendations %}
+
+<div class="dashboard-card">
+
+<h4>
+Question {{ item.question_id }}
+</h4>
+
+<p>
+<strong>Recommended Action:</strong>
+{{ item.action }}
+</p>
+
+<p>
+{{ item.reason }}
+</p>
+
+<button
+class="btn-primary"
+onclick="regenerateQuestion({{ item.question_id }})">
+🤖 Regenerate Question
+</button>
+
+</div>
+
+{% endfor %}
+
+
+{% else %}
+
+<p>
+No recommendations available yet.
+</p>
+
+{% endif %}
+
+
+<hr>
+
+
+<h3>📖 Ministry Teaching Insight</h3>
+
+<p>
+Use these insights to improve Bible teaching,
+discipleship classes, youth training and
+small group learning.
+</p>
+
+
+</section>
+
+
+
+
+<script>
+
+function regenerateQuestion(questionId){
+
+fetch(
+`/bible-quiz/question/${questionId}/regenerate`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+}
+}
+)
+
+.then(response=>response.json())
+
+.then(data=>{
+
+alert(data.message || data.error);
+
+location.reload();
+
+});
+
+}
+
+</script>
+
+\n{% endblock %}

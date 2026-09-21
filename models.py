@@ -1,0 +1,1360 @@
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+
+db = SQLAlchemy()
+
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='member')
+    wallet_balance = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def has_role(self, *roles):
+        return self.role in roles
+
+    def is_super_admin(self):
+        return self.role == 'super_admin'
+
+    def is_admin(self):
+        return self.role in [
+            'super_admin',
+            'admin',
+            'support_admin',
+            'content_admin',
+            'finance_admin'
+        ]
+
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+
+class Member(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    full_name = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(30))
+    email = db.Column(db.String(120))
+    address = db.Column(db.String(255))
+    church_role = db.Column(db.String(80))
+    date_joined = db.Column(db.Date)
+    date_of_salvation = db.Column(db.Date)
+    date_of_baptism = db.Column(db.Date)
+    marital_status = db.Column(db.String(30))
+    age_range = db.Column(db.String(20))
+    birthday = db.Column(db.Date)
+    profile_photo = db.Column(db.String(255))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Member {self.full_name}>'
+
+
+class AcademicWork(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    work_type = db.Column(db.String(30), nullable=False, default='thesis_chapter')
+    title = db.Column(db.String(200), nullable=False)
+    status = db.Column(db.String(30), nullable=False, default='not_started')
+    deadline = db.Column(db.Date)
+    notes = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    documents = db.relationship('AcademicDocument', backref='work', lazy=True, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<AcademicWork {self.title}>'
+
+
+class AcademicDocument(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    work_id = db.Column(db.Integer, db.ForeignKey('academic_work.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)
+    original_filename = db.Column(db.String(255), nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<AcademicDocument {self.original_filename}>'
+
+
+class PromptPack(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    category = db.Column(db.String(80))
+    price_units = db.Column(db.Integer, nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    pdf_filename = db.Column(db.String(255))
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<PromptPack {self.title}>'
+
+
+class Purchase(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pack_id = db.Column(db.Integer, db.ForeignKey('prompt_pack.id'), nullable=False)
+    units_spent = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='purchases')
+    pack = db.relationship('PromptPack', backref='purchases')
+
+    def __repr__(self):
+        return f'<Purchase user={self.user_id} pack={self.pack_id}>'
+
+
+class WalletTransaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    reference = db.Column(db.String(100), unique=True, nullable=False)
+    amount_naira = db.Column(db.Integer, nullable=False)
+    units_added = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='wallet_transactions')
+
+    def __repr__(self):
+        return f'<WalletTransaction {self.reference}>'
+
+class ContactMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    admin_reply = db.Column(db.Text)
+    status = db.Column(db.String(20), nullable=False, default='open')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    replied_at = db.Column(db.DateTime)
+
+    user = db.relationship('User', backref='contact_messages')
+
+    def __repr__(self):
+        return f'<ContactMessage {self.subject}>'
+
+
+import json
+import random
+import string
+
+
+def gen_pin(length=6):
+    return "".join(random.choices(string.digits, k=length))
+
+
+class BibleQuiz(db.Model):
+    __tablename__ = "quiz_quizzes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    ministry_id = db.Column(
+        db.Integer,
+        db.ForeignKey('ministry_profiles.id'),
+        nullable=True
+    )
+
+    title = db.Column(db.String(200), nullable=False)
+    age_group = db.Column(db.String(20), default="Adults")
+
+    target_group = db.Column(
+        db.String(100),
+        default="General Church"
+    )
+
+    bible_version = db.Column(
+        db.String(20),
+        default="KJV"
+    )
+
+    question_type = db.Column(
+        db.String(50),
+        default="Mixed"
+    )
+
+    difficulty = db.Column(
+        db.String(20),
+        default="Medium"
+    )
+
+    question_style = db.Column(
+        db.String(50),
+        default="Knowledge"
+    )
+
+    source_type = db.Column(db.String(30))
+    source_ref = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    questions = db.relationship(
+        "QuizQuestion", backref="quiz", lazy=True, cascade="all, delete-orphan"
+    )
+    sessions = db.relationship(
+        "QuizLiveSession",
+        backref="quiz",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    ministry = db.relationship(
+        "MinistryProfile",
+        backref="bible_quizzes"
+    )
+
+
+class QuizQuestion(db.Model):
+    __tablename__ = "quiz_questions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz_quizzes.id"), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    options_json = db.Column(db.Text, nullable=False)
+    correct_index = db.Column(db.Integer, nullable=False)
+    scripture_ref = db.Column(db.String(150))
+    explanation = db.Column(db.Text)
+    difficulty = db.Column(db.String(10), default="Medium")
+
+    # AI Adaptive Metadata
+    age_group = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    target_group = db.Column(
+        db.String(100),
+        default="General Church"
+    )
+
+    question_style = db.Column(
+        db.String(50),
+        default="Knowledge"
+    )
+
+    question_type = db.Column(
+        db.String(50),
+        default="Multiple Choice"
+    )
+
+    ai_generated = db.Column(
+        db.Boolean,
+        default=False
+    )
+
+    order_index = db.Column(db.Integer, default=0)
+
+    @property
+    def options(self):
+        return json.loads(self.options_json)
+
+    @options.setter
+    def options(self, value):
+        self.options_json = json.dumps(value)
+
+
+class QuizLiveSession(db.Model):
+    __tablename__ = "quiz_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz_quizzes.id"), nullable=False)
+    mode = db.Column(db.String(1), default="A")
+    pin_code = db.Column(db.String(10), unique=True, default=gen_pin)
+    status = db.Column(db.String(20), default="waiting")
+    current_question_index = db.Column(db.Integer, default=0)
+    question_started_at = db.Column(db.DateTime)
+    seconds_per_question = db.Column(db.Integer, default=20)
+    started_at = db.Column(db.DateTime)
+    ended_at = db.Column(db.DateTime)
+
+    participants = db.relationship(
+        "QuizParticipant", backref="session", lazy=True, cascade="all, delete-orphan"
+    )
+
+    def participant_limit(self):
+        return 12 if self.mode == "A" else 500
+
+
+class QuizParticipant(db.Model):
+    __tablename__ = "quiz_participants"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("quiz_sessions.id"), nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    avatar_color = db.Column(db.String(20), default="#d4af37")
+    device_token = db.Column(db.String(64))
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+    score = db.Column(db.Integer, default=0)
+
+    answers = db.relationship(
+        "QuizAnswer", backref="participant", lazy=True, cascade="all, delete-orphan"
+    )
+
+
+class QuizAnswer(db.Model):
+    __tablename__ = "quiz_answers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    participant_id = db.Column(db.Integer, db.ForeignKey("quiz_participants.id"), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey("quiz_questions.id"), nullable=False)
+    chosen_index = db.Column(db.Integer)
+    is_correct = db.Column(db.Boolean, default=False)
+    time_taken_ms = db.Column(db.Integer)
+    answered_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint("participant_id", "question_id", name="uq_participant_question"),
+    )
+
+
+class ChurchEvent(db.Model):
+    __tablename__ = "church_events"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(200), nullable=False)
+
+    category = db.Column(
+        db.String(50),
+        default="Church"
+    )
+
+    level = db.Column(
+        db.String(30),
+        default="Local Church"
+    )
+
+    organization_name = db.Column(
+        db.String(150),
+        default="General"
+    )
+
+    ministry = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    description = db.Column(
+        db.Text
+    )
+
+    venue = db.Column(
+        db.String(200)
+    )
+
+    organizer = db.Column(
+        db.String(150)
+    )
+
+    start_datetime = db.Column(
+        db.DateTime,
+        nullable=False
+    )
+
+    end_datetime = db.Column(
+        db.DateTime
+    )
+
+    event_color = db.Column(
+        db.String(20),
+        default="#1a73e8"
+    )
+
+    is_public = db.Column(
+        db.Boolean,
+        default=True
+    )
+
+    created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey("church_profile.id")
+    )
+
+    pastor_id = db.Column(
+        db.Integer,
+        db.ForeignKey("pastor_profile.id")
+    )
+
+    location = db.Column(
+        db.String(255)
+    )
+
+    association = db.Column(
+        db.String(150)
+    )
+
+    conference = db.Column(
+        db.String(150)
+    )
+
+    convention = db.Column(
+        db.String(150)
+    )
+
+    church = db.relationship(
+        'ChurchProfile',
+        foreign_keys=[church_id]
+    )
+
+    pastor = db.relationship(
+        'PastorProfile',
+        foreign_keys=[pastor_id]
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+
+class AITransaction(db.Model):
+    __tablename__ = "ai_transactions"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    reference = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False
+    )
+
+    amount_naira = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    units = db.Column(
+        db.Integer,
+        nullable=False
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="pending"
+    )
+
+    transaction_type = db.Column(
+        db.String(50),
+        default="recharge"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<AITransaction {self.reference}>"
+
+
+class ActivityLog(db.Model):
+    __tablename__ = "activity_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=True
+    )
+
+    action = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    module = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    details = db.Column(
+        db.Text
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    user = db.relationship(
+        "User",
+        backref="activity_logs"
+    )
+
+    def __repr__(self):
+        return f"<ActivityLog {self.action}>"
+
+
+class AIConversation(db.Model):
+    __tablename__ = "ai_conversations"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=True
+    )
+
+    question = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    module = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    response = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    user = db.relationship(
+        "User",
+        backref="ai_conversations"
+    )
+
+    def __repr__(self):
+        return f"<AIConversation {self.module}>"
+
+
+class MinistryProfile(db.Model):
+    __tablename__ = "ministry_profiles"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    church_name = db.Column(
+        db.String(150)
+    )
+
+    denomination = db.Column(
+        db.String(150)
+    )
+
+    ministry_role = db.Column(
+        db.String(100)
+    )
+
+    location = db.Column(
+        db.String(150)
+    )
+
+    preferred_sermon_style = db.Column(
+        db.String(100)
+    )
+
+    preferred_bible_translation = db.Column(
+        db.String(50),
+        default="KJV"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    user = db.relationship(
+        "User",
+        backref=db.backref("ministry_profile", uselist=False)
+    )
+
+    def __repr__(self):
+        return f"<MinistryProfile {self.church_name}>"
+
+
+
+# ==========================================================
+# Bible Quiz AI Intelligence Engine (v3.3)
+# ==========================================================
+
+
+class QuizQuestionAnalytics(db.Model):
+    __tablename__ = "quiz_question_analytics"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    question_id = db.Column(
+        db.Integer,
+        db.ForeignKey("quiz_questions.id"),
+        nullable=False
+    )
+
+    times_answered = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    correct_answers = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    accuracy_rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+    difficulty_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    ai_recommendation = db.Column(
+        db.Text
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    question = db.relationship(
+        "QuizQuestion",
+        backref=db.backref(
+            "analytics",
+            uselist=False
+        )
+    )
+
+
+class QuizParticipantProfile(db.Model):
+    __tablename__ = "quiz_participant_profiles"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    participant_id = db.Column(
+        db.Integer,
+        db.ForeignKey("quiz_participants.id"),
+        nullable=False
+    )
+
+    age_group = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    knowledge_level = db.Column(
+        db.String(50),
+        default="Developing"
+    )
+
+    strengths = db.Column(
+        db.Text
+    )
+
+    improvement_areas = db.Column(
+        db.Text
+    )
+
+    recommended_difficulty = db.Column(
+        db.String(50),
+        default="Medium"
+    )
+
+    ai_summary = db.Column(
+        db.Text
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    participant = db.relationship(
+        "QuizParticipant",
+        backref=db.backref(
+            "learning_profile",
+            uselist=False
+        )
+    )
+
+
+class QuizLearnerProfile(db.Model):
+
+    __tablename__ = "quiz_learner_profiles"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    participant_id = db.Column(
+        db.Integer,
+        db.ForeignKey("quiz_participants.id"),
+        nullable=False,
+        unique=True
+    )
+
+
+    total_questions = db.Column(
+        db.Integer,
+        default=0
+    )
+
+
+    correct_answers = db.Column(
+        db.Integer,
+        default=0
+    )
+
+
+    accuracy_rate = db.Column(
+        db.Float,
+        default=0
+    )
+
+
+    learning_level = db.Column(
+        db.String(50),
+        default="Beginner"
+    )
+
+
+    strong_topics = db.Column(
+        db.Text
+    )
+
+
+    weak_topics = db.Column(
+        db.Text
+    )
+
+
+    ai_recommendation = db.Column(
+        db.Text
+    )
+
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+
+
+
+# ==============================
+# CHURCH MANAGEMENT SYSTEM
+# ==============================
+
+
+class ChurchProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id'),
+        nullable=False
+    )
+
+    church_name = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    motto = db.Column(db.String(255))
+
+    vision = db.Column(db.Text)
+
+    mission = db.Column(db.Text)
+
+    statement_of_faith = db.Column(db.Text)
+
+    denomination = db.Column(db.String(100))
+
+    association = db.Column(db.String(100))
+
+    conference = db.Column(db.String(100))
+
+    address = db.Column(db.String(255))
+
+    phone = db.Column(db.String(50))
+
+    email = db.Column(db.String(120))
+
+    website = db.Column(db.String(255))
+
+    logo_filename = db.Column(db.String(255))
+
+    founded_date = db.Column(db.Date)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    pastors = db.relationship(
+        'PastorProfile',
+        backref='church',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+    histories = db.relationship(
+        'ChurchHistory',
+        backref='church',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+    documents = db.relationship(
+        'ChurchDocument',
+        backref='church',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+
+    def __repr__(self):
+        return f'<ChurchProfile {self.church_name}>'
+
+
+
+class PastorProfile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    full_name = db.Column(
+        db.String(150),
+        nullable=False
+    )
+
+    biography = db.Column(db.Text)
+
+    education = db.Column(db.Text)
+
+    ordination_details = db.Column(db.Text)
+
+    ministry_experience = db.Column(db.Text)
+
+    called_to_church_date = db.Column(db.Date)
+
+    leadership_message = db.Column(db.Text)
+
+    pastoral_vision = db.Column(db.Text)
+
+    photo_filename = db.Column(db.String(255))
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+    def __repr__(self):
+        return f'<PastorProfile {self.full_name}>'
+
+
+
+class ChurchHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    founder = db.Column(db.String(150))
+
+    founding_story = db.Column(db.Text)
+
+    milestones = db.Column(db.Text)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+    def __repr__(self):
+        return f'<ChurchHistory {self.id}>'
+
+
+
+class ChurchDocument(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    document_type = db.Column(
+        db.String(100)
+    )
+
+    filename = db.Column(
+        db.String(255)
+    )
+
+    uploaded_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
+    def __repr__(self):
+        return f'<ChurchDocument {self.title}>'
+
+
+
+class MinistryReport(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    report_type = db.Column(
+        db.String(100),
+        default="Ministry Intelligence"
+    )
+
+    generated_by = db.Column(
+        db.String(120)
+    )
+
+    generated_on = db.Column(
+        db.String(50)
+    )
+
+    file_path = db.Column(
+        db.String(255)
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f'<MinistryReport {self.title}>'
+
+
+class MinistryReportAnalysis(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    report_id = db.Column(
+        db.Integer,
+        db.ForeignKey("ministry_report.id"),
+        nullable=False
+    )
+
+    health_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    growth_score = db.Column(
+        db.Float,
+        default=0
+    )
+
+    risk_level = db.Column(
+        db.String(50),
+        default="Unknown"
+    )
+
+    recommendations = db.Column(
+        db.Text
+    )
+
+    summary = db.Column(
+        db.Text
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryReportAnalysis {self.report_id}>"
+
+
+class MinistryMemory(db.Model):
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        nullable=True
+    )
+
+    memory_type = db.Column(
+        db.String(50),
+        default="Insight"
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    content = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    source = db.Column(
+        db.String(100),
+        default="AI Ministry Copilot"
+    )
+
+    importance = db.Column(
+        db.String(20),
+        default="Medium"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryMemory {self.title}>"
+
+
+class MinistryOccasion(db.Model):
+    __tablename__ = "ministry_occasions"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    title = db.Column(
+        db.String(200),
+        nullable=False
+    )
+
+    occasion_type = db.Column(
+        db.String(50),
+        default="General"
+    )
+
+    source_type = db.Column(
+        db.String(50),
+        default="Manual"
+    )
+
+    date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    description = db.Column(
+        db.Text
+    )
+
+    scripture_theme = db.Column(
+        db.String(255)
+    )
+
+    member_id = db.Column(
+        db.Integer,
+        db.ForeignKey("member.id")
+    )
+
+    event_id = db.Column(
+        db.Integer,
+        db.ForeignKey("church_events.id")
+    )
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey("church_profile.id")
+    )
+
+    created_by = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    def __repr__(self):
+        return f"<MinistryOccasion {self.title}>"
+
+
+class MinistryContent(db.Model):
+    __tablename__ = "ministry_contents"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    occasion_id = db.Column(
+        db.Integer,
+        db.ForeignKey("ministry_occasions.id")
+    )
+
+    content_type = db.Column(
+        db.String(50),
+        nullable=False
+    )
+
+    title = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    content = db.Column(
+        db.Text,
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    version_number = db.Column(
+        db.Integer,
+        default=1
+    )
+
+    parent_id = db.Column(
+        db.Integer
+    )
+
+    ai_action = db.Column(
+        db.String(100)
+    )
+
+    is_preferred = db.Column(
+        db.Boolean,
+        default=False
+    )
+
+    status = db.Column(
+        db.String(30),
+        default="Draft"
+    )
+
+    approved_by = db.Column(
+        db.Integer
+    )
+
+    approved_at = db.Column(
+        db.DateTime
+    )
+
+    approval_note = db.Column(
+        db.Text
+    )
+
+    published_at = db.Column(
+        db.DateTime
+    )
+
+    published_by = db.Column(
+        db.Integer
+    )
+
+    visibility = db.Column(
+        db.String(30),
+        default="Private"
+    )
+
+    category = db.Column(
+        db.String(100)
+    )
+
+    scripture_reference = db.Column(
+        db.String(255)
+    )
+
+    tags = db.Column(
+        db.Text
+    )
+
+    view_count = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    download_count = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    last_viewed_at = db.Column(
+        db.DateTime
+    )
+
+    def __repr__(self):
+        return f"<MinistryContent {self.title}>"
+
+
+class ChurchBrandProfile(db.Model):
+    """
+    AI branding identity profile for churches and ministries.
+    Used by AI Flyer Generator and future digital content tools.
+    """
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    church_id = db.Column(
+        db.Integer,
+        db.ForeignKey('church_profile.id'),
+        nullable=False
+    )
+
+    primary_color = db.Column(
+        db.String(20),
+        default="#1a2a6c"
+    )
+
+    accent_color = db.Column(
+        db.String(20),
+        default="#d4af37"
+    )
+
+    visual_style = db.Column(
+        db.String(100),
+        default="premium Christian ministry"
+    )
+
+    ministry_tone = db.Column(
+        db.String(100),
+        default="inspiring"
+    )
+
+    preferred_layout = db.Column(
+        db.String(50),
+        default="modern"
+    )
+
+    logo_position = db.Column(
+        db.String(50),
+        default="top_right"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    updated_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow
+    )
+
+    church = db.relationship(
+        'ChurchProfile',
+        backref='brand_profile'
+    )
+
+    def __repr__(self):
+        return f"<ChurchBrandProfile {self.church_id}>"

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Start Bible Quiz{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Start Bible Quiz</h1>
+
+    <div class="prompt-output">
+        <h2>{{ quiz.title }}</h2>
+        <p><strong>Age Group:</strong> {{ quiz.age_group }}</p>
+        <p><strong>Questions:</strong> {{ quiz.questions|length }}</p>
+    </div>
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label for="mode">Quiz Mode</label>
+            <select name="mode" id="mode">
+                <option value="A">Individual</option>
+                <option value="B">Team</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="seconds_per_question">
+                Seconds per Question
+            </label>
+
+            <select name="seconds_per_question" id="seconds_per_question">
+                <option value="10">10 seconds</option>
+                <option value="20" selected>20 seconds</option>
+                <option value="30">30 seconds</option>
+                <option value="45">45 seconds</option>
+                <option value="60">60 seconds</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            Create Live Quiz Session
+        </button>
+
+        <a href="{{ url_for('bible_quiz.edit_quiz', quiz_id=quiz.id) }}"
+           class="btn-secondary">
+            Back to Quiz
+        </a>
+
+    </form>
+</div>
+{% endblock %}

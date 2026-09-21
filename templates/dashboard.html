@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard — InChristAlone AI Studio
+{% endblock %}
+
+
+{% block content %}
+
+
+<section class="dashboard-hero">
+
+    <div>
+        <h1>
+            Welcome, {{ current_user.full_name }} 👋
+        </h1>
+
+        <p class="role-badge">
+            Role: {{ current_user.role|replace('_', ' ')|title }}
+        </p>
+
+        <p>
+            Welcome to <strong>InChristAlone AI Studio</strong>.
+            Build websites, create content, conduct research,
+            and develop AI-powered ministry solutions through
+            intelligent prompt engineering.
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<section class="stats-grid">
+
+    <div class="stat-card">
+        <h3>🤖</h3>
+        <p>AI Tools</p>
+        <strong>10+</strong>
+    </div>
+
+
+    <div class="stat-card">
+        <h3>🚀</h3>
+        <p>Creative Possibilities</p>
+        <strong>Unlimited</strong>
+    </div>
+
+
+    <div class="stat-card">
+        <h3>⛪</h3>
+        <p>Ministry Focus</p>
+        <strong>AI + Faith</strong>
+    </div>
+
+</section>
+
+
+
+
+<h2 class="section-title">
+    AI Studio Tools
+</h2>
+
+
+
+<section class="dashboard-grid">
+
+
+<a href="{{ url_for('prompt_engine.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>✨ AI Prompt Engine</h3>
+<p>
+Generate ministry-ready AI prompts by category.
+</p>
+</div>
+</a>
+
+
+
+<a href="{{ url_for('website_generator.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🌐 AI Website Generator</h3>
+<p>
+Create deployable websites for churches and ministries.
+</p>
+</div>
+</a>
+
+
+
+<a href="{{ url_for('content_generator.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🎨 Christian Content Generator</h3>
+<p>
+Create graphics, scripts, videos, music concepts and more.
+</p>
+</div>
+</a>
+
+
+
+<a href="{{ url_for('research_assistant.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>📚 Research Assistant</h3>
+<p>
+Support academic research, citations and writing.
+</p>
+</div>
+</a>
+
+
+
+<a href="{{ url_for('seminary_assistant.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🎓 Seminary Assistant</h3>
+<p>
+Manage theological research, thesis and assignments.
+</p>
+</div>
+</a>
+
+
+
+{% if current_user.has_role('super_admin', 'admin') %}
+<a href="{{ url_for('church_management.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>⛪ Church Management</h3>
+<p>
+Manage church members and ministry records.
+</p>
+</div>
+</a>
+{% endif %}
+
+
+
+{% if current_user.has_role('super_admin', 'admin', 'quiz_moderator', 'teacher', 'youth_leader') %}
+<a href="{{ url_for('bible_quiz.dashboard') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>📖 Bible Quiz</h3>
+<p>
+Create and host interactive Bible quiz sessions.
+</p>
+</div>
+</a>
+{% endif %}
+
+
+
+<a href="{{ url_for('prompt_marketplace.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🛒 Prompt Marketplace</h3>
+<p>
+Discover premium AI prompt resources.
+</p>
+</div>
+</a>
+
+
+
+{% if current_user.is_admin() %}
+
+<a href="{{ url_for('admin_panel.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>⚙️ Admin Panel</h3>
+<p>
+Manage users, statistics and prompt packs.
+</p>
+</div>
+</a>
+
+{% endif %}
+
+
+
+<a href="{{ url_for('ai_assistant.chat') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🤖 InChristAlone AI Assistant</h3>
+<p>
+Ask AI about ministry programmes, members, Bible Quiz, church calendar and AI Studio.
+</p>
+</div>
+</a>
+
+
+<a href="{{ url_for('ai_assistant.dashboard') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>🧠 AI Ministry Intelligence Center</h3>
+<p>
+Explore Ministry Copilot, Knowledge Memory,
+Timeline Intelligence, Knowledge Graph,
+Graph Reasoning and Visualization.
+</p>
+</div>
+</a>
+
+
+<a href="{{ url_for('help_center.index') }}" class="tool-link">
+<div class="dashboard-card">
+<h3>💡 Help Center</h3>
+<p>
+Learn how to use every AI Studio feature.
+</p>
+</div>
+</a>
+
+
+</section>
+
+
+
+{% endblock %}

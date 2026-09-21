@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Ministry Report</title>
+</head>
+
+<body>
+
+<h2>📊 AI Ministry Intelligence Report</h2>
+
+<p>
+Period: {{ report.period }}
+</p>
+
+<p>
+Total AI Requests:
+<strong>{{ report.total_requests }}</strong>
+</p>
+
+<p>
+Most Used Module:
+<strong>{{ report.top_module }}</strong>
+</p>
+
+
+<h3>Module Usage</h3>
+
+<ul>
+{% for module,count in report.modules.items() %}
+<li>
+{{ module }} : {{ count }}
+</li>
+{% endfor %}
+</ul>
+
+
+</body>
+</html>

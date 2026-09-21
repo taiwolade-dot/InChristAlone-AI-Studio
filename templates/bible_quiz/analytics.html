@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard-card">
+
+<h2>📊 AI Quiz Analytics Dashboard</h2>
+
+<h3>📚 {{ quiz.title }}</h3>
+
+<p>
+AI-powered performance analysis based on participant responses.
+</p>
+
+</div>
+
+
+<div class="dashboard-card" style="margin-top:1rem;">
+
+<h3>🤖 AI Learning Intelligence Summary</h3>
+
+<div style="display:flex; gap:1rem; flex-wrap:wrap;">
+
+<div class="dashboard-card">
+<h4>🧠 Learning Score</h4>
+<p style="font-size:2rem;">
+{{ learning_score }}%
+</p>
+</div>
+
+
+<div class="dashboard-card">
+<h4>📈 Average Accuracy</h4>
+<p style="font-size:2rem;">
+{{ average_accuracy }}%
+</p>
+</div>
+
+
+<div class="dashboard-card">
+<h4>🎯 Difficulty Index</h4>
+<p style="font-size:2rem;">
+{{ average_difficulty }}
+</p>
+</div>
+
+</div>
+
+
+{% if hardest_question %}
+
+<hr>
+
+<h4>🔥 Most Challenging Question</h4>
+
+<p>
+<strong>
+{{ hardest_question.question }}
+</strong>
+</p>
+
+<p>
+Difficulty Score:
+{{ hardest_question.difficulty_score }}
+</p>
+
+{% endif %}
+
+
+
+{% if easiest_question %}
+
+<h4>⭐ Strongest Question</h4>
+
+<p>
+<strong>
+{{ easiest_question.question }}
+</strong>
+</p>
+
+<p>
+Difficulty Score:
+{{ easiest_question.difficulty_score }}
+</p>
+
+{% endif %}
+
+
+</div>
+
+
+
+{% if analytics %}
+
+{% set total_attempts = analytics|sum(attribute='times_answered') %}
+{% set total_correct = analytics|sum(attribute='correct_answers') %}
+
+
+<div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+
+<div class="dashboard-card">
+<h3>👥 Attempts</h3>
+<p style="font-size:2rem;">
+{{ total_attempts }}
+</p>
+</div>
+
+
+<div class="dashboard-card">
+<h3>✅ Correct Answers</h3>
+<p style="font-size:2rem;">
+{{ total_correct }}
+</p>
+</div>
+
+
+<div class="dashboard-card">
+<h3>🧠 Questions Analysed</h3>
+<p style="font-size:2rem;">
+{{ analytics|length }}
+</p>
+</div>
+
+</div>
+
+
+<div class="dashboard-card">
+
+<h3>📈 Question Performance</h3>
+
+<canvas id="accuracyChart"></canvas>
+
+<br>
+
+<h3>🎯 Difficulty Distribution</h3>
+
+<canvas id="difficultyChart"></canvas>
+
+<br>
+
+<h3>🧠 AI Learning Performance</h3>
+
+<canvas id="learningChart"></canvas>
+
+</div>
+
+
+
+{% for item in analytics %}
+
+<div class="dashboard-card"
+style="margin-top:1rem;text-align:left;">
+
+<h4>
+❓ Question {{ loop.index }}
+</h4>
+
+<p>
+<strong>{{ item.question }}</strong>
+</p>
+
+
+<p>
+👥 Attempts:
+{{ item.times_answered }}
+</p>
+
+
+<p>
+📈 Accuracy:
+{{ item.accuracy_rate }}%
+</p>
+
+
+<p>
+🎯 Difficulty Score:
+{{ item.difficulty_score }}
+</p>
+
+
+<div style="
+padding:10px;
+background:#eef6ff;
+border-radius:8px;
+">
+
+🧠 <strong>AI Insight:</strong>
+
+<br>
+
+{{ item.recommendation }}
+
+</div>
+
+
+</div>
+
+{% endfor %}
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const labels = [
+{% for item in analytics %}
+"Q{{ loop.index }}",
+{% endfor %}
+];
+
+
+const accuracy = [
+{% for item in analytics %}
+{{ item.accuracy_rate }},
+{% endfor %}
+];
+
+
+new Chart(
+document.getElementById('accuracyChart'),
+{
+type:'bar',
+
+data:{
+labels:labels,
+
+datasets:[
+{
+label:'Accuracy %',
+data:accuracy
+}
+]
+
+},
+
+options:{
+responsive:true,
+
+scales:{
+y:{
+beginAtZero:true,
+max:100
+}
+}
+
+}
+
+}
+);
+
+
+// Difficulty Distribution Chart
+
+new Chart(
+document.getElementById('difficultyChart'),
+{
+type:'pie',
+
+data:{
+labels:[
+{% for key,value in difficulty_distribution.items() %}
+"{{ key }}",
+{% endfor %}
+],
+
+datasets:[
+{
+label:'Difficulty',
+data:[
+{% for key,value in difficulty_distribution.items() %}
+{{ value }},
+{% endfor %}
+]
+}
+]
+
+}
+
+}
+
+);
+
+
+// AI Learning Metrics Chart
+
+new Chart(
+document.getElementById('learningChart'),
+{
+type:'radar',
+
+data:{
+labels:[
+{% for key,value in learning_metrics.items() %}
+"{{ key }}",
+{% endfor %}
+],
+
+datasets:[
+{
+label:'AI Learning Performance',
+
+data:[
+{% for key,value in learning_metrics.items() %}
+{{ value }},
+{% endfor %}
+]
+
+}
+]
+
+}
+
+}
+
+);
+
+
+</script>
+
+
+{% else %}
+
+<div class="dashboard-card">
+
+<h3>📌 No Analytics Available</h3>
+
+<p>
+Start a live quiz session to generate adaptive AI insights.
+</p>
+
+</div>
+
+{% endif %}
+
+
+{% endblock %}

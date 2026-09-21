@@ -1,0 +1,932 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask_login import login_required, current_user
+
+from models import db, BibleQuiz, QuizQuestion, QuizLiveSession, QuizParticipant, QuizAnswer
+from . import ai_generator
+from .adaptive_engine import regenerate_question
+
+bible_quiz_bp = Blueprint(
+    'bible_quiz',
+    __name__,
+    url_prefix='/bible-quiz',
+    template_folder='../../templates/bible_quiz'
+)
+
+
+@bible_quiz_bp.route('/', methods=['GET'])
+@login_required
+def dashboard():
+
+    ministry = getattr(current_user, "ministry_profile", None)
+
+    if ministry:
+        quizzes = BibleQuiz.query.filter_by(
+            ministry_id=ministry.id
+        ).order_by(
+            BibleQuiz.created_at.desc()
+        ).all()
+    else:
+        quizzes = BibleQuiz.query.filter_by(
+            owner_id=current_user.id
+        ).order_by(
+            BibleQuiz.created_at.desc()
+        ).all()
+
+    return render_template(
+        'bible_quiz/dashboard.html',
+        quizzes=quizzes,
+        ministry=ministry
+    )
+
+
+@bible_quiz_bp.route('/intelligence')
+@login_required
+def intelligence_dashboard():
+
+    from models import QuizQuestionAnalytics, QuizLearnerProfile
+
+    analytics = QuizQuestionAnalytics.query.all()
+
+    learner_profiles = QuizLearnerProfile.query.all()
+
+    total_questions = len(analytics)
+
+    total_attempts = sum(
+        a.times_answered for a in analytics
+    )
+
+    total_correct = sum(
+        a.correct_answers for a in analytics
+    )
+
+    average_accuracy = 0
+
+    if total_attempts:
+        average_accuracy = round(
+            (total_correct / total_attempts) * 100,
+            2
+        )
+
+    difficult_questions = sorted(
+        analytics,
+        key=lambda x: x.difficulty_score,
+        reverse=True
+    )[:10]
+
+    recommendations = [
+        a for a in analytics
+        if a.ai_recommendation
+    ]
+
+    # AI Ministry Insight Engine
+    mastery_questions = sorted(
+        analytics,
+        key=lambda x: x.accuracy_rate,
+        reverse=True
+    )[:10]
+
+    teaching_attention = sorted(
+        analytics,
+        key=lambda x: x.accuracy_rate
+    )[:10]
+
+    if average_accuracy >= 80:
+        ai_summary = (
+            "Excellent biblical knowledge performance. "
+            "Consider introducing deeper theological questions."
+        )
+    elif average_accuracy >= 50:
+        ai_summary = (
+            "Good learning progress detected. "
+            "Continue reinforcement and guided teaching."
+        )
+    else:
+        ai_summary = (
+            "Learning gaps detected. "
+            "Consider focused teaching and revision sessions."
+        )
+
+
+    # AI Learner Development Intelligence
+
+    total_learners = len(learner_profiles)
+
+    knowledge_distribution = {
+        "Beginner": 0,
+        "Developing": 0,
+        "Advanced": 0
+    }
+
+    difficulty_distribution = {
+        "Easy": 0,
+        "Medium": 0,
+        "Advanced": 0
+    }
+
+    for profile in learner_profiles:
+
+        level = profile.learning_level
+
+        if level in knowledge_distribution:
+            knowledge_distribution[level] += 1
+
+        recommended = profile.learning_level
+
+        if recommended == "Beginner":
+            difficulty_distribution["Easy"] += 1
+        elif recommended == "Developing":
+            difficulty_distribution["Medium"] += 1
+        elif recommended == "Advanced":
+            difficulty_distribution["Advanced"] += 1
+
+
+    if total_learners >= 10:
+        learner_summary = (
+            "Strong learner participation detected. "
+            "AI recommends differentiated Bible teaching pathways."
+        )
+
+    elif total_learners > 0:
+        learner_summary = (
+            "Early learner development data available. "
+            "Continue quiz participation for deeper AI insights."
+        )
+
+    else:
+        learner_summary = (
+            "No learner profiles available yet. "
+            "Profiles will develop after quiz participation."
+        )
+
+
+
+    # Analytics Visualization Data
+    accuracy_chart = [
+        round(a.accuracy_rate, 2)
+        for a in analytics
+    ]
+
+    difficulty_chart = [
+        round(a.difficulty_score, 2)
+        for a in analytics
+    ]
+
+    question_labels = [
+        f"Q{a.question_id}"
+        for a in analytics
+    ]
+
+
+    # AI Learner Visualization Data
+
+    learner_level_chart = {
+        "Beginner": 0,
+        "Intermediate": 0,
+        "Advanced": 0
+    }
+
+    learner_labels = []
+    learner_accuracy_chart = []
+
+    for profile in learner_profiles:
+
+        if profile.learning_level in learner_level_chart:
+            learner_level_chart[profile.learning_level] += 1
+
+        learner_labels.append(
+            f"Participant {profile.participant_id}"
+        )
+
+        learner_accuracy_chart.append(
+            round(profile.accuracy_rate, 2)
+        )
+
+
+    return render_template(
+        'bible_quiz/intelligence.html',
+        total_questions=total_questions,
+        total_attempts=total_attempts,
+        average_accuracy=average_accuracy,
+        difficult_questions=difficult_questions,
+        recommendations=recommendations,
+        mastery_questions=mastery_questions,
+        teaching_attention=teaching_attention,
+        ai_summary=ai_summary,
+        accuracy_chart=accuracy_chart,
+        difficulty_chart=difficulty_chart,
+        question_labels=question_labels,
+          learner_profiles=learner_profiles,
+          total_learners=total_learners,
+          knowledge_distribution=knowledge_distribution,
+          difficulty_distribution=difficulty_distribution,
+          learner_summary=learner_summary,
+          learner_level_chart=learner_level_chart,
+          learner_labels=learner_labels,
+          learner_accuracy_chart=learner_accuracy_chart
+    )
+
+
+@bible_quiz_bp.route('/new', methods=['GET', 'POST'])
+@login_required
+def new_quiz():
+    from modules.wallet_utils import spend_units, refund_units
+
+    if request.method == 'POST':
+        title = request.form['title'].strip()
+        age_group = request.form['age_group']
+        target_group = request.form.get('target_group', 'General Church')
+        bible_version = request.form.get('bible_version', 'KJV')
+        question_type = request.form.get('question_type', 'Mixed')
+        source_type = request.form['source_type']
+        count = int(request.form.get('count', 10))
+
+        try:
+            if source_type == 'topic_text':
+                text = request.form.get('bible_text', '')
+
+                difficulty = request.form.get('difficulty', 'Medium')
+                question_style = request.form.get('question_style', 'Knowledge')
+
+                source_material = f"""
+Bible Passage / Topic / Theme:
+{text}
+
+Bible Version:
+{bible_version}
+
+Question Type:
+{question_type}
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
+
+Difficulty:
+{difficulty}
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
+"""
+            elif source_type == 'pasted_text':
+                source_material = request.form.get('pasted_text', '')
+            elif source_type == 'youtube':
+                youtube_url = request.form.get('youtube_url', '')
+                source_material = ai_generator.source_text_from_youtube(youtube_url)
+            else:
+                source_material = request.form.get('pasted_text', '')
+        except Exception as exc:
+            flash(f'Could not read source material: {exc}', 'error')
+            return redirect(url_for('bible_quiz.new_quiz'))
+
+        result = spend_units(100)
+        if result is not True:
+            return result
+
+        from .fal_quiz_service import generate_quiz_with_fal
+        import json
+        import re
+
+        questions = []
+        status = "fal"
+
+        fal_prompt = f"""
+Create {count} Bible quiz questions for a church ministry.
+
+Bible Passage / Topic / Theme:
+{source_material}
+
+Audience Age Group:
+{age_group}
+
+Generation Guidelines:
+- Adjust vocabulary, complexity, and depth according to the selected audience.
+- Children (6-12): Use simple biblical facts, memory-friendly questions, and clear language.
+- Teenagers (13-19): Focus on faith challenges, identity, choices, and practical Christian living.
+- Youth (20-35): Emphasize discipleship, decision-making, leadership, and life application.
+- Adults (36+): Provide deeper biblical understanding and practical spiritual growth.
+- Pastors / Church Leaders: Include theological insight, ministry leadership, and biblical interpretation.
+- Seminary Students: Include exegetical depth, theological concepts, and biblical analysis.
+- Mixed Congregation: Balance accessibility with spiritual depth.
+
+Difficulty Level:
+{difficulty}
+
+Difficulty Guidelines:
+- Beginner: Create simple questions focused on Bible facts, names, events, memory verses, and basic understanding.
+- Medium: Create questions that test comprehension, biblical principles, spiritual application, and Christian living.
+- Advanced: Create deeper questions involving context, interpretation, doctrine, connections between passages, and critical thinking.
+- Theological / Seminary: Create scholarly questions involving biblical interpretation, theology, hermeneutics, historical background, and where appropriate original language insights.
+
+
+Ministry Target Group:
+{target_group}
+
+Bible Version:
+{bible_version}
+
+Question Type:
+{question_type}
+
+Question Style:
+{question_style}
+
+Question Style Guidelines:
+- Knowledge: Focus on biblical facts, events, people, places, teachings, and Scripture understanding.
+- Application: Focus on applying biblical principles to daily Christian life, decision-making, character, and faith practice.
+- Spiritual Reflection: Focus on personal devotion, spiritual growth, prayer, transformation, and relationship with God.
+
+
+Instruction:
+Generate questions that promote biblical knowledge, spiritual understanding,
+practical application, and Christian growth.
+
+Return ONLY JSON array:
+[
+ {{
+  "text": "Question",
+  "options": ["A","B","C","D"],
+  "correct_index": 0,
+  "scripture_ref": "Bible Reference",
+  "explanation": "Biblical explanation",
+  "difficulty": "Medium"
+ }}
+]
+"""
+
+        fal_result = generate_quiz_with_fal(fal_prompt)
+
+        try:
+            cleaned = re.sub(r'```json|```', '', fal_result).strip()
+            questions = json.loads(cleaned)
+        except Exception:
+            questions = []
+
+        if not questions:
+            questions, status = ai_generator.generate_questions(
+                source_material,
+                age_group=age_group,
+                count=count,
+                target_group=target_group,
+              bible_version=bible_version,
+              question_type=question_type,
+              difficulty=difficulty,
+              question_style=question_style,
+            )
+
+
+        # Convert Fal AI JSON format to internal quiz format
+        if questions and isinstance(questions, str):
+            import json
+            try:
+                cleaned = questions.replace("```json", "").replace("```", "").strip()
+                questions = json.loads(cleaned)
+            except Exception:
+                questions = []
+
+        if isinstance(questions, dict):
+            questions = [questions]
+
+        converted_questions = []
+
+        for q in questions:
+            if "question" in q:
+                answer = q.get("answer", "")
+                options = q.get("options", [])
+
+                converted_questions.append({
+                    "text": q.get("question", ""),
+                    "options": options,
+                    "correct_index": options.index(answer) if answer in options else 0,
+                    "scripture_ref": q.get("reference", ""),
+                    "explanation": "Generated by Fal AI",
+                    "difficulty": "Medium"
+                })
+            else:
+                converted_questions.append(q)
+
+        questions = converted_questions
+
+        if not questions:
+            refund_units(100)
+            flash('Question generation failed. Your 10 Units have been refunded.', 'error')
+            return redirect(url_for('bible_quiz.new_quiz'))
+
+        quiz = BibleQuiz(
+            owner_id=current_user.id,
+
+              ministry_id=(
+                  current_user.ministry_profile.id
+                  if current_user.ministry_profile
+                  else None
+              ),
+            title=title,
+            age_group=age_group,
+              target_group=target_group,
+              bible_version=bible_version,
+              question_type=question_type,
+              difficulty=difficulty,
+            source_type=source_type,
+            source_ref=source_material[:2000],
+        )
+        db.session.add(quiz)
+        db.session.flush()
+
+        print("DEBUG QUESTIONS:", questions)
+
+        for i, q in enumerate(questions):
+            print("DEBUG QUESTION ITEM:", q)
+
+            question = QuizQuestion(
+                quiz_id=quiz.id,
+                text=q['text'],
+                correct_index=q['correct_index'],
+                scripture_ref=q.get('scripture_ref', ''),
+                explanation=q.get('explanation', ''),
+                difficulty=q.get('difficulty', 'Medium'),
+
+                # AI Intelligence Metadata
+                age_group=q.get('age_group', quiz.age_group),
+                target_group=q.get('target_group', quiz.target_group),
+                question_style=q.get('question_style', quiz.question_style),
+                question_type=q.get('question_type', quiz.question_type),
+                ai_generated=(status == 'ai'),
+
+                order_index=i,
+            )
+            question.options = q['options']
+            db.session.add(question)
+
+        try:
+            db.session.commit()
+            print("DEBUG: QUIZ SAVED SUCCESSFULLY ID:", quiz.id)
+        except Exception as e:
+            db.session.rollback()
+            print("DEBUG DATABASE ERROR:", repr(e))
+            raise
+
+        if status.startswith('fallback'): 
+            flash(
+                'AI generation was unavailable, so questions were pulled from the '
+                'built-in fallback bank. You can edit them below.',
+                'warning',
+            )
+        else:
+            flash(f'Generated {len(questions)} questions. Review and edit below.', 'success')
+
+        return redirect(url_for('bible_quiz.edit_quiz', quiz_id=quiz.id))
+
+    ministry = getattr(current_user, "ministry_profile", None)
+    return render_template(
+        'bible_quiz/new_quiz.html',
+        ministry=ministry
+    )
+
+
+@bible_quiz_bp.route('/<int:quiz_id>/delete', methods=['POST'])
+@login_required
+def delete_quiz(quiz_id):
+    print("DELETE QUIZ REQUEST RECEIVED:", quiz_id)
+
+    quiz = BibleQuiz.query.filter_by(
+        id=quiz_id,
+        owner_id=current_user.id
+    ).first_or_404()
+
+    db.session.delete(quiz)
+    db.session.commit()
+
+    flash('Quiz deleted successfully.', 'success')
+    return redirect(url_for('bible_quiz.dashboard'))
+
+
+@bible_quiz_bp.route('/<int:quiz_id>/edit')
+@login_required
+def edit_quiz(quiz_id):
+    quiz = BibleQuiz.query.filter_by(id=quiz_id, owner_id=current_user.id).first_or_404()
+    return render_template('bible_quiz/edit_quiz.html', quiz=quiz)
+
+
+
+@bible_quiz_bp.route('/<int:quiz_id>/update-settings', methods=['POST'])
+@login_required
+def update_quiz_settings(quiz_id):
+    quiz = BibleQuiz.query.filter_by(id=quiz_id, owner_id=current_user.id).first_or_404()
+
+    quiz.target_group = request.form.get('target_group', quiz.target_group)
+    quiz.bible_version = request.form.get('bible_version', quiz.bible_version)
+    quiz.question_type = request.form.get('question_type', quiz.question_type)
+    quiz.difficulty = request.form.get('difficulty', quiz.difficulty)
+    quiz.question_style = request.form.get('question_style', quiz.question_style)
+
+    db.session.commit()
+
+    flash('Quiz settings updated successfully.', 'success')
+    return redirect(url_for('bible_quiz.edit_quiz', quiz_id=quiz.id))
+
+@bible_quiz_bp.route('/<int:quiz_id>/question/<int:question_id>/update', methods=['POST'])
+@login_required
+def update_question(quiz_id, question_id):
+    question = QuizQuestion.query.get_or_404(question_id)
+    data = request.get_json()
+    question.text = data.get('text', question.text)
+    if 'options' in data:
+        question.options = data['options']
+    if 'correct_index' in data:
+        question.correct_index = int(data['correct_index'])
+
+    # AI Adaptive Metadata Update
+    if 'age_group' in data:
+        question.age_group = data['age_group']
+
+    if 'target_group' in data:
+        question.target_group = data['target_group']
+
+    if 'question_style' in data:
+        question.question_style = data['question_style']
+
+    if 'question_type' in data:
+        question.question_type = data['question_type']
+
+    if 'difficulty' in data:
+        question.difficulty = data['difficulty']
+
+    db.session.commit()
+
+    return jsonify({'ok': True})
+
+
+@bible_quiz_bp.route('/<int:quiz_id>/question/<int:question_id>/delete', methods=['POST'])
+@login_required
+def delete_question(quiz_id, question_id):
+    question = QuizQuestion.query.get_or_404(question_id)
+    db.session.delete(question)
+    db.session.commit()
+    return jsonify({'ok': True})
+
+
+
+
+@bible_quiz_bp.route('/analytics/<int:quiz_id>')
+@login_required
+def quiz_analytics(quiz_id):
+
+    quiz = BibleQuiz.query.get_or_404(quiz_id)
+
+    analytics = []
+
+    for question in quiz.questions:
+
+        data = getattr(
+            question,
+            "analytics",
+            None
+        )
+
+        if data:
+            analytics.append({
+                "question": question.text,
+                "times_answered": data.times_answered,
+                "correct_answers": data.correct_answers,
+                "accuracy_rate": data.accuracy_rate,
+                "difficulty_score": data.difficulty_score,
+                "recommendation": data.ai_recommendation
+            })
+
+    analytics.sort(
+        key=lambda x: x["difficulty_score"],
+        reverse=True
+    )
+
+    average_accuracy = 0
+    average_difficulty = 0
+    learning_score = 0
+
+    if analytics:
+        average_accuracy = round(
+            sum(x["accuracy_rate"] for x in analytics) / len(analytics),
+            2
+        )
+
+        average_difficulty = round(
+            sum(x["difficulty_score"] for x in analytics) / len(analytics),
+            2
+        )
+
+        learning_score = round(
+            (average_accuracy + (100 - average_difficulty)) / 2,
+            2
+        )
+
+    hardest_question = None
+    easiest_question = None
+
+    if analytics:
+        hardest_question = max(
+            analytics,
+            key=lambda x: x["difficulty_score"]
+        )
+
+        easiest_question = min(
+            analytics,
+            key=lambda x: x["difficulty_score"]
+        )
+
+    # Advanced AI Analytics Visualization Data
+
+    difficulty_distribution = {
+        "Easy": 0,
+        "Medium": 0,
+        "Hard": 0
+    }
+
+    for item in analytics:
+        score = item["difficulty_score"]
+
+        if score < 40:
+            difficulty_distribution["Easy"] += 1
+        elif score < 70:
+            difficulty_distribution["Medium"] += 1
+        else:
+            difficulty_distribution["Hard"] += 1
+
+
+    learning_metrics = {
+        "Accuracy": average_accuracy,
+        "Learning Score": learning_score,
+        "Difficulty Handling": round(100 - average_difficulty, 2)
+    }
+
+
+    return render_template(
+        "bible_quiz/analytics.html",
+        quiz=quiz,
+        analytics=analytics,
+        average_accuracy=average_accuracy,
+        average_difficulty=average_difficulty,
+        learning_score=learning_score,
+        hardest_question=hardest_question,
+        easiest_question=easiest_question,
+        difficulty_distribution=difficulty_distribution,
+        learning_metrics=learning_metrics
+    )
+
+
+@bible_quiz_bp.route('/report/<int:session_id>')
+@login_required
+def quiz_report(session_id):
+    session = QuizLiveSession.query.get_or_404(session_id)
+
+    participants = QuizParticipant.query.filter_by(
+        session_id=session_id
+    ).order_by(
+        QuizParticipant.score.desc()
+    ).all()
+
+    total_participants = len(participants)
+
+    total_questions = len(
+        session.quiz.questions
+    )
+
+    answers = QuizAnswer.query.join(
+        QuizParticipant
+    ).filter(
+        QuizParticipant.session_id == session_id
+    ).all()
+
+    total_answers = len(answers)
+
+    correct_answers = len([
+        a for a in answers
+        if a.is_correct
+    ])
+
+    accuracy = 0
+
+    if total_answers:
+        accuracy = round(
+            (correct_answers / total_answers) * 100,
+            1
+        )
+
+    return render_template(
+        'bible_quiz/report.html',
+        session=session,
+        participants=participants,
+        total_participants=total_participants,
+        total_questions=total_questions,
+        total_answers=total_answers,
+        correct_answers=correct_answers,
+        accuracy=accuracy
+    )
+
+
+@bible_quiz_bp.route('/analytics/data')
+@login_required
+def quiz_analytics_data():
+
+    from sqlalchemy import func
+
+    # Get quizzes owned by current user or ministry
+    ministry = getattr(
+        current_user,
+        "ministry_profile",
+        None
+    )
+
+    if ministry:
+        quiz_ids = [
+            q.id for q in BibleQuiz.query.filter_by(
+                ministry_id=ministry.id
+            ).all()
+        ]
+    else:
+        quiz_ids = [
+            q.id for q in BibleQuiz.query.filter_by(
+                owner_id=current_user.id
+            ).all()
+        ]
+
+
+    questions = QuizQuestion.query.filter(
+        QuizQuestion.quiz_id.in_(quiz_ids)
+    ).all()
+
+
+    total_questions = len(questions)
+
+    ai_generated = len([
+        q for q in questions
+        if getattr(q, "ai_generated", False)
+    ])
+
+    fallback = total_questions - ai_generated
+
+
+    difficulty = {}
+
+    for q in questions:
+        level = q.difficulty or "Unknown"
+        difficulty[level] = difficulty.get(level, 0) + 1
+
+
+    styles = {}
+
+    for q in questions:
+        style = q.question_style or "Unknown"
+        styles[style] = styles.get(style, 0) + 1
+
+
+    age_groups = {}
+
+    for q in questions:
+        age = q.age_group or "Unknown"
+        age_groups[age] = age_groups.get(age, 0) + 1
+
+
+    target_groups = {}
+
+    for q in questions:
+        target = q.target_group or "Unknown"
+        target_groups[target] = target_groups.get(target, 0) + 1
+
+
+    return jsonify({
+
+        "total_questions": total_questions,
+
+        "ai_generated": ai_generated,
+
+        "fallback": fallback,
+
+        "difficulty": difficulty,
+
+        "styles": styles,
+
+        "age_groups": age_groups,
+
+        "target_groups": target_groups
+
+    })
+
+
+@bible_quiz_bp.route('/improve/<int:quiz_id>', methods=['GET'])
+@login_required
+def improve_quiz_with_ai(quiz_id):
+
+    from modules.bible_quiz.analytics_engine import analyze_quiz_performance
+    from modules.bible_quiz.improvement_engine import generate_quiz_improvement
+    from models import QuizQuestionAnalytics
+
+    quiz = BibleQuiz.query.get_or_404(quiz_id)
+
+    analytics_records = []
+
+    for question in quiz.questions:
+
+        data = getattr(
+            question,
+            "analytics",
+            None
+        )
+
+        if data:
+            analytics_records.append(data)
+
+
+    analysis = analyze_quiz_performance(
+        analytics_records
+    )
+
+    recommendations = generate_quiz_improvement(
+        analytics_records
+    )
+
+
+    return render_template(
+        "bible_quiz/improve_quiz.html",
+        quiz=quiz,
+        analysis=analysis,
+        recommendations=recommendations
+    )
+
+
+@bible_quiz_bp.route(
+    '/question/<int:question_id>/regenerate',
+    methods=['POST']
+)
+@login_required
+def regenerate_quiz_question(question_id):
+
+    from models import QuizQuestion, QuizQuestionAnalytics
+
+    question = QuizQuestion.query.get_or_404(
+        question_id
+    )
+
+    analytics = QuizQuestionAnalytics.query.filter_by(
+        question_id=question.id
+    ).first()
+
+
+    if not analytics:
+        return jsonify({
+            "error": "No analytics available"
+        }), 400
+
+
+    improved = regenerate_question(
+        question,
+        analytics
+    )
+
+
+    if not improved:
+        return jsonify({
+            "error": "AI regeneration failed"
+        }), 500
+
+
+    question.text = improved["text"]
+    question.options = improved["options"]
+    question.correct_index = improved["correct_index"]
+    question.scripture_ref = improved.get(
+        "scripture_ref",
+        question.scripture_ref
+    )
+    question.explanation = improved.get(
+        "explanation",
+        question.explanation
+    )
+    question.difficulty = improved["difficulty"]
+    question.ai_generated = True
+
+
+    db.session.commit()
+
+
+    return jsonify({
+        "success": True,
+        "message": "Question regenerated successfully"
+    })
+

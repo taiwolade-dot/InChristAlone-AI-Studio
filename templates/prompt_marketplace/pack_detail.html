@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ pack.title }} — Prompt Marketplace{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>{{ pack.title }}</h2>
+    {% if pack.category %}<p><strong>Category:</strong> {{ pack.category }}</p>{% endif %}
+    <p>{{ pack.description }}</p>
+    <p><strong>Price:</strong> {{ pack.price_units }} Units</p>
+
+{% if already_purchased %}
+    {% if pack.content %}
+    <div class="prompt-output">
+        <h3>Your Prompt Pack Content</h3>
+        <textarea id="packContent" readonly rows="12">{{ pack.content }}</textarea>
+        <button type="button" class="btn-secondary" onclick="copyText('packContent')">Copy to Clipboard</button>
+    </div>
+    {% endif %}
+
+    {% if pack.pdf_filename %}
+    <div class="prompt-output">
+        <h3>Downloadable PDF</h3>
+        <a href="{{ url_for('prompt_marketplace.download_pdf', pack_id=pack.id) }}" class="btn-primary">Download PDF</a>
+    </div>
+    {% endif %}
+{% else %}
+    <form method="POST" action="{{ url_for('prompt_marketplace.purchase_pack', pack_id=pack.id) }}">
+        <button type="submit" class="btn-primary">Unlock for {{ pack.price_units }} Units</button>
+    </form>
+    {% endif %}
+
+    <p class="auth-switch">
+        <a href="{{ url_for('prompt_marketplace.index') }}">← Back to Marketplace</a>
+    </p>
+</section>
+
+<script>
+function copyText(elementId) {
+    const textarea = document.getElementById(elementId);
+    textarea.select();
+    document.execCommand('copy');
+    alert('Copied to clipboard!');
+}
+</script>
+{% endblock %}

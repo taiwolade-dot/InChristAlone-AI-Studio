@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>📚 Ministry Content Library</h2>
+
+    <p>
+        Saved AI-generated ministry resources.
+    </p>
+
+    {% if contents %}
+
+        {% for item in contents %}
+
+        <div class="card mb-3">
+            <div class="card-body">
+
+                <h5>{{ item.title }}</h5>
+
+                <p>
+                    <strong>Type:</strong>
+                    {{ item.content_type }}
+                </p>
+
+                <p>
+                    <strong>Version:</strong>
+                    {{ item.version_number or 1 }}
+                    <br>
+
+                    <strong>AI Action:</strong>
+                    {{ item.ai_action or "Original Content" }}
+                    <br>
+
+                    <strong>Created:</strong>
+                    {{ item.created_at }}
+                </p>
+
+                <p>
+                    {{ item.content[:300] }}
+                    {% if item.content|length > 300 %}
+                    ...
+                    {% endif %}
+                </p>
+
+                <div class="mt-3">
+
+                    <a class="btn-primary"
+                       href="{{ url_for('ministry.view_content', content_id=item.id) }}">
+                        👁 View Full Content
+                    </a>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ai_assistant.content_similar', content_id=item.id) }}">
+                        🔄 Generate Similar
+                    </a>
+
+                    {% if item.occasion_id %}
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ai_assistant.occasion_prayer', occasion_id=item.occasion_id) }}">
+                        🙏 Convert to Prayer
+                    </a>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ai_assistant.occasion_announcement', occasion_id=item.occasion_id) }}">
+                        📢 Convert to Announcement
+                    </a>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ai_assistant.occasion_outline', occasion_id=item.occasion_id) }}">
+                        📖 Convert to Study Outline
+                    </a>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ai_assistant.occasion_flyer', occasion_id=item.occasion_id) }}">
+                        🎨 Create Flyer
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="alert alert-info">
+            No saved ministry content yet.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

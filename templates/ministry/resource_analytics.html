@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>📊 Ministry Resource Analytics</h2>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>👁 Total Views</h4>
+        <p>{{ total_views }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>⬇️ Total Downloads</h4>
+        <p>{{ total_downloads }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🏆 Most Downloaded Resource</h4>
+        {% if most_downloaded %}
+            <p>
+                {{ most_downloaded.title }}
+                ({{ most_downloaded.download_count }} downloads)
+            </p>
+        {% else %}
+            <p>No downloads yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🔥 Top Category</h4>
+        {% if top_category %}
+            <p>
+                {{ top_category[0] or "General" }}
+                ({{ top_category[1] }} resources)
+            </p>
+        {% else %}
+            <p>No category data.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🤖 AI Ministry Recommendations</h4>
+
+        {% for insight in resource_insights %}
+            <p>• {{ insight }}</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>🚀 AI Content Strategy Opportunities</h4>
+
+        {% for strategy in content_strategies %}
+            <p>• {{ strategy }}</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Published Resources</h4>
+        <p>{{ total_resources }}</p>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Resource Categories</h4>
+
+        {% for category, count in categories %}
+            <p>{{ category or "General" }}: {{ count }}</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h4>Most Viewed Resources</h4>
+
+        {% for resource in top_resources %}
+            <p>
+                {{ resource.title }}
+                ({{ resource.view_count }} views)
+            </p>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

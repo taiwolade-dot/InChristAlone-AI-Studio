@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>📚 Ministry Resource Library</h2>
+
+    <form method="get" class="card mt-3 mb-3">
+        <div class="card-body">
+
+            <h5>🔍 Search Resources</h5>
+
+            <input class="form-control mb-2"
+                   name="search"
+                   placeholder="Search title, content, tags"
+                   value="{{ search or '' }}">
+
+            <input class="form-control mb-2"
+                   name="category"
+                   placeholder="Category"
+                   value="{{ category or '' }}">
+
+            <input class="form-control mb-2"
+                   name="scripture"
+                   placeholder="Scripture Reference"
+                   value="{{ scripture or '' }}">
+
+            <button class="btn-secondary" type="submit">
+                🔎 Search
+            </button>
+
+        </div>
+    </form>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            {% if resources %}
+
+                {% for resource in resources %}
+
+                <div class="mb-4">
+
+                    <h4>{{ resource.title }}</h4>
+
+                    <p>
+                        <strong>Category:</strong>
+                        {{ resource.category or "General" }}
+                    </p>
+
+                    <p>
+                        <strong>Scripture:</strong>
+                        {{ resource.scripture_reference or "Not specified" }}
+                    </p>
+
+                    <p>
+                        <strong>Visibility:</strong>
+                        {{ resource.visibility }}
+                    </p>
+
+                    <p>
+                        <strong>Published:</strong>
+                        {{ resource.published_at }}
+                    </p>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ministry.view_content', content_id=resource.id) }}">
+                        📖 View Resource
+                    </a>
+
+                    <a class="btn-primary"
+                       href="{{ url_for('ministry.download_content', content_id=resource.id) }}">
+                        ⬇️ Download Resource
+                    </a>
+
+                </div>
+
+                <hr>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No published resources available.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

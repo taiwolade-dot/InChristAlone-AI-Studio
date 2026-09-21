@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Ministry Flyer Creator
+{% endblock %}
+
+{% block content %}
+
+<h1>🎨 AI Ministry Flyer Creator</h1>
+
+<div class="dashboard-card">
+
+<form method="POST">
+
+<label>Topic / Event Title</label>
+<input type="text" name="topic" placeholder="Church Anniversary" required>
+
+<br><br>
+
+<label>Audience</label>
+<input type="text" name="audience" placeholder="Church Members">
+
+<br><br>
+
+<label>Content Type</label>
+<select name="content_type">
+    <option value="Event Flyer">Event Flyer</option>
+    <option value="Bible Study">Bible Study</option>
+    <option value="Sermon">Sermon</option>
+    <option value="Devotional">Devotional</option>
+</select>
+
+<br><br>
+
+<button type="submit">
+🤖 Generate Ministry Flyer
+</button>
+
+</form>
+
+</div>
+
+
+{% if draft %}
+
+<div class="dashboard-card">
+
+<h2>📝 AI Generated Content</h2>
+
+<pre>
+{{ draft }}
+</pre>
+
+</div>
+
+{% endif %}
+
+
+{% if flyer_result %}
+
+<div class="dashboard-card">
+
+<h2>🎨 Flyer Result</h2>
+
+{% if flyer_result.file %}
+
+<p>
+Generated Flyer:
+</p>
+
+<img src="{{ flyer_result.file }}"
+     style="max-width:400px;">
+
+{% else %}
+
+<p>
+{{ flyer_result }}
+</p>
+
+{% endif %}
+
+</div>
+
+{% endif %}
+
+{% endblock %}

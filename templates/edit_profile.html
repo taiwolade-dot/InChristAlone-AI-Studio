@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Profile — InChristAlone AI Studio
+{% endblock %}
+
+{% block content %}
+
+<section class="account-card">
+
+<h2>✏️ Edit Profile</h2>
+
+<form method="POST">
+
+<label>Full Name</label>
+<input type="text" name="full_name" value="{{ current_user.full_name }}" required>
+
+<br><br>
+
+<label>Email</label>
+<input type="email" name="email" value="{{ current_user.email }}" required>
+
+<br><br>
+
+<button type="submit" class="btn-primary">
+Save Changes
+</button>
+
+</form>
+
+</section>
+
+{% endblock %}

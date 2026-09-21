@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Add Prompt Pack — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="auth-form" style="max-width:550px;">
+    <h2>Add Prompt Pack</h2>
+
+    <form method="POST" action="{{ url_for('prompt_marketplace.add_pack') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category" placeholder="e.g. Sermon Prep, Youth Ministry">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="price_units">Price (Units)</label>
+            <input type="number" id="price_units" name="price_units" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="pdf_file">PDF File (optional)</label>
+            <input type="file" id="pdf_file" name="pdf_file" accept=".pdf">
+        </div>
+
+        <div class="form-group">
+            <label for="content">Pack Content (optional if PDF is provided)</label>
+            <textarea id="content" name="content" rows="10"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">Add Prompt Pack</button>
+    </form>
+
+    <p class="auth-switch">
+        <a href="{{ url_for('prompt_marketplace.index') }}">← Back to Marketplace</a>
+    </p>
+</section>
+{% endblock %}

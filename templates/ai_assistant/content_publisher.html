@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}AI Ministry Content Publisher{% endblock %}
+
+{% block content %}
+
+<h1>📢 AI Ministry Content Publisher</h1>
+
+<div class="dashboard-card">
+
+<form method="POST">
+
+<label>Content Draft</label>
+<br>
+
+<textarea name="draft" rows="12" style="width:100%;" placeholder="Paste generated ministry content here..."></textarea>
+
+<br><br>
+
+<label>Publishing Format</label>
+<br>
+
+<select name="format_type" style="width:100%;">
+    <option>Website Article</option>
+    <option>Social Media Post</option>
+    <option>Flyer Content</option>
+    <option>PDF Resource</option>
+</select>
+
+<br><br>
+
+<button class="btn-primary">
+📢 Publish Content
+</button>
+
+</form>
+
+</div>
+
+{% if published %}
+
+<div class="dashboard-card">
+
+<h2>Published Content</h2>
+
+<pre style="white-space:pre-wrap;">{{ published }}</pre>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

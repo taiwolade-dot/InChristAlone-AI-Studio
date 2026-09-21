@@ -1,0 +1,62 @@
+.env*
+*.backup*
+*.bak
+*.before*
+*_backup*
+*_stage*
+static/generated/
+__pycache__/
+*.pyc
+
+# Databases
+*.db
+instance/
+
+# Uploads
+uploads/
+static/uploads/
+
+# Backup source files
+*_before_*
+*_backup*
+*_stage*
+*.v2bak
+*.bak2
+*.zip
+
+# Generated AI files
+static/generated/
+
+
+# Development backups
+*.falbackup
+flyer_composer.py
+flyer_composer_v2.py
+flyer_composer_v3.py
+flyer_composer_v4.py
+data_after_flyer_v5.py
+
+# Development checkpoint files
+*_working.py
+*_working.html
+*_complete.py
+*_checkpoint.py
+*_backup.py
+
+# Flyer Composer development snapshots
+modules/content_generator/flyer_composer_v5_after_*.py
+modules/content_generator/flyer_engine/composer.py
+modules/content_generator/flyer_engine/export.py
+modules/content_generator/flyer_engine/layout.py
+
+# Church Calendar dashboard snapshots
+modules/church_calendar/templates/church_calendar/dashboard_after_*.html
+
+# Historical development snapshots
+*_before_*.py
+*_before_*.html
+*_backup_*.py
+*_backup_*.html
+
+# Versioned development snapshots
+*.v[0-9]*

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>Admin Panel</h2>
+
+    <div class="tab-switcher">
+        <a href="{{ url_for('admin_panel.index', tab='stats') }}"
+           class="tab-link {% if active_tab == 'stats' %}active{% endif %}">Stats</a>
+        <a href="{{ url_for('admin_panel.index', tab='users') }}"
+           class="tab-link {% if active_tab == 'users' %}active{% endif %}">Users</a>
+        <a href="{{ url_for('admin_panel.index', tab='packs') }}"
+           class="tab-link {% if active_tab == 'packs' %}active{% endif %}">Prompt Packs</a>
+        <a href="{{ url_for('admin_panel.index', tab='messages') }}" class="tab-link {% if active_tab == 'messages' %}active{% endif %}">Messages</a>
+    </div>
+
+    {% if active_tab == 'stats' %}
+    <div class="dashboard-grid" style="margin-top:1.5rem;">
+        <div class="dashboard-card">
+            <h3>{{ total_users }}</h3>
+            <p>Total Users</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>{{ total_packs }}</h3>
+            <p>Prompt Packs</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>{{ total_purchases }}</h3>
+            <p>Packs Unlocked</p>
+        </div>
+        <div class="dashboard-card">
+            <h3>₦{{ total_revenue_naira }}</h3>
+            <p>Total Revenue (Recharges)</p>
+        </div>
+    </div>
+
+    {% elif active_tab == 'users' %}
+    <div class="dashboard-card" style="margin-bottom:1.5rem; border-left: 4px solid #d4af37;">
+        <h3>Grant Units to All Members</h3>
+        <p style="font-size:0.9rem; color:#666;">Useful for training sessions — gives every registered user free units instantly.</p>
+        <form method="POST" action="{{ url_for('admin_panel.grant_units_all') }}"
+              onsubmit="return confirm('Grant units to ALL registered members?');"
+              style="display:flex; gap:0.8rem; margin-top:0.8rem; flex-wrap:wrap;">
+            <input type="number" name="grant_amount" placeholder="e.g. 50" min="1" style="width:120px; padding:0.5rem;" required>
+            <button type="submit" class="btn-primary">Grant to All</button>
+        </form>
+    </div>
+    {% for user in users %}
+    <div class="dashboard-card" style="margin-bottom:1rem;">
+        <h3>{{ user.full_name }}</h3>
+        <p>{{ user.email }}</p>
+        <p><strong>Role:</strong> {{ user.role }} | <strong>Wallet:</strong> {{ user.wallet_balance }} Units</p>
+
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:0.8rem;">
+            <form method="POST" action="{{ url_for('admin_panel.change_role', user_id=user.id) }}"
+                  style="display:flex; gap:0.5rem; align-items:center;"
+                  onsubmit="return confirm('Change {{ user.full_name }} role?');">
+
+                <select name="role" style="padding:0.5rem;">
+                    {% for role_key, role_name in ROLES.items() %}
+                    <option value="{{ role_key }}" {% if user.role == role_key %}selected{% endif %}>
+                        {{ role_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn-secondary">
+                    Update Role
+                </button>
+            </form>
+
+            <form method="POST" action="{{ url_for('admin_panel.adjust_wallet', user_id=user.id) }}" style="display:flex; gap:0.5rem;">
+                <input type="number" name="adjustment" placeholder="+/- units" style="width:100px; padding:0.5rem;">
+                <button type="submit" class="btn-secondary">Adjust Wallet</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% elif active_tab == 'packs' %}
+    {% for pack in packs %}
+    <div class="dashboard-card" style="margin-bottom:1rem;">
+        <h3>{{ pack.title }} {% if not pack.is_active %}<span style="color:#b91c1c;">(Inactive)</span>{% endif %}</h3>
+        <p>{{ pack.category }} — {{ pack.price_units }} Units</p>
+
+        <div style="display:flex; gap:0.8rem; flex-wrap:wrap; margin-top:0.8rem;">
+            <a href="{{ url_for('admin_panel.edit_pack', pack_id=pack.id) }}" class="btn-secondary">Edit</a>
+            <form method="POST" action="{{ url_for('admin_panel.toggle_pack_active', pack_id=pack.id) }}">
+                <button type="submit" class="btn-secondary">
+                    {% if pack.is_active %}Deactivate{% else %}Activate{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% elif active_tab == 'messages' %}
+    {% for msg in messages %}
+    <div class="dashboard-card" style="margin-bottom:1rem;">
+        <h3>{{ msg.subject }} <span style="font-size:0.8rem; color:#666;">({{ msg.status|title }})</span></h3>
+        <p style="font-size:0.85rem; color:#666;">From: {{ msg.user.full_name }} — {{ msg.created_at.strftime('%d %b %Y') }}</p>
+        <p>{{ msg.message }}</p>
+        {% if msg.admin_reply %}
+        <div style="margin-top:0.6rem; padding:0.5rem; background:#f5f5f7; border-left:3px solid #d4af37;">
+            <strong>Your Reply:</strong> {{ msg.admin_reply }}
+        </div>
+        {% else %}
+        <form method="POST" action="{{ url_for('admin_panel.reply_message', message_id=msg.id) }}" style="margin-top:0.6rem;">
+            <textarea name="admin_reply" rows="2" placeholder="Type your reply..." required></textarea>
+            <button type="submit" class="btn-secondary">Send Reply</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+</section>
+{% endblock %}

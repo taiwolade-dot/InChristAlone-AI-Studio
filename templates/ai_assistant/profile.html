@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI Ministry Profile
+{% endblock %}
+
+{% block content %}
+
+<h1>🏛️ AI Ministry Profile</h1>
+
+<div class="dashboard-card">
+
+<form method="POST">
+
+<label>Church Name</label>
+<input type="text"
+name="church_name"
+value="{{ profile.church_name if profile else '' }}"
+style="width:100%;">
+
+<br><br>
+
+<label>Denomination</label>
+<input type="text"
+name="denomination"
+value="{{ profile.denomination if profile else '' }}"
+style="width:100%;">
+
+<br><br>
+
+<label>Ministry Role</label>
+<input type="text"
+name="ministry_role"
+value="{{ profile.ministry_role if profile else '' }}"
+style="width:100%;">
+
+<br><br>
+
+<label>Location</label>
+<input type="text"
+name="location"
+value="{{ profile.location if profile else '' }}"
+style="width:100%;">
+
+<br><br>
+
+<label>Preferred Sermon Style</label>
+<input type="text"
+name="preferred_sermon_style"
+placeholder="Expository, Topical, Evangelistic..."
+value="{{ profile.preferred_sermon_style if profile else '' }}"
+style="width:100%;">
+
+<br><br>
+
+<label>Preferred Bible Translation</label>
+<input type="text"
+name="preferred_bible_translation"
+value="{{ profile.preferred_bible_translation if profile else 'KJV' }}"
+style="width:100%;">
+
+<br><br>
+
+<button class="btn-primary">
+💾 Save Ministry Profile
+</button>
+
+</form>
+
+</div>
+
+<br>
+
+<a href="{{ url_for('ai_assistant.chat') }}" class="btn-primary">
+⬅ Back to AI Assistant
+</a>
+
+{% endblock %}

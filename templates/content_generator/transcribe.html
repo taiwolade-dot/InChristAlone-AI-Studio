@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Audio to Text — InChristAlone AI Studio{% endblock %}
+
+{% block content %}
+<section class="prompt-engine">
+    <h2>Audio to Text</h2>
+    <p class="prompt-engine-subtitle">
+        Upload an audio recording (sermon, meeting, voice note) and get a text transcript.
+    </p>
+
+    <form method="POST" action="{{ url_for('content_generator.transcribe_submit') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="audio_file">Upload Audio (MP3, WAV, M4A, OGG)</label>
+            <input type="file" id="audio_file" name="audio_file" accept="audio/*" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Transcribe Audio (10 Units)</button>
+    </form>
+
+    {% if transcribed_text %}
+    <div class="prompt-output" style="margin-top:1.5rem;">
+        <h3>Transcript</h3>
+        <textarea id="transcriptOutput" readonly rows="10">{{ transcribed_text }}</textarea>
+        <button type="button" class="btn-secondary" onclick="copyText('transcriptOutput')">Copy to Clipboard</button>
+    </div>
+    {% endif %}
+
+    <p class="auth-switch">
+        <a href="{{ url_for('content_generator.index') }}">← Back to Content Generator</a>
+    </p>
+</section>
+
+<script>
+function copyText(elementId) {
+    const textarea = document.getElementById(elementId);
+    textarea.select();
+    document.execCommand('copy');
+    alert('Copied to clipboard!');
+}
+</script>
+{% endblock %}

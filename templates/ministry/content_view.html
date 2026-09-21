@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>📖 Ministry Content View</h2>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <h4>{{ content.title }}</h4>
+
+            <p>
+                <strong>Type:</strong>
+                {{ content.content_type }}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                {{ content.status or "Draft" }}
+            </p>
+
+            <div class="mb-3">
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.submit_content_review', content_id=content.id) }}">
+                    📝 Submit for Review
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.approve_content', content_id=content.id) }}">
+                    ✅ Approve
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.reject_content', content_id=content.id) }}">
+                    ↩ Return for Revision
+                </a>
+
+                <a class="btn-secondary"
+                   href="{{ url_for('ministry.publish_content', content_id=content.id) }}">
+                    📢 Publish Resource
+                </a>
+
+            </div>
+
+            <hr>
+
+            <p style="white-space: pre-line;">
+                {{ content.content }}
+            </p>
+
+            <hr>
+
+            <h4>🤖 Related Ministry Resources</h4>
+
+            {% if related_resources %}
+
+                {% for resource in related_resources %}
+
+                <div class="mb-3">
+
+                    <strong>{{ resource.title }}</strong>
+
+                    <p>
+                        Category:
+                        {{ resource.category or "General" }}
+                    </p>
+
+                    <a class="btn-secondary"
+                       href="{{ url_for('ministry.view_content', content_id=resource.id) }}">
+                        📖 View Resource
+                    </a>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No related resources available.</p>
+
+            {% endif %}
+
+            <a class="btn-secondary"
+               href="{{ url_for('ministry.content_history', content_id=content.id) }}">
+                🕘 Version History
+            </a>
+
+            <a class="btn-secondary"
+               href="{{ url_for('ministry.content_library') }}">
+                ← Back to Library
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

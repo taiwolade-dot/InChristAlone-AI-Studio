@@ -1,0 +1,551 @@
+from sqlalchemy import or_, func
+from flask import Blueprint, render_template, request, make_response
+from flask_login import login_required, current_user
+from datetime import datetime, date
+
+from models import (
+    MinistryProfile,
+    Member,
+    ChurchEvent,
+    BibleQuiz,
+    AIConversation,
+    MinistryOccasion,
+    MinistryContent,
+    db
+)
+
+
+ministry_bp = Blueprint(
+    "ministry",
+    __name__,
+    url_prefix="/ministry"
+)
+
+
+def generate_resource_insights(
+    total_resources,
+    total_views,
+    total_downloads,
+    most_downloaded,
+    top_category
+):
+    insights = []
+
+    if top_category:
+        insights.append(
+            f"Your strongest content category is {top_category[0] or 'General'}."
+        )
+
+    if most_downloaded:
+        insights.append(
+            f"Your most downloaded resource is '{most_downloaded.title}'."
+        )
+
+    if total_downloads > 0:
+        insights.append(
+            "Members are actively engaging with your ministry resources."
+        )
+
+    if total_resources > 0 and total_views == 0:
+        insights.append(
+            "Create engagement campaigns to increase resource visibility."
+        )
+
+    if not insights:
+        insights.append(
+            "Create and publish ministry resources to generate insights."
+        )
+
+    return insights
+
+
+def generate_content_strategy(
+    total_resources,
+    total_views,
+    total_downloads,
+    categories,
+    top_category
+):
+    strategies = []
+
+    if top_category:
+        category_name = top_category[0] or "General"
+        strategies.append(
+            f"Create more {category_name} resources because this category has the strongest engagement."
+        )
+
+    if total_resources > 0 and total_downloads == 0:
+        strategies.append(
+            "Promote existing resources to increase member downloads."
+        )
+
+    if total_views > total_downloads:
+        strategies.append(
+            "Convert popular viewed resources into downloadable study materials."
+        )
+
+    if not strategies:
+        strategies.append(
+            "Create and publish more ministry resources to generate content opportunities."
+        )
+
+    return strategies
+
+
+@ministry_bp.route("/")
+@login_required
+def dashboard():
+
+    profile = MinistryProfile.query.filter_by(
+        user_id=current_user.id
+    ).first()
+
+    members = Member.query.filter_by(
+        owner_id=current_user.id
+    ).count()
+
+    events = ChurchEvent.query.filter_by(
+        created_by=current_user.id
+    ).count()
+
+    quizzes = BibleQuiz.query.filter_by(
+        owner_id=current_user.id
+    ).count()
+
+    ai_usage = AIConversation.query.filter_by(
+        user_id=current_user.id
+    ).count()
+
+    today = date.today()
+
+    upcoming_events = ChurchEvent.query.filter(
+        ChurchEvent.created_by == current_user.id,
+        ChurchEvent.start_datetime >= datetime.utcnow()
+    ).order_by(
+        ChurchEvent.start_datetime.asc()
+    ).limit(5).all()
+
+    event_alerts = []
+
+    for event in upcoming_events:
+        days_remaining = (event.start_datetime.date() - today).days
+        event.days_remaining = days_remaining
+
+        if days_remaining in [30, 7, 1]:
+            event_alerts.append({
+                "id": event.id,
+                "title": event.title,
+                "days_remaining": days_remaining
+            })
+
+    birthday_alerts = []
+
+    members_with_birthdays = Member.query.filter_by(
+        owner_id=current_user.id
+    ).all()
+
+    for member in members_with_birthdays:
+        if member.birthday:
+            birthday_this_year = member.birthday.replace(
+                year=today.year
+            )
+
+            days_until = (birthday_this_year - today).days
+
+            if days_until < 0:
+                days_until += 365
+
+            if days_until <= 7:
+                birthday_alerts.append({
+                    "name": member.full_name,
+                      "member_id": member.id,
+                    "days_remaining": days_until
+            })
+
+    occasion_alerts = []
+
+    upcoming_occasions = MinistryOccasion.query.filter(
+        MinistryOccasion.created_by == current_user.id,
+        MinistryOccasion.date >= today
+    ).order_by(
+        MinistryOccasion.date.asc()
+    ).limit(5).all()
+
+    for occasion in upcoming_occasions:
+        days_remaining = (
+            occasion.date - today
+        ).days
+
+        occasion_alerts.append({
+            "id": occasion.id,
+            "title": occasion.title,
+            "occasion_type": occasion.occasion_type,
+            "days_remaining": days_remaining
+        })
+
+    return render_template(
+        "ministry/dashboard.html",
+        profile=profile,
+        members=members,
+        events=events,
+        quizzes=quizzes,
+        ai_usage=ai_usage,
+          upcoming_events=upcoming_events,
+          event_alerts=event_alerts,
+          birthday_alerts=birthday_alerts,
+        occasion_alerts=occasion_alerts
+    )
+
+
+@ministry_bp.route("/content-library")
+@login_required
+def content_library():
+
+    contents = MinistryContent.query.filter_by(
+        owner_id=current_user.id
+    ).order_by(
+        MinistryContent.created_at.desc()
+    ).all()
+
+    return render_template(
+        "ministry/content_library.html",
+        contents=contents
+    )
+
+
+@ministry_bp.route("/resources")
+@login_required
+def resource_library():
+
+    search = request.args.get("search", "")
+    category = request.args.get("category", "")
+    scripture = request.args.get("scripture", "")
+
+    query = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    )
+
+    if search:
+        query = query.filter(
+            or_(
+                MinistryContent.title.ilike(f"%{search}%"),
+                MinistryContent.content.ilike(f"%{search}%"),
+                MinistryContent.tags.ilike(f"%{search}%")
+            )
+        )
+
+    if category:
+        query = query.filter(
+            MinistryContent.category.ilike(f"%{category}%")
+        )
+
+    if scripture:
+        query = query.filter(
+            MinistryContent.scripture_reference.ilike(f"%{scripture}%")
+        )
+
+    resources = query.order_by(
+        MinistryContent.published_at.desc()
+    ).all()
+
+    return render_template(
+        "ministry/resource_library.html",
+        resources=resources,
+        search=search,
+        category=category,
+        scripture=scripture
+    )
+
+
+@ministry_bp.route("/resource-analytics")
+@login_required
+def resource_analytics():
+
+    published = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    )
+
+    total_resources = published.count()
+
+    categories = db.session.query(
+        MinistryContent.category,
+        func.count(MinistryContent.id)
+    ).filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).group_by(
+        MinistryContent.category
+    ).all()
+
+    top_resources = published.order_by(
+        MinistryContent.view_count.desc()
+    ).limit(5).all()
+
+    total_views = db.session.query(
+        func.sum(MinistryContent.view_count)
+    ).filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).scalar() or 0
+
+    total_downloads = db.session.query(
+        func.sum(MinistryContent.download_count)
+    ).filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published"
+    ).scalar() or 0
+
+    most_downloaded = published.order_by(
+        MinistryContent.download_count.desc()
+    ).first()
+
+    top_category = max(
+        categories,
+        key=lambda item: item[1],
+        default=None
+    )
+
+    resource_insights = generate_resource_insights(
+        total_resources,
+        total_views,
+        total_downloads,
+        most_downloaded,
+        top_category
+    )
+
+    content_strategies = generate_content_strategy(
+        total_resources,
+        total_views,
+        total_downloads,
+        categories,
+        top_category
+    )
+
+    return render_template(
+        "ministry/resource_analytics.html",
+        total_resources=total_resources,
+        total_views=total_views,
+        total_downloads=total_downloads,
+        most_downloaded=most_downloaded,
+        top_category=top_category,
+        resource_insights=resource_insights,
+        content_strategies=content_strategies,
+        categories=categories,
+        top_resources=top_resources
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/history")
+@login_required
+def content_history(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    versions = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.parent_id == content.id
+    ).order_by(
+        MinistryContent.version_number.desc()
+    ).all()
+
+    return render_template(
+        "ministry/content_history.html",
+        content=content,
+        versions=versions
+    )
+
+
+@ministry_bp.route("/content/<int:version_id>/restore")
+@login_required
+def restore_content_version(version_id):
+
+    version = MinistryContent.query.get_or_404(version_id)
+
+    if version.owner_id != current_user.id:
+        abort(403)
+
+    if not version.parent_id:
+        return redirect(
+            url_for(
+                "ministry.view_content",
+                content_id=version.id
+            )
+        )
+
+    original = MinistryContent.query.get_or_404(version.parent_id)
+
+    MinistryContent.query.filter(
+        MinistryContent.parent_id == original.id
+    ).update(
+        {"is_preferred": False},
+        synchronize_session=False
+    )
+
+    original.is_preferred = False
+
+    version.is_preferred = True
+
+    original.content = version.content
+    original.ai_action = "Restore Version"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=original.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/submit-review")
+@login_required
+def submit_content_review(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Under Review"
+    content.ai_action = "Submitted for Review"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/approve")
+@login_required
+def approve_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Approved"
+    content.approved_by = current_user.id
+    content.approved_at = datetime.utcnow()
+    content.ai_action = "Approved"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/reject")
+@login_required
+def reject_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Draft"
+    content.approval_note = "Returned for revision"
+    content.ai_action = "Returned for Revision"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/publish")
+@login_required
+def publish_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        abort(403)
+
+    content.status = "Published"
+    content.published_by = current_user.id
+    content.published_at = datetime.utcnow()
+    content.ai_action = "Published"
+
+    db.session.commit()
+
+    return redirect(
+        url_for(
+            "ministry.view_content",
+            content_id=content.id
+        )
+    )
+
+
+@ministry_bp.route("/content/<int:content_id>/download")
+@login_required
+def download_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.owner_id != current_user.id:
+        return "Unauthorized", 403
+
+    if content.status != "Published":
+        return "Resource not available", 404
+
+    content.download_count = (content.download_count or 0) + 1
+    db.session.commit()
+
+    response = make_response(content.content)
+
+    filename = f"{content.title.replace(' ', '_')}.txt"
+
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename={filename}"
+    )
+
+    response.headers["Content-Type"] = "text/plain"
+
+    return response
+
+
+@ministry_bp.route("/content/<int:content_id>")
+@login_required
+def view_content(content_id):
+
+    content = MinistryContent.query.get_or_404(content_id)
+
+    if content.status == "Published":
+        content.view_count = (content.view_count or 0) + 1
+        content.last_viewed_at = datetime.utcnow()
+        from models import db
+        db.session.commit()
+
+    related_resources = MinistryContent.query.filter(
+        MinistryContent.owner_id == current_user.id,
+        MinistryContent.status == "Published",
+        MinistryContent.id != content.id,
+        or_(
+            MinistryContent.category == content.category,
+            MinistryContent.scripture_reference == content.scripture_reference,
+            MinistryContent.tags.ilike(f"%{content.tags}%")
+        )
+    ).limit(5).all()
+
+    return render_template(
+        "ministry/content_view.html",
+        content=content,
+        related_resources=related_resources
+    )

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+<h2>🤖 AI Ministry Insights</h2>
+
+
+<div class="card">
+
+<h3>
+Top Ministry Focus
+</h3>
+
+<p>
+{{ insight.focus or "No activity yet" }}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+AI Requests
+</h3>
+
+<p>
+{{ insight.requests }}
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Ministry Observation
+</h3>
+
+<p>
+{{ insight.message }}
+</p>
+
+</div>
+
+
+<h3>
+Activity Trends
+</h3>
+
+<ul>
+
+{% for day,count in insight.trends.items() %}
+
+<li>
+{{ day }} : {{ count }} requests
+</li>
+
+{% endfor %}
+
+</ul>
+
+
+</div>
+
+{% endblock %}

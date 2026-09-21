@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ pack.title }} — Admin Panel{% endblock %}
+
+{% block content %}
+<section class="auth-form" style="max-width:550px;">
+    <h2>Edit Prompt Pack</h2>
+
+    <form method="POST" action="{{ url_for('admin_panel.edit_pack', pack_id=pack.id) }}">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" value="{{ pack.title }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category" value="{{ pack.category or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="3">{{ pack.description or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="price_units">Price (Units)</label>
+            <input type="number" id="price_units" name="price_units" value="{{ pack.price_units }}" min="1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="content">Pack Content</label>
+            <textarea id="content" name="content" rows="10">{{ pack.content or '' }}</textarea>
+        </div>
+
+        {% if pack.pdf_filename %}
+        <p style="font-size:0.9rem; color:#666;">PDF already attached: {{ pack.pdf_filename.split('_', 1)[-1] }}</p>
+        {% endif %}
+
+        <button type="submit" class="btn-primary btn-full">Save Changes</button>
+    </form>
+
+    <p class="auth-switch">
+        <a href="{{ url_for('admin_panel.index', tab='packs') }}">← Back to Prompt Packs</a>
+    </p>
+</section>
+{% endblock %}

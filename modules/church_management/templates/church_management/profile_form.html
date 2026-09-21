@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+{% if profile %}
+<h2>Edit Church Profile</h2>
+{% else %}
+<h2>Church Profile Setup</h2>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+
+<div class="mb-3">
+<label>Church Name</label>
+<input type="text"
+name="church_name"
+class="form-control"
+value="{{ profile.church_name if profile else '' }}"
+required>
+</div>
+
+
+<div class="mb-3">
+<label>Motto</label>
+<input type="text"
+name="motto"
+class="form-control"
+value="{{ profile.motto if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Vision</label>
+<textarea name="vision"
+class="form-control">{{ profile.vision if profile else '' }}</textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Mission</label>
+<textarea name="mission"
+class="form-control">{{ profile.mission if profile else '' }}</textarea>
+</div>
+
+
+<div class="mb-3">
+<label>Denomination</label>
+<input type="text"
+name="denomination"
+class="form-control"
+value="{{ profile.denomination if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Association</label>
+<input type="text"
+name="association"
+class="form-control"
+value="{{ profile.association if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Conference</label>
+<input type="text"
+name="conference"
+class="form-control"
+value="{{ profile.conference if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Address</label>
+<input type="text"
+name="address"
+class="form-control"
+value="{{ profile.address if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Phone</label>
+<input type="text"
+name="phone"
+class="form-control"
+value="{{ profile.phone if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Email</label>
+<input type="email"
+name="email"
+class="form-control"
+value="{{ profile.email if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Website</label>
+<input type="text"
+name="website"
+class="form-control"
+value="{{ profile.website if profile else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Church Logo</label>
+<input type="file"
+name="logo"
+class="form-control">
+</div>
+
+
+<div class="mb-3">
+<label>Founded Date</label>
+<input type="date"
+name="founded_date"
+class="form-control"
+value="{{ profile.founded_date if profile and profile.founded_date else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Date Church Was Organized</label>
+<input type="date"
+name="organized_date"
+class="form-control"
+value="{{ profile.organized_date if profile and profile.organized_date else '' }}">
+</div>
+
+
+<div class="mb-3">
+<label>Statement of Faith</label>
+<textarea name="statement_of_faith"
+class="form-control">{{ profile.statement_of_faith if profile else '' }}</textarea>
+</div>
+
+
+<button class="btn btn-primary">
+{% if profile %}
+Update Church Profile
+{% else %}
+Save Church Profile
+{% endif %}
+</button>
+
+
+</form>
+
+</div>
+
+{% endblock %}

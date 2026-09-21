@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>🕘 Ministry Content Version History</h2>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <h4>{{ content.title }}</h4>
+
+            <p>
+                <strong>Type:</strong>
+                {{ content.content_type }}
+                <br>
+                <strong>Version:</strong>
+                {{ content.version_number or 1 }}
+                <br>
+                <strong>AI Action:</strong>
+                {{ content.ai_action or "Original Content" }}
+            </p>
+
+            <hr>
+
+            <h5>Current Content</h5>
+
+            <p style="white-space: pre-line;">{{ content.content }}</p>
+
+        </div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <h5>Previous / Generated Versions</h5>
+
+            {% if versions %}
+
+                {% for version in versions %}
+
+                    <div class="border rounded p-3 mb-3">
+
+                        <h6>
+                            Version {{ version.version_number or 1 }}
+                            {% if version.is_preferred %}
+                                <span class="badge bg-success">
+                                    ⭐ Preferred Version
+                                </span>
+                            {% endif %}
+                        </h6>
+
+                        <p>
+                            <strong>AI Action:</strong>
+                            {{ version.ai_action or "AI Generated" }}
+                            <br>
+                            <strong>Created:</strong>
+                            {{ version.created_at }}
+                        </p>
+
+                        <p style="white-space: pre-line;">
+                            {{ version.content }}
+                        </p>
+
+                        <a class="btn-secondary"
+                           href="{{ url_for('ministry.restore_content_version', version_id=version.id) }}">
+                            🔄 Restore This Version
+                        </a>
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No previous versions have been created yet.</p>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="mt-3">
+
+        <a class="btn-secondary"
+           href="{{ url_for('ministry.view_content', content_id=content.id) }}">
+            ← Back to Content
+        </a>
+
+        <a class="btn-secondary"
+           href="{{ url_for('ministry.content_library') }}">
+            📚 Back to Library
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}
