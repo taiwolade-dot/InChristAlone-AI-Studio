@@ -16,7 +16,8 @@ from .reports import generate_ai_report
 from .insights import generate_ministry_insights
 from .ministry_decision_engine import format_ministry_decision_response
 from .ministry_copilot import format_ministry_copilot_response
-from modules.ai_service import ask_ai, AI_LAST_STATUS, AI_LAST_STATUS
+from modules.ai_gateway.gateway import run_ai
+from modules.ai_service import AI_LAST_STATUS
 from modules.content_generator.flyer_composer_v5 import ai_compose_flyer
 from modules.ministry_intelligence.occasion import build_occasion_context
 from modules.content_generator.fal_service import generate_birthday_background
@@ -783,7 +784,7 @@ def ask_ai_with_memory(question, module=None):
         module
     )
 
-    return ask_ai(prompt)
+    return run_ai(prompt)
 
 
 

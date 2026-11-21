@@ -21,6 +21,7 @@ class Config:
     ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     ANTHROPIC_MODEL = 'claude-sonnet-4-6'
+    AI_DEFAULT_PROVIDER = os.environ.get("AI_DEFAULT_PROVIDER", "gemini")
 
     # Email Configuration
     MAIL_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')

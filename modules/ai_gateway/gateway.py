@@ -2,15 +2,16 @@
 InChristAlone AI Gateway v4.11
 
 Central AI access layer.
-Future support:
-- Gemini
-- Claude
-- OpenAI
-- Model routing
+
+Features:
+- Unified AI entry point
+- AI Router integration
+- Future support for Gemini, Claude, OpenAI
+- Task-aware routing
 - Usage tracking
 """
 
-from modules.ai_service import ask_ai
+from modules.ai_gateway.router import route
 
 
 def run_ai(prompt, task=None, context=None):
@@ -19,11 +20,14 @@ def run_ai(prompt, task=None, context=None):
 
     Parameters:
         prompt: User request
-        task: Future routing category
-        context: Future church/ministry context
+        task: Optional task type
+        context: Optional ministry/church context
 
     Returns:
         AI response
     """
-
-    return ask_ai(prompt)
+    return route(
+        prompt=prompt,
+        task=task,
+        context=context,
+    )
