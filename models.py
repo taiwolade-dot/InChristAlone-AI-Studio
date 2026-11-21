@@ -473,6 +473,51 @@ class AITransaction(db.Model):
         return f"<AITransaction {self.reference}>"
 
 
+
+class AIUsageLog(db.Model):
+    __tablename__ = "ai_usage_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    church_id = db.Column(
+        db.Integer,
+        nullable=True
+    )
+
+    provider = db.Column(
+        db.String(50)
+    )
+
+    model = db.Column(
+        db.String(100)
+    )
+
+    task = db.Column(
+        db.String(100)
+    )
+
+    units_used = db.Column(
+        db.Integer,
+        default=0
+    )
+
+    status = db.Column(
+        db.String(20),
+        default="success"
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+
 class ActivityLog(db.Model):
     __tablename__ = "activity_logs"
 
