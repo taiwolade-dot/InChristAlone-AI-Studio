@@ -1,5 +1,5 @@
 """
-InChristAlone AI Gateway v4.11.7
+InChristAlone AI Gateway v4.11.8
 
 Central AI access layer.
 
@@ -7,6 +7,7 @@ Features:
 - Unified AI entry point
 - AI Router integration
 - Transaction-safe billing
+- Dynamic task costing
 - AI usage tracking
 """
 
@@ -16,9 +17,7 @@ from modules.ai_gateway.transactions import (
     charge_ai_request,
     refund_ai_request,
 )
-
-
-AI_REQUEST_COST = 1
+from modules.ai_gateway.costs import get_task_cost
 
 
 def run_ai(prompt, task=None, context=None, user_id=1, church_id=None):
@@ -26,10 +25,12 @@ def run_ai(prompt, task=None, context=None, user_id=1, church_id=None):
     Unified AI gateway entry point.
     """
 
-    if not charge_ai_request(user_id, AI_REQUEST_COST):
+    request_cost = get_task_cost(task)
+
+    if not charge_ai_request(user_id, request_cost):
         return (
-            "Insufficient AI units. "
-            "Please recharge your account to continue."
+            f"Insufficient AI units. "
+            f"This request requires {request_cost} units."
         )
 
     try:
@@ -44,7 +45,7 @@ def run_ai(prompt, task=None, context=None, user_id=1, church_id=None):
             provider="gateway",
             model="auto",
             task=task or "general",
-            units_used=AI_REQUEST_COST,
+            units_used=request_cost,
             status="success",
             church_id=church_id,
         )
@@ -54,7 +55,7 @@ def run_ai(prompt, task=None, context=None, user_id=1, church_id=None):
     except Exception as error:
         refund_ai_request(
             user_id,
-            AI_REQUEST_COST
+            request_cost
         )
 
         return f"AI generation failed: {error}"
