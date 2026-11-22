@@ -80,9 +80,12 @@ def generate_questions(
     question_type="Mixed",
     difficulty="Medium",
     question_style="Knowledge",
-    analytics_context=None
+    analytics_context=None,
+    user_id=None,
+    church_id=None
 ):
     import os, json
+    from modules.ai_gateway.gateway import run_ai
 
     if analytics_context is None:
         analytics_context = get_quiz_analytics_context()
@@ -128,12 +131,7 @@ def generate_questions(
                     e
                 )
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if api_key:
-        try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
+    try:
             print("===== ADAPTIVE AI CONTEXT =====")
             print(analytics_context[:1000])
             print("===== END ADAPTIVE AI CONTEXT =====")
@@ -203,8 +201,13 @@ Format:
  }}
 ]
 """
-            resp = model.generate_content(prompt)
-            text = resp.text.strip()
+            text = run_ai(
+                prompt=prompt,
+                task="quiz_generation",
+                user_id=user_id or 1,
+                church_id=church_id,
+            )
+            text = text.strip()
             if "```json" in text:
                 text = text.split("```json")[1].split("```")[0].strip()
             data = json.loads(text)
@@ -224,7 +227,7 @@ Format:
                       normalized.append(q)
 
                   return normalized, 'ai'
-        except Exception as e:
+    except Exception as e:
             print("AI Generation failed:", e)
 
     # Adaptive fallback engine

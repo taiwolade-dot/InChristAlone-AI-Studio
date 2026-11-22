@@ -1,45 +1,25 @@
 """
-InChristAlone AI Cost Engine v4.11.8
+InChristAlone AI Cost Engine v4.11.10
 
-Defines AI service unit costs.
-
-Keeps pricing separate from:
-- Gateway logic
-- Billing logic
-- AI providers
+Uses AI Service Catalog as the single
+source of pricing truth.
 """
 
-AI_TASK_COSTS = {
-    "general": 1,
-
-    # Ministry Content
-    "prayer_guide": 2,
-    "bible_study": 3,
-    "sermon_outline": 5,
-    "theological_research": 5,
-
-    # Church Operations
-    "church_policy": 5,
-    "event_planning": 3,
-
-    # Creative Tools
-    "flyer_generation": 10,
-    "quiz_generation": 3,
-    "website_content": 3,
-}
+from modules.ai_gateway.catalog import get_service
 
 
 def get_task_cost(task=None):
     """
-    Return AI unit cost based on task.
+    Return AI unit cost from service catalog.
 
-    Unknown tasks default to general cost.
+    Unknown tasks default to general.
     """
 
-    if not task:
-        return AI_TASK_COSTS["general"]
+    service = get_service(task)
 
-    return AI_TASK_COSTS.get(
-        task,
-        AI_TASK_COSTS["general"]
-    )
+    if service:
+        return service["units"]
+
+    general = get_service("general")
+
+    return general["units"]

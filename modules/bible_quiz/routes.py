@@ -391,6 +391,8 @@ Return ONLY JSON array:
               question_type=question_type,
               difficulty=difficulty,
               question_style=question_style,
+              user_id=current_user.id,
+              church_id=getattr(current_user, "church_id", None),
             )
 
 
