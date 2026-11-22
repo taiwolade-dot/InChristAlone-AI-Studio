@@ -30,6 +30,7 @@ from .flyer_engine.text import (
 from .flyer_engine.premium import add_premium_decoration
 from .flyer_engine.fal_generator import generate_flyer_background
 from .flyer_engine.brand_memory import get_brand_profile
+from modules.ai_gateway.gateway import run_ai
 
 
 # ==============================
@@ -1126,6 +1127,42 @@ def ai_compose_flyer(
         output_dir="static/generated",
         church_id=None
 ):
+
+    # ==============================
+    # AI GATEWAY FLYER INTELLIGENCE
+    # ==============================
+
+    ai_direction = None
+
+    try:
+        flyer_prompt = f"""
+You are a Christian ministry flyer design assistant.
+
+Create creative direction for this flyer:
+
+Title: {title}
+Bible Verse: {bible_verse}
+Event Date: {event_date}
+Venue: {venue}
+Theme: {theme}
+
+Provide:
+- recommended visual mood
+- colour direction
+- design emphasis
+- audience feeling
+
+Keep the response concise.
+"""
+
+        ai_direction = run_ai(
+            prompt=flyer_prompt,
+            task="flyer_generation",
+            church_id=church_id,
+        )
+
+    except Exception as e:
+        print("Flyer AI Gateway enhancement failed:", e)
 
     # AI understanding
 
