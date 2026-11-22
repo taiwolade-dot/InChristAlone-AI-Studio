@@ -1125,7 +1125,8 @@ def ai_compose_flyer(
         background_path=None,
         images=None,
         output_dir="static/generated",
-        church_id=None
+        church_id=None,
+        user_id=1
 ):
 
     # ==============================
@@ -1158,6 +1159,7 @@ Keep the response concise.
         ai_direction = run_ai(
             prompt=flyer_prompt,
             task="flyer_generation",
+              user_id=user_id,
             church_id=church_id,
         )
 
